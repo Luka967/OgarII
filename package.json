@@ -1,0 +1,14 @@
+{
+    "name": "ogar",
+    "version": "0.9.1",
+    "description": "FOSS implementation of a private Agar.io gameserver",
+    "author": {
+        "name": "Luka Djokovic",
+        "url": "https://github.com/Luka967"
+    },
+    "license": "Apache-2.0",
+    "dependencies": {
+        "uws": "^9.14.0",
+        "json-beautify": "1.0.1"
+    }
+}
