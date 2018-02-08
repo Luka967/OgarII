@@ -1,5 +1,6 @@
 const WebSocket = require("uws");
 const WebSocketServer = WebSocket.Server;
+
 const PlayingRouter = require("../primitives/PlayingRouter");
 const Connection = require("./Connection");
 const ServerHandle = require("../ServerHandle");
@@ -20,35 +21,36 @@ class Listener {
     }
 
     get settings() { return this.handle.settings; }
+    get logger() { return this.handle.logger; }
 
     open() {
-        console.debug("Listener.open call");
+        this.logger.debug("Listener.prototype.open call");
         this.listenerSocket = new WebSocketServer({
             port: this.settings.socketPort,
             verifyClient: this._verifyClient.bind(this)
         }, this._onOpen.bind(this));
     }
     _verifyClient(info, response) {
-        console.debug("client verification called");
+        this.logger.debug("client verification called");
         if (this.settings.socketAcceptedOrigins !== null) {
             const split = this.settings.socketAcceptedOrigins.split(" ");
             let matches = false;
             for (let i = 0, l = split.length; i < l; i++)
                 if (info.origin === split) { matches = true; break; }
-            console.debug(`socketAcceptedOrigins is defined; did pass: ${matches}`);
+            this.logger.debug(`socketAcceptedOrigins is defined; did pass: ${matches}`);
             if (!matches) return void response(false, 400, "Bad Request");
         }
         // TODO: check IPs
     }
     _onOpen() {
-        console.debug("listener open");
+        this.logger.inform("listener open");
     }
 
     /**
      * @param {WebSocket} webSocket
      */
     onConnection(webSocket) {
-        console.debug("new connection");
+        this.logger.debug("new connection");
         this.connections.push(new Connection(this, webSocket));
     }
 
@@ -57,7 +59,7 @@ class Listener {
      * @param {{code: Number, reason: String}} event
      */
     onDisconnection(connection, event) {
-        console.debug(`disconnection (${event.code} '${event.reason}')`);
+        this.logger.debug(`disconnection (${event.code} '${event.reason}')`);
         this.connections.splice(this.connections.indexOf(connection), 1);
     }
 }

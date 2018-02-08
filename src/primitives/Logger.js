@@ -18,43 +18,48 @@ class Logger {
     /**
      * @param {any[]} message
      */
+    _formatMessage(...message) { return util.format.apply(null, ...message); }
+
+    /**
+     * @param {any[]} message
+     */
     debug(...message) {
-        this._onLog(new Date(), "DEBUG", util.format(message));
+        this._onLog && this._onLog(new Date(), "DEBUG", this._formatMessage(message));
     }
 
     /**
      * @param {any[]} message
      */
     onAccess(...message) {
-        this._onLog(new Date(), "ACCESS", util.format(message));
+        this._onLog && this._onLog(new Date(), "ACCESS", this._formatMessage(message));
     }
 
     /**
      * @param {any[]} message
      */
     inform(...message) {
-        this._onLog(new Date(), "INFO", util.format(message));
+        this._onLog && this._onLog(new Date(), "INFO", this._formatMessage(message));
     }
 
     /**
      * @param {any[]} message
      */
     warn(...message) {
-        this._onLog(new Date(), "WARN", util.format(message));
+        this._onLog && this._onLog(new Date(), "WARN", this._formatMessage(message));
     }
 
     /**
      * @param {any[]} message
      */
     onError(...message) {
-        this._onLog(new Date(), "ERROR", util.format(message));
+        this._onLog && this._onLog(new Date(), "ERROR", this._formatMessage(message));
     }
 
     /**
      * @param {any[]} message
      */
     onFatal(...message) {
-        this._onLog(new Date(), "FATAL", util.format(message));
+        this._onLog && this._onLog(new Date(), "FATAL", this._formatMessage(message));
     }
 }
 

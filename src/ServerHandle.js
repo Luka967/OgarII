@@ -11,8 +11,7 @@ class ServerHandle {
     constructor(settings) {
         /** @type {Settings} */
         this.settings = Object.assign(Object.create(Settings), settings);
-        /** @type {Listener} */
-        this.listener = null;
+        this.listener = new Listener(this);
         /** @type {{[id: string]: World}} */
         this.worlds = { };
         this.ticker = new Ticker(40);
@@ -22,7 +21,6 @@ class ServerHandle {
 
     start() {
         this.logger.inform("starting");
-        this.listener = new Listener(this);
         this.listener.open();
         this.ticker.begin();
         this.logger.inform("ticker begin");

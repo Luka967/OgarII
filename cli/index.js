@@ -9,7 +9,8 @@ if (!fs.existsSync("./settings.json")) {
     settings = defaultSettings;
 } else settings = JSON.parse(fs.readFileSync("./settings.json", "utf-8"));
 
-const server = new ServerHandle(settings);
-server.start();
+const currentHandle = new ServerHandle(settings);
+require("./log-handler")(currentHandle);
+currentHandle.start();
 
 // TODO: commands

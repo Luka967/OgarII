@@ -67,3 +67,6 @@ package-lock.json
 
 # Settings
 cli/settings.json
+
+# Visual Studio Code settings
+.vscode/*
