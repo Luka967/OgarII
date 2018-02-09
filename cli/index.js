@@ -13,4 +13,8 @@ const currentHandle = new ServerHandle(settings);
 require("./log-handler")(currentHandle);
 currentHandle.start();
 
+process.once("SIGINT", () => {
+    currentHandle.stop();
+});
+
 // TODO: commands

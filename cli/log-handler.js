@@ -48,4 +48,5 @@ function time(date) {
  */
 module.exports = (handle) => {
     handle.logger.onlog = (date, level, message) => console.log(`${dateTime(date)} [${level}] ${message}`);
+    // TODO: logging to file
 };

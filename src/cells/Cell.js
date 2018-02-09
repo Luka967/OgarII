@@ -1,5 +1,6 @@
 const World = require("../worlds/World");
 
+/** @abstract */
 class Cell {
     /**
      * @param {World} world
@@ -10,10 +11,22 @@ class Cell {
      */
     constructor(world, x, y, size, color) {
         this.world = world;
+
+        this.birthTick = world.handle.tick;
+        /** @private */
         this._x = x;
         this._y = y;
         this._size = size;
         this._color = color;
+        /** @type {{x: Number, y: Number, w: Number, h: Number}} */
+        this.range = null;
+        /** @type {{dx: Number, dy: Number, d: Number}} */
+        this.boost = {
+            dx: 0,
+            dy: 0,
+            d: 0
+        };
+
         /** @type {String} */
         this._name = this._skin = null;
         /** @type {Cell|null} */
@@ -27,7 +40,16 @@ class Cell {
             false;
     }
 
-    get _settings() { }
+    /**
+     * @abstract
+     * @returns {Number}
+     */
+    get type() { throw new Error("Must be overriden"); }
+    /** 
+     * @abstract
+     * @returns {Boolean}
+    */
+    get avoidWhenSpawning() { throw new Error("Must be overriden"); }
 
     get x() { return this._x; }
     get y() { return this._y; }
@@ -58,14 +80,14 @@ class Cell {
 
     /**
      * @param {Cell} other
-     * @returns {(0|1|2|3)}
+     * @returns {(0|1|2|3)} 0 for none, 1 for rigid, 2 for eat, 3 for inverted eat
      */
     getEatResult(other) {
         throw new Error("Must be overriden");
     }
 
     onSpawned() { }
-    onWorldUpdate() {
+    onTick() {
         this.posChanged =
             this.sizeChanged =
             this.colorChanged =

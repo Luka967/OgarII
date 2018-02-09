@@ -28,7 +28,7 @@ class Ticker {
         this.callback.splice(i, 1);
         return this;
     }
-    begin() {
+    start() {
         if (this.isRunning) throw new Error("The ticker has already started");
         this._bind = this._tick.bind(this);
         this.isRunning = true;

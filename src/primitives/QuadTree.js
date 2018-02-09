@@ -108,13 +108,16 @@ class QuadTree {
      * @private
      */
     merge() {
-        if (!this.hasSplit) return;
-        for (var i = 0; i < 4; i++)
-            if (this.branches[i].items.length > 0 ||
-                this.branches[i].hasSplit) return;
-        delete this.branches;
-        this.hasSplit = false;
-        if (this.root) this.root.merge();
+        var quad = this;
+        while (quad !== null) {
+            if (!this.hasSplit) return;
+            for (var i = 0; i < 4; i++)
+                if (this.branches[i].items.length > 0 ||
+                    this.branches[i].hasSplit) return;
+            delete this.branches;
+            this.hasSplit = false;
+            quad = quad.root;
+        }
     }
 
     /**

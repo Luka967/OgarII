@@ -89,3 +89,5 @@ class Writer {
         return a;
     }
 }
+
+module.exports = Writer;
