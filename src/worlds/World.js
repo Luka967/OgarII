@@ -71,6 +71,7 @@ class World {
 
     /** @param {Cell} cell */
     addCell(cell) {
+        cell.exists = true;
         cell.range = {
             x: cell.x,
             y: cell.y,
@@ -116,31 +117,37 @@ class World {
         delete cell.range;
         this.cells.splice(this.cells.indexOf(cell), 1);
         cell.onRemoved();
+        cell.exists = false;
     }
 
     /** @param {Player} player */
     addPlayer(player) {
         this.players.push(player);
         player.world = this;
+        player.router.onWorldSet();
     }
     /** @param {Player} player */
     removePlayer(player) {
         this.players.push(this.players.indexOf(player), 1);
         player.world = null;
+        player.router.onWorldReset();
     }
 
-    /** @returns {Position} */
-    getRandomPos() {
+    /**
+     * @param {Number} cellSize
+     * @returns {Position}
+     */
+    getRandomPos(cellSize) {
         return {
-            x: this.border.x - this.border.w + 2 * Math.random() * this.border.w,
-            y: this.border.y - this.border.h + 2 * Math.random() * this.border.h,
+            x: this.border.x - this.border.w + cellSize + Math.random() * (2 * this.border.w - cellSize),
+            y: this.border.y - this.border.h + cellSize + Math.random() * (2 * this.border.h - cellSize),
         };
     }
     /**
      * @param {Range} range
      */
     isSafeSpawnPos(range) {
-        return !this.finder.containsAny(range, (item) => item.avoidWhenSpawning);
+        return !this.finder.containsAny(range, /** @param {Cell} other */ (item) => item.avoidWhenSpawning);
     }
     /**
      * @param {Number} cellSize
@@ -149,11 +156,11 @@ class World {
     getSafeSpawnPos(cellSize) {
         let tries = this.settings.safeSpawnTries;
         while (--tries >= 0) {
-            const pos = this.getRandomPos();
+            const pos = this.getRandomPos(cellSize);
             if (this.isSafeSpawnPos({ x: pos.x, y: pos.y, w: cellSize, h: cellSize }))
                 return pos;
         }
-        return this.getRandomPos();
+        return this.getRandomPos(cellSize);
     }
     /**
      * @param {Number} cellSize
@@ -202,17 +209,39 @@ class World {
         while (this.pelletCount < this.settings.pelletCount)
             this.addCell(new Pellet(this));
         
+        // boosting cell updates
         for (i = 0, l = this.boostingCells.length; i < l;) {
             if (!this.boostCell(this.boostingCells[i])) l--;
             else i++;
         }
 
+        // player cell updates        
         for (i = 0, l = this.playerCells.length; i < l; i++) {
             const cell = this.playerCells[i];
             this.movePlayerCell(cell);
             this.bounceCell(cell);
             this.updateCell(cell);
         }
+
+        // player cell checks
+        for (i = 0; i < l; i++) {
+            const cell = this.playerCells[i];
+            this.finder.search(cell.range, /** @param {Cell} other */ (other) => {
+                switch (cell.getEatResult(other)) {
+                    case 1: rigid.push(cell, other); break;
+                    case 2: eat.push(cell, other); break;
+                    case 3: eat.push(other, cell); break;
+                }
+            });
+        }
+
+        // resolve rigids
+        for (i = 0, l = rigid.length; i < l;)
+            this.resolveRigidCheck(rigid[i++], rigid[i++]);
+
+        // resolve eats
+        for (i = 0, l = eat.length; i < l;)
+            this.resolveEatCheck(eat[i++], eat[i++]);
 
         // update players
         for (i = 0, l = this.players.length; i < l; i++) {
@@ -233,6 +262,46 @@ class World {
             }
             player.updateVisibleCells();
         }
+    }
+
+    /**
+     * @param {Cell} a
+     * @param {Cell} b
+     */
+    resolveRigidCheck(a, b) {
+        let dx = b.x - a.x;
+        let dy = b.y - a.y;
+        let d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 1) { d = 1; dx = 1; dy = 0; }
+        const m = a.size + b.size - d;
+        if (m <= 0) return; dx /= d; dy /= d;
+        const M = a.squareSize + b.squareSize;
+        const aM = b.squareSize / M;
+        const bM = a.squareSize / M;
+        a.x -= dx * m * aM;
+        a.y -= dy * m * aM;
+        b.x += dx * m * bM;
+        b.y += dy * m * bM;
+        this.bounceCell(a);
+        this.bounceCell(b);
+        this.updateCell(a);
+        this.updateCell(b);
+    }
+
+    /**
+     * @param {Cell} a
+     * @param {Cell} b
+     */
+    resolveEatCheck(a, b) {
+        if (!a.exists || !b.exists) return;
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d > a.size - b.size / 3) return;
+        a.whenAte(b);
+        b.whenEatenBy(a);
+        this.removeCell(b);
+        this.updateCell(a);
     }
 
     /** @param {Cell} cell */

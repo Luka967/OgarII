@@ -24,5 +24,9 @@ module.exports = Object.seal({
     playerMaxNameLength: 16,
     
     playerSpawnSize: 100,
-    playerMoveSpeed: 1
+    playerMoveSpeed: 1,
+    playerMergeTime: 25 * 30,
+    playerMergeTimeIncrease: 0.02,
+    playerNoCollideDelay: 13,
+    playerNoMergeDelay: 15
 });

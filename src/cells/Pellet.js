@@ -11,10 +11,12 @@ class Pellet extends Cell {
      */
     constructor(world, spawner, x, y) {
         spawner = spawner || null;
+
+        const size = world.settings.pelletMinSize;
         if (spawner === null) {
-            const pos = world.getRandomPos();
-            super(world, pos.x, pos.y, world.settings.pelletMinSize, Misc.randomColor());
-        } else super(world, x, y, world.settings.pelletMinSize, Misc.randomColor());
+            const pos = world.getRandomPos(size);
+            super(world, pos.x, pos.y, size, Misc.randomColor());
+        } else super(world, x, y, size, Misc.randomColor());
         
         this.spawner = spawner;
         this.lastGrowTick = this.birthTick;

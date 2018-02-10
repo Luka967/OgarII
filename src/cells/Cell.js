@@ -14,7 +14,8 @@ class Cell {
 
         this.id = world.nextCellId;
         this.birthTick = world.handle.tick;
-        /** @private */
+        this.exists = false;
+
         this._x = x;
         this._y = y;
         this._size = size;
@@ -69,6 +70,7 @@ class Cell {
             this.colorChanged || this.nameChanged || this.skinChanged;
     }
 
+    get age() { return this.world.handle.tick - this.birthTick; }
     get x() { return this._x; }
     get y() { return this._y; }
     /** @param {Number} value */
@@ -120,11 +122,11 @@ class Cell {
             false;
     }
     /** @param {Cell} other @virtual */
-    onAte(other) {
+    whenAte(other) {
         this.squareSize += other.squareSize;
     }
     /** @param {Cell} other @virtual */
-    onEaten(other) {
+    whenEatenBy(other) {
         this.eatenBy = other;
     }
     /** @virtual */

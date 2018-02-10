@@ -17,16 +17,51 @@ class PlayerCell extends Cell {
         this.owner = owner;
         this._name = name || "";
         this._skin = skin || "";
+        this._canMerge = false;
     }
 
     get moveSpeed() {
         return 88 * Math.pow(this.size, -0.4396754) * this.owner.settings.playerMoveSpeed;
     }
+    get canMerge() { return this._canMerge; }
 
-    get type() { return 1; }
+    get type() { return 0; }
     get isSpiked() { return false; }
     get isAgitated() { return false; }
     get avoidWhenSpawning() { return true; }
+
+    /**
+     * @param {PlayerCell|Cell} other
+     * @returns {(0|1|2|3)} 0 for none, 1 for rigid, 2 for eat, 3 for inverted eat
+     */
+    getEatResult(other) {
+        if (other.type === 0) {
+            const delay = this.world.settings.playerNoCollideDelay;
+            if (other.owner.id === this.owner.id) {
+                if (other.age < delay || this.age < delay) return 0;
+                if (this.canMerge && other.canMerge) return 2;
+                return 1;
+            }
+            if (other.owner.team === this.owner.team && this.owner.team !== null)
+                return (other.age < delay || this.age < delay) ? 0 : 1;
+            return this.getDefaultEatResult(other);
+        }
+        if (other.type === 4 && other.size > this.size) return 3;
+        if (other.type === 1) return 2;
+        return this.getDefaultEatResult(other);
+    }
+    /** @param {Cell} other */
+    getDefaultEatResult(other) {
+        return other.size * 1.14075183 > this.size ? 0 : 2;
+    }
+
+    onTick() {
+        super.onTick();
+        const settings = this.world.settings;
+        if (settings.playerMergeTime === 0)
+            this._canMerge = this.age >= settings.playerNoMergeDelay;
+        else this._canMerge = this.age >= settings.playerMergeTime + ~~(this.mass * settings.playerMergeTimeIncrease);
+    }
 
     onSpawned() {
         this.owner.router.onNewOwnedCell(this);

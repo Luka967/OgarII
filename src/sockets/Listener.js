@@ -77,7 +77,7 @@ class Listener {
      * @param {String} reason
      */
     onDisconnection(connection, code, reason) {
-        this.logger.debug(`disconnection (${code} '${reason}')`);
+        this.logger.debug(`disconnection from ${connection.remoteAddress} (${code} '${reason}')`);
         this.connections.splice(this.connections.indexOf(connection), 1);
     }
 
