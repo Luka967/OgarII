@@ -1,9 +1,9 @@
-const WebSocket = require("uws");
 const Packets = {
+    SetNewOwnedCell: require("../messages/SetNewOwnedCell"),
+    SetWorldBounds: require("../messages/SetWorldBounds"),
     UpdateVisible: require("../messages/UpdateVisible"),
-    UpdatePosition: require("../messages/UpdatePosition")
+    UpdatePosition: require("../messages/UpdatePosition"),
 };
-const Listener = require("./Listener");
 const PlayingRouter = require("../primitives/PlayingRouter");
 const Reader = require("../primitives/Reader");
 
@@ -79,11 +79,10 @@ class Connection extends PlayingRouter {
     _onGameMessage(messageId, reader) {
         switch (messageId) {
             case 0:
-                // TODO: spawning
+                const name = reader[this.protocol < 6 ? "readZTStringUCS2" : "readZTStringUTF8"]();
+                this.spawningName = name.slice(0, this.listener.settings.playerMaxNameLength - 1);
                 break;
-            case 1:
-                this.player && this.player.updateState(1);
-                break;
+            case 1: this.requestingSpectate = true; break;
             case 16:
                 switch (reader.dataLength) {
                     case 13:
@@ -110,36 +109,16 @@ class Connection extends PlayingRouter {
                     default: return void this.closeSocket(1003, "Unexpected message format");
                 }
                 break;
-            case 17:
-                // TODO: space press
-                break;
-            case 18:
-                // TODO: Q press
-                break;
-            case 19:
-                // TODO: Q release
-                break;
-            case 21:
-                // TODO: eject mass
-                break;
-            case 22:
-                // TODO: minion split
-                break;
-            case 23:
-                // TODO: minion eject mass
-                break;
-            case 24:
-                // TODO: minion freeze
-                break;
-            case 25:
-                // TODO: minion mode change
-                break;
-            case 99:
-                // TODO: chat message send
-                break;
-            case 254:
-                // TODO: stats request
-                break;
+            case 17: this.splitAttempts++; break;
+            case 18: this.isPressingQ = true; break;
+            case 19: this.isPressingQ = this.hasProcessedQ = false; break;
+            case 21: this.ejectAttempts++; break;
+            case 22: this.minionSplitAttempts++; break;
+            case 23: this.minionEjectAttempts++; break;
+            case 24: /* TODO: minion freeze */ break;
+            case 25: /* TODO: minion mode change */ break;
+            case 99: /* TODO: chat message send */ break;
+            case 254: /* TODO: stats request */ break;
         }
     }
 
@@ -178,6 +157,15 @@ class Connection extends PlayingRouter {
     close() {
         this.closeSocket(1001, "Manual connection close call");
     }
+    onWorldSet() {
+        this.send(Packets.SetWorldBounds(this.player.world, true, this.protocol));
+    }
+    /**
+     * @param {PlayerCell} cell
+     */
+    onNewOwnedCell(cell) {
+        this.send(Packets.SetNewOwnedCell(cell.id));
+    }
 
     /**
      * @param {Number=} code
@@ -191,3 +179,6 @@ class Connection extends PlayingRouter {
 }
 
 module.exports = Connection;
+
+const WebSocket = require("uws");
+const Listener = require("./Listener");

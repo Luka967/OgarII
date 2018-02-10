@@ -3,13 +3,14 @@ module.exports = Object.seal({
     socketAcceptedOrigins: null,
     socketPort: 443,
 
-    worldMapX: 0,
-    worldMapY: 0,
-    worldMapW: 7071,
-    worldMapH: 7071,
-    worldFinderMaxLevel: 32,
-    worldFinderMaxItems: 32,
-    worldSafeSpawnTries: 16,
+    mapX: 0,
+    mapY: 0,
+    mapW: 7071,
+    mapH: 7071,
+    finderMaxLevel: 32,
+    finderMaxItems: 32,
+    safeSpawnTries: 16,
+    safeSpawnFromEjected: 0.8,
 
     pelletMinSize: 10,
     pelletMaxSize: 40,
@@ -19,5 +20,7 @@ module.exports = Object.seal({
     playerRoamSpeed: 32,
     playerRoamViewScale: 0.4,
     playerViewScaleMult: 1,
-    playerMinViewScale: 0.01
+    playerMinViewScale: 0.01,
+
+    playerMaxNameLength: 16
 });

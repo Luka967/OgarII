@@ -1,9 +1,12 @@
 const QuadTree = require("../primitives/QuadTree");
 const Cell = require("../cells/Cell");
 const Pellet = require("../cells/Pellet");
+const PlayerCell = require("../cells/PlayerCell");
 
 /**
  * @typedef {{x: Number, y: Number}} Position
+ * @typedef {{r: Number, g: Number, b: Number}} Color
+ * @typedef {{x: Number, y: Number, w: Number, h: Number}} Range
  */
 
 class World {
@@ -21,7 +24,7 @@ class World {
         /** @type {Cell[]} */
         this.boostingCells = [];
         this.pelletCount = 0;
-        /** @type {EjectedCell[]} */
+        /** @type {Cell[]} */
         this.ejectedCells = [];
         /** @type {PlayerCell[]} */
         this.playerCells = [];
@@ -33,15 +36,15 @@ class World {
 
         /** @type {{x: Number, y: Number, w: Number, h: Number}} */
         this.border = {
-            x: this.settings.worldMapX,
-            y: this.settings.worldMapY,
-            w: this.settings.worldMapW,
-            h: this.settings.worldMapH
+            x: this.settings.mapX,
+            y: this.settings.mapY,
+            w: this.settings.mapW,
+            h: this.settings.mapH
         };
         this.finder = new QuadTree(
             this.border, 
-            this.settings.worldFinderMaxLevel,
-            this.settings.worldFinderMaxItems
+            this.settings.finderMaxLevel,
+            this.settings.finderMaxItems
         );
         /** @type {{[tick: string]: Cell[]}} */
         this.cellUpdateQueue = { };
@@ -134,17 +137,51 @@ class World {
         };
     }
     /**
+     * @param {Range} range
+     */
+    isSafeSpawnPos(range) {
+        return !this.finder.containsAny(range, (item) => item.avoidWhenSpawning);
+    }
+    /**
      * @param {Number} cellSize
      * @returns {Position}
      */
     getSafeSpawnPos(cellSize) {
-        let tries = this.settings.worldSafeSpawnTries;
+        let tries = this.settings.safeSpawnTries;
         while (--tries >= 0) {
             const pos = this.getRandomPos();
-            if (!this.finder.containsAny({ x: pos.x, y: pos.y, w: cellSize, h: cellSize }, (item) => item.avoidWhenSpawning))
+            if (this.isSafeSpawnPos({ x: pos.x, y: pos.y, w: cellSize, h: cellSize }))
                 return pos;
         }
         return this.getRandomPos();
+    }
+    /**
+     * @param {Number} cellSize
+     * @returns {{color: Color, pos: Position}}
+     */
+    getPlayerSpawnPos(cellSize) {
+        if (this.settings.safeSpawnFromEjected > Math.random() && this.ejectedCells.length > 0) {
+            let tries = this.settings.safeSpawnTries;
+            while (--tries >= 0) {
+                const cell = this.ejectedCells[~~(Math.random() * this.ejectedCells.length)];
+                if (this.isSafeSpawnPos({ x: cell.x, y: cell.y, w: cellSize, h: cellSize }))
+                    return { color: cell.color, pos: { x: cell.x, y: cell.y } };
+            }
+        }
+        return this.getSafeSpawnPos(cellSize);
+    }
+
+    /**
+     * @param {Player} player
+     * @param {Color} color
+     * @param {Position} pos
+     * @param {Number} size
+     * @param {String} name
+     * @param {String} skin
+     */
+    spawnPlayer(player, color, pos, size, name, skin) {
+        const playerCell = new PlayerCell(player, pos.x, pos.y, size, color, name, skin);
+        this.addCell(playerCell);
     }
 
     update() {

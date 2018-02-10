@@ -82,6 +82,13 @@ class Writer {
         sharedBuf[offset++] = 0;
     }
     /**
+     * @param {String} a
+     * @param {Number} protocol
+     */
+    writeZTString(a, protocol) {
+        this[protocol < 6 ? "writeZTStringUCS2" : "writeZTStringUTF8"](a);
+    }
+    /**
      * @param {Buffer} a
      */
     writeBytes(a) {

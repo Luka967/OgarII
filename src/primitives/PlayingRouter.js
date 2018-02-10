@@ -7,16 +7,49 @@ class PlayingRouter {
         this.listener = listener;
         this.mouseX = 0;
         this.mouseY = 0;
-        this.isEjecting = false;
+
+        /** @type {String=} */
+        this.spawningName = null;
+        this.requestingSpectate = false;
+        this.isPressingQ = false;
+        this.hasProcessedQ = false;
+
         this.splitAttempts = 0;
-        this.isMinionEjecting = false;
         this.minionSplitAttempts = 0;
+        this.ejectAttempts = 0;
+        this.minionEjectAttempts = 0;
 
         this.player = null;
     }
 
     createPlayer() {
         this.player = this.listener.handle.createPlayer(this);
+    }
+
+    /** @virtual */
+    onWorldSet() { }
+    /** @virtual */
+    onWorldReset() { }
+    /** @param {PlayerCell} cell @virtual */
+    onNewOwnedCell(cell) { }
+    
+    /** @virtual */
+    onQPress() {
+        if (this.hasProcessedQ) return;
+        this.hasProcessedQ = true;
+        // TODO: pass thru gamemode
+    }
+    /** @virtual */
+    attemptSplit() {
+        // TODO: player splitting
+        // TODO: pass thru gamemode
+        // if (this.player.world !== null) this.player.world.splitPlayer(this.player);
+    }
+    /** @virtual */
+    attemptEject() {
+        // TODO: player mass ejecting
+        // TODO: pass thru gamemode
+        // if (this.player.world !== null) this.player.world.ejectPlayer(this.player);
     }
 
     /** @abstract */
@@ -34,3 +67,4 @@ module.exports = PlayingRouter;
 
 const Listener = require("../sockets/Listener");
 const Player = require("../worlds/Player");
+const PlayerCell = require("../cells/PlayerCell");

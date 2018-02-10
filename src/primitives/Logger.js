@@ -17,6 +17,7 @@ class Logger {
 
     /**
      * @param {any[]} message
+     * @private
      */
     _formatMessage(...message) { return util.format.apply(null, ...message); }
 

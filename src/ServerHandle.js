@@ -13,14 +13,17 @@ class ServerHandle {
         /** @type {Settings} */
         this.settings = Object.assign(Object.create(Settings), settings);
         this.listener = new Listener(this);
+        this.logger = new Logger();
+        this.ticker = new Ticker(40);
+        this.ticker.add(this._onTick.bind(this));
+
         /** @type {{[id: string]: World}} */
         this.worlds = { };
         /** @type {{[id: string]: World}} */
         this.players = { };
-        this.ticker = new Ticker(40);
-        this.ticker.add(this._onTick.bind(this));
-        this.logger = new Logger();
 
+        /** @type {Gamemode} */
+        this.gamemode = null;
         this.running = false;
         this.tick = NaN;
     }
@@ -104,3 +107,4 @@ class ServerHandle {
 module.exports = ServerHandle;
 
 const PlayingRouter = require("./primitives/PlayingRouter");
+const Gamemode = require("./gamemodes/Gamemode");

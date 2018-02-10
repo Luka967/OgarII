@@ -51,13 +51,15 @@ class Reader {
     skip(count) {
         this.offset += count;
     }
-    readStringUTF8() {
-        var toConvert = [];
-        var curr = 0;
-        while ((curr = this.data[this.offset++]) > 0)
-            toConvert.push(curr);
-        var buf = Buffer.from(toConvert);
-        return buf.toString("utf-8");
+    readZTStringUCS2() {
+        var start = this.offset;
+        while (this.readUInt16() !== 0) ;
+        return this.data.slice(start, this.offset - 2).toString("ucs2");
+    }
+    readZTStringUTF8() {
+        var start = this.offset;
+        while (this.readUInt8() !== 0) ;
+        return this.data.slice(start, this.offset - 1).toString("utf-8");
     }
 }
 
