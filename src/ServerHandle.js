@@ -4,6 +4,8 @@ const Listener = require("./sockets/Listener");
 const Settings = require("./Settings");
 const Ticker = require("./primitives/Ticker");
 const Logger = require("./primitives/Logger");
+// DEBUG
+const FFA = require("./gamemodes/FFA");
 
 class ServerHandle {
     /**
@@ -23,7 +25,7 @@ class ServerHandle {
         this.players = { };
 
         /** @type {Gamemode} */
-        this.gamemode = null;
+        this.gamemode = new FFA(this);
         this.running = false;
         this.tick = NaN;
     }
@@ -73,13 +75,13 @@ class ServerHandle {
     }
 
     /**
-     * @param {PlayingRouter} playingRouter
+     * @param {PlayingRouter} router
      * @returns {Player}
      */
-    createPlayer(playingRouter) {
+    createPlayer(router) {
         let id = 0;
         while (this.players.hasOwnProperty(++id)) ;
-        const newPlayer = new Player(this, id, playingRouter);
+        const newPlayer = new Player(this, id, router);
         this.players[id] = newPlayer;
         this.logger.debug(`added a player with id ${id}`);
         return newPlayer;

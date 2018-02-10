@@ -14,7 +14,7 @@ module.exports = (world, includeServerInfo, protocol) => {
     writer.writeFloat64(world.border.y + world.border.h);
     if (includeServerInfo) {
         writer.writeUInt32(world.handle.gamemode.gamemodeType);
-        writer.writeZTString("OgarII 0.9.5");
+        writer.writeZTString("OgarII 0.9.5", protocol);
     }
     return writer.finalize();
 };

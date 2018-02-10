@@ -8,12 +8,12 @@ class Player {
     /**
      * @param {ServerHandle} handle
      * @param {Number} id
-     * @param {PlayingRouter} playingRouter
+     * @param {PlayingRouter} router
      */
-    constructor(handle, id, playingRouter) {
+    constructor(handle, id, router) {
         this.handle = handle;
         this.id = id;
-        this.playingRouter = playingRouter;
+        this.router = router;
 
         /**
          * -1 - Idle
@@ -95,8 +95,8 @@ class Player {
                 break;
             case 2:
                 this.score = NaN;
-                let dx = this.playingRouter.mouseX - this.viewArea.x;
-                let dy = this.playingRouter.mouseY - this.viewArea.y;
+                let dx = this.router.mouseX - this.viewArea.x;
+                let dy = this.router.mouseY - this.viewArea.y;
                 const d = Math.sqrt(dx * dx + dy * dy);
                 const D = Math.min(d, this.settings.playerRoamSpeed);
                 if (D < 1) break; dx /= d; dy /= d;

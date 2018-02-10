@@ -47,7 +47,7 @@ class Gamemode {
         // TODO: trigger player splitting
     }
 
-    /** @param {Player} player @abstract */
+    /** @param {Player} player @param {String} name @abstract */
     onPlayerSpawnRequest(player, name) {
         throw new Error("Must be overriden");
     }

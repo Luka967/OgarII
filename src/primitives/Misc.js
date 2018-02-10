@@ -1,17 +1,3 @@
-/*global.filterIP = function(ip) {
-    if (ip === "::1") return "127.0.0.1";
-    var ipv4 = /::FFFF:([0-9]{1,4})\.([0-9]{1,4})\.([0-9]{1,4})\.([0-9]{1,4})/i.exec(ip);
-    if (ipv4) return ipv4[1] + "." + ipv4[2] + "." + ipv4[3] + "." + ipv4[4];
-    return ip;
-};
-
-global.getPlayer = function(id) {
-    for (var i in server.worlds)
-        for (var j = 0, l = server.worlds[i].players.length; j < l; j++)
-            if (server.worlds[i].players[j].id === id) return server.worlds[i].players[j];
-    return undefined;
-};*/
-
 module.exports = {
     /**
      * @returns {{r: Number, g: Number, b: Number}}
@@ -40,7 +26,9 @@ module.exports = {
         return { r: weight, g: weight, b: weight };
     }
 };
-/*global.blowMass = function(cell) {
+/*
+TODO: on pop mass distribution
+function(cell) {
     var player = cell.owner;
     var cellsLeft = settings.playerMaxCells - player.ownedCells.length;
     if (cellsLeft <= 0) return [];
@@ -78,28 +66,4 @@ module.exports = {
     splits.sort(function() { return Math.random() - .5; });
     return splits;
 };
-
-global.HSVtoRGB = function(h, s, v) {
-    var r, g, b, i, f, p, q, t;
-    if (arguments.length === 1) {
-        s = h.s, v = h.v, h = h.h;
-    }
-    i = Math.floor(h * 6);
-    f = h * 6 - i;
-    p = v * (1 - s);
-    q = v * (1 - f * s);
-    t = v * (1 - (1 - f) * s);
-    switch (i % 6) {
-        case 0: r = v, g = t, b = p; break;
-        case 1: r = q, g = v, b = p; break;
-        case 2: r = p, g = v, b = t; break;
-        case 3: r = p, g = q, b = v; break;
-        case 4: r = t, g = p, b = v; break;
-        case 5: r = v, g = p, b = q; break;
-    }
-    return {
-        r: Math.round(r * 255),
-        g: Math.round(g * 255),
-        b: Math.round(b * 255)
-    };
-}*/
+*/

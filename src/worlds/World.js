@@ -168,7 +168,7 @@ class World {
                     return { color: cell.color, pos: { x: cell.x, y: cell.y } };
             }
         }
-        return this.getSafeSpawnPos(cellSize);
+        return { color: null, pos: this.getSafeSpawnPos(cellSize) };
     }
 
     /**
@@ -182,6 +182,7 @@ class World {
     spawnPlayer(player, color, pos, size, name, skin) {
         const playerCell = new PlayerCell(player, pos.x, pos.y, size, color, name, skin);
         this.addCell(playerCell);
+        player.updateState(0);
     }
 
     update() {
@@ -201,9 +202,82 @@ class World {
         while (this.pelletCount < this.settings.pelletCount)
             this.addCell(new Pellet(this));
         
+        for (i = 0, l = this.boostingCells.length; i < l;) {
+            if (!this.boostCell(this.boostingCells[i])) l--;
+            else i++;
+        }
+
+        for (i = 0, l = this.playerCells.length; i < l; i++) {
+            const cell = this.playerCells[i];
+            this.movePlayerCell(cell);
+            this.bounceCell(cell);
+            this.updateCell(cell);
+        }
+
+        // update players
         for (i = 0, l = this.players.length; i < l; i++) {
             const player = this.players[i];
+            const router = player.router;
+            if (router.ejectAttempts > 0) {
+                router.attemptEject();
+                router.ejectAttempts = 0;
+            }
+            if (router.isPressingQ) router.onQPress();
+            if (router.requestingSpectate) {
+                player.updateState(1);
+                router.requestingSpectate = false;
+            }
+            if (router.spawningName !== null) {
+                this.handle.gamemode.onPlayerSpawnRequest(player, router.spawningName);
+                router.spawningName = null;
+            }
             player.updateVisibleCells();
+        }
+    }
+
+    /** @param {Cell} cell */
+    boostCell(cell) {
+        const d = cell.boost.d / 9;
+        cell.x += cell.boost.dx * d;
+        cell.y += cell.boost.dy * d;
+        this.bounceCell(cell);
+        this.updateCell(cell);
+        if ((cell.boost.d -= d) >= 1) return true;
+        this.setCellAsNotBoosting(cell);
+        return false;
+    }
+
+    /** @param {PlayerCell} cell */
+    movePlayerCell(cell) {
+        const router = cell.owner.router;
+        let dx = router.mouseX - cell.x;
+        let dy = router.mouseY - cell.y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 1) return; dx /= d; dy /= d;
+        const m = Math.min(cell.moveSpeed, d);
+        cell.x += dx * m;
+        cell.y += dy * m;
+    }
+
+    /** @param {Cell} cell */
+    bounceCell(cell) {
+        const r = cell.size / 2;
+        const b = this.border;
+        if (cell.x <= b.x - b.w + r) {
+            cell.x = b.x - b.w + r;
+            if (cell.isBoosting) cell.boost.dx = -cell.boost.dx;
+        }
+        if (cell.x >= b.x + b.w - r) {
+            cell.x = b.x + b.w - r;
+            if (cell.isBoosting) cell.boost.dx = -cell.boost.dx;
+        }
+        if (cell.y <= b.y - b.h + r) {
+            cell.y = b.y - b.h + r;
+            if (cell.isBoosting) cell.boost.dy = -cell.boost.dy;
+        }
+        if (cell.y >= b.y + b.h - r) {
+            cell.y = b.y + b.h - r;
+            if (cell.isBoosting) cell.boost.dy = -cell.boost.dy;
         }
     }
 }

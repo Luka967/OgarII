@@ -21,6 +21,8 @@ module.exports = Object.seal({
     playerRoamViewScale: 0.4,
     playerViewScaleMult: 1,
     playerMinViewScale: 0.01,
-
-    playerMaxNameLength: 16
+    playerMaxNameLength: 16,
+    
+    playerSpawnSize: 100,
+    playerMoveSpeed: 1
 });

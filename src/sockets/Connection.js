@@ -17,6 +17,7 @@ class Connection extends PlayingRouter {
         this.remoteAddress = webSocket._socket.remoteAddress;
         this.webSocket = webSocket;
         this.isDisconnected = false;
+        
         this.upgradeLevel = 0;
         this.protocol = NaN;
         this.protocolKey = NaN;

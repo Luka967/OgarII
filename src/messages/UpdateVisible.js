@@ -45,7 +45,7 @@ module.exports = (requesting, add, upd, eat, del) => {
         protocols[requesting.protocol](writer, protocol, cell, true, true, true, true, true, true);
     }
     for (i = 0, l = upd.length; i < l; i++) {
-        cell = add[i];
+        cell = upd[i];
         protocols[requesting.protocol](writer, protocol, cell, false, cell.sizeChanged, cell.posChanged, cell.colorChanged, cell.nameChanged, cell.skinChanged);
     }
     writer.writeUInt32(0);
