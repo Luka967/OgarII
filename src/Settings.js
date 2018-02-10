@@ -14,7 +14,7 @@ module.exports = Object.seal({
     pelletMinSize: 10,
     pelletMaxSize: 40,
     pelletGrowTicks: 25 * 60,
-    pelletCount: 10000,
+    pelletCount: 1000,
 
     playerRoamSpeed: 32,
     playerRoamViewScale: 0.4,
