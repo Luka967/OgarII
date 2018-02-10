@@ -1,5 +1,5 @@
 var poolSize = 1048576;
-var sharedBuf = oldNode ? new Buffer(poolSize) : Buffer.allocUnsafe(poolSize);
+var sharedBuf = Buffer.allocUnsafe(poolSize);
 var offset = 0;
 
 class Writer {
@@ -64,8 +64,10 @@ class Writer {
      * @param {String} a
      */
     writeZTStringUCS2(a) {
-        var tbuf = Buffer.from(a, "ucs2");
-        offset += tbuf.copy(sharedBuf, offset);
+        if (a) {
+            var tbuf = Buffer.from(a, "ucs2");
+            offset += tbuf.copy(sharedBuf, offset);
+        }
         sharedBuf[offset++] = 0;
         sharedBuf[offset++] = 0;
     }
@@ -73,8 +75,10 @@ class Writer {
      * @param {String} a
      */
     writeZTStringUTF8(a) {
-        var tbuf = Buffer.from(a, "utf-8");
-        offset += tbuf.copy(sharedBuf, offset);
+        if (a) {
+            var tbuf = Buffer.from(a, "utf-8");
+            offset += tbuf.copy(sharedBuf, offset);
+        }
         sharedBuf[offset++] = 0;
     }
     /**

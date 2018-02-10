@@ -1,4 +1,5 @@
 const World = require("./worlds/World");
+const Player = require("./worlds/Player");
 const Listener = require("./sockets/Listener");
 const Settings = require("./Settings");
 const Ticker = require("./primitives/Ticker");
@@ -14,6 +15,8 @@ class ServerHandle {
         this.listener = new Listener(this);
         /** @type {{[id: string]: World}} */
         this.worlds = { };
+        /** @type {{[id: string]: World}} */
+        this.players = { };
         this.ticker = new Ticker(40);
         this.ticker.add(this._onTick.bind(this));
         this.logger = new Logger();
@@ -29,6 +32,8 @@ class ServerHandle {
         this.tick = 0;
         this.ticker.start();
         this.logger.inform("ticker begin");
+        // DEBUG
+        this.createWorld();
         return true;
     }
 
@@ -43,11 +48,12 @@ class ServerHandle {
     }
 
     /** @returns {World} */
-    addWorld() {
+    createWorld() {
         let id = 0;
         while (this.worlds.hasOwnProperty(++id)) ;
-        let newWorld = new World(this, id);
+        const newWorld = new World(this, id);
         this.worlds[id] = newWorld;
+        this.logger.debug(`added a world with id ${id}`);
         return newWorld;
     }
 
@@ -59,6 +65,32 @@ class ServerHandle {
         if (!this.worlds.hasOwnProperty(id)) return false;
         this.worlds[id].destroy();
         delete this.worlds[id];
+        this.logger.debug(`removed world with id ${id}`);
+        return true;
+    }
+
+    /**
+     * @param {PlayingRouter} playingRouter
+     * @returns {Player}
+     */
+    createPlayer(playingRouter) {
+        let id = 0;
+        while (this.players.hasOwnProperty(++id)) ;
+        const newPlayer = new Player(this, id, playingRouter);
+        this.players[id] = newPlayer;
+        this.logger.debug(`added a player with id ${id}`);
+        return newPlayer;
+    }
+
+    /**
+     * @param {Number} id
+     * @returns {Boolean}
+     */
+    removePlayer(id) {
+        if (!this.players.hasOwnProperty(id)) return false;
+        this.players[id].destroy();
+        delete this.players[id];
+        this.logger.debug(`removed player with id ${id}`);
         return true;
     }
 
@@ -70,3 +102,5 @@ class ServerHandle {
 }
 
 module.exports = ServerHandle;
+
+const PlayingRouter = require("./primitives/PlayingRouter");

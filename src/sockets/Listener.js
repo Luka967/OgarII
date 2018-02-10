@@ -1,9 +1,7 @@
 const WebSocket = require("uws");
 const WebSocketServer = WebSocket.Server;
 
-const PlayingRouter = require("../primitives/PlayingRouter");
 const Connection = require("./Connection");
-const ServerHandle = require("../ServerHandle");
 
 class Listener {
     /**
@@ -28,25 +26,22 @@ class Listener {
         this.logger.debug(`listener opening at ${this.settings.socketPort}`);
         this.listenerSocket = new WebSocketServer({
             port: this.settings.socketPort,
-            verifyClient: this._verifyClient.bind(this)
-        }, this._onOpen.bind(this));
+            verifyClient: this.verifyClient.bind(this)
+        }, this.onOpen.bind(this));
+        this.listenerSocket.on("connection", this.onConnection.bind(this));
         return true;
     }
-    /**
-     * @param {Function} callback
-     * @returns {Boolean}
-     */
-    close(callback) {
+    close() {
         if (this.listenerSocket === null) return false;
         this.logger.debug("closing");
         for (let i = 0, l = this.connections.length; i < l; i++)
             this.connections[i].close();
-        this.listenerSocket.close(callback);
+        this.listenerSocket.close();
         this.listenerSocket = null;
         return true;
     }
 
-    _verifyClient(info, response) {
+    verifyClient(info, response) {
         this.logger.debug("client verification called");
         if (this.settings.socketAcceptedOrigins !== null) {
             const split = this.settings.socketAcceptedOrigins.split(" ");
@@ -60,7 +55,7 @@ class Listener {
         this.logger.debug("client verification passed");
         response(true);
     }
-    _onOpen() {
+    onOpen() {
         this.logger.inform("listener open");
     }
 
@@ -68,22 +63,32 @@ class Listener {
      * @param {WebSocket} webSocket
      */
     onConnection(webSocket) {
-        this.logger.debug("new connection");
-        this.connections.push(new Connection(this, webSocket));
+        const newConnection = new Connection(this, webSocket);
+        this.logger.debug(`new connection from ${newConnection.remoteAddress}`);
+        this.connections.push(newConnection);
+        newConnection.createPlayer();
+        // DEBUG
+        this.handle.worlds[1].addPlayer(newConnection.player);
     }
 
     /**
      * @param {Connection} connection
-     * @param {{code: Number, reason: String}} event
+     * @param {Number} code
+     * @param {String} reason
      */
-    onDisconnection(connection, event) {
-        this.logger.debug(`disconnection (${event.code} '${event.reason}')`);
+    onDisconnection(connection, code, reason) {
+        this.logger.debug(`disconnection (${code} '${reason}')`);
         this.connections.splice(this.connections.indexOf(connection), 1);
     }
 
     update() {
-        
+        let i, l;
+        for (i = 0, l = this.connections.length; i < l; i++)
+            this.connections[i].sendUpdate();
     }
 }
 
 module.exports = Listener;
+
+const PlayingRouter = require("../primitives/PlayingRouter");
+const ServerHandle = require("../ServerHandle");

@@ -7,11 +7,12 @@ class Cell {
      * @param {Number} x
      * @param {Number} y
      * @param {Number} size
-     * @param {({r: Number, g: Number, b: Number})} color
+     * @param {{r: Number, g: Number, b: Number}} color
      */
     constructor(world, x, y, size, color) {
         this.world = world;
 
+        this.id = world.nextCellId;
         this.birthTick = world.handle.tick;
         /** @private */
         this._x = x;
@@ -20,6 +21,8 @@ class Cell {
         this._color = color;
         /** @type {{x: Number, y: Number, w: Number, h: Number}} */
         this.range = null;
+
+        this.isBoosting = false;
         /** @type {{dx: Number, dy: Number, d: Number}} */
         this.boost = {
             dx: 0,
@@ -45,11 +48,26 @@ class Cell {
      * @returns {Number}
      */
     get type() { throw new Error("Must be overriden"); }
+    /**
+     * @abstract
+     * @returns {Boolean}
+     */
+    get isSpiked() { throw new Error("Must be overriden"); }
+    /**
+     * @abstract
+     * @returns {Boolean}
+     */
+    get isAgitated() { throw new Error("Must be overriden"); }
     /** 
      * @abstract
      * @returns {Boolean}
     */
     get avoidWhenSpawning() { throw new Error("Must be overriden"); }
+    /** @virtual */
+    get shouldUpdate() {
+        return this.posChanged || this.sizeChanged ||
+            this.colorChanged || this.nameChanged || this.skinChanged;
+    }
 
     get x() { return this._x; }
     get y() { return this._y; }
@@ -70,6 +88,10 @@ class Cell {
     /** @param {Number} value */
     set mass(value) { this.size = Math.sqrt(100 * value); }
 
+    get color() { return this._color; }
+    /** @param {{r: Number, g: Number, b: Number}} value */
+    set color(value) { this._color = value; this.colorChanged = true; }
+
     get name() { return this._name; }
     /** @param {String} value */
     set name(value) { this._name = value; this.nameChanged = true; }
@@ -86,7 +108,9 @@ class Cell {
         throw new Error("Must be overriden");
     }
 
+    /** @virtual */
     onSpawned() { }
+    /** @virtual */
     onTick() {
         this.posChanged =
             this.sizeChanged =
@@ -95,14 +119,15 @@ class Cell {
             this.skinChanged =
             false;
     }
-    /** @param {Cell} other */
+    /** @param {Cell} other @virtual */
     onAte(other) {
         this.squareSize += other.squareSize;
     }
-    /** @param {Cell} other */
+    /** @param {Cell} other @virtual */
     onEaten(other) {
         this.eatenBy = other;
     }
+    /** @virtual */
     onRemoved() { }
 }
 

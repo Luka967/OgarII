@@ -1,6 +1,4 @@
-const ServerHandle = require("../ServerHandle");
 const QuadTree = require("../primitives/QuadTree");
-const Player = require("./Player");
 const Cell = require("../cells/Cell");
 const Pellet = require("../cells/Pellet");
 
@@ -17,6 +15,7 @@ class World {
         this.handle = handle;
         this.id = id;
 
+        this._nextCellId = 1;
         /** @type {Cell[]} */
         this.cells = [];
         /** @type {Cell[]} */
@@ -29,23 +28,39 @@ class World {
 
         /** @type {Player[]} */
         this.players = [];
+        /** @type {Player=} */
+        this.largestPlayer = null;
 
-        this.map = {
+        /** @type {{x: Number, y: Number, w: Number, h: Number}} */
+        this.border = {
             x: this.settings.worldMapX,
             y: this.settings.worldMapY,
             w: this.settings.worldMapW,
             h: this.settings.worldMapH
         };
         this.finder = new QuadTree(
-            this.map, 
+            this.border, 
             this.settings.worldFinderMaxLevel,
             this.settings.worldFinderMaxItems
         );
         /** @type {{[tick: string]: Cell[]}} */
         this.cellUpdateQueue = { };
+
+        this.stats = {
+            limit: -1,
+            players: -1,
+            playing: -1,
+            spectating: -1,
+            bots: -1,
+            loadTime: 0,
+            uptime: 0
+        };
     }
 
     get settings() { return this.handle.settings; }
+    get nextCellId() {
+        return this._nextCellId === 4294967296 ? (this._nextCellId = 1) : this._nextCellId++;
+    }
 
     destroy() {
         
@@ -63,7 +78,6 @@ class World {
         this.finder.insert(cell);
         cell.onSpawned();
     }
-
     /**
      * @param {Cell} cell
      * @param {Number} tick
@@ -71,12 +85,20 @@ class World {
     queueCellForUpdate(cell, tick) {
         (this.cellUpdateQueue[tick] || (this.cellUpdateQueue[tick] = [])).push(cell);
     }
-
     /** @param {Cell} cell */
     setCellAsBoosting(cell) {
-
+        if (cell.isBoosting) return false;
+        cell.isBoosting = true;
+        this.boostingCells.push(cell);
+        return true;
     }
-
+    /** @param {Cell} cell */
+    setCellAsNotBoosting(cell) {
+        if (!cell.isBoosting) return false;
+        cell.isBoosting = false;
+        this.boostingCells.splice(this.boostingCells.indexOf(cell), 1);
+        return true;
+    }
     /** @param {Cell} cell */
     updateCell(cell) {
         cell.range.x = cell.x;
@@ -85,7 +107,6 @@ class World {
         cell.range.h = cell.size;
         this.finder.update(cell);
     }
-    
     /** @param {Cell} cell */
     removeCell(cell) {
         this.finder.remove(cell);
@@ -94,14 +115,28 @@ class World {
         cell.onRemoved();
     }
 
+    /** @param {Player} player */
+    addPlayer(player) {
+        this.players.push(player);
+        player.world = this;
+    }
+    /** @param {Player} player */
+    removePlayer(player) {
+        this.players.push(this.players.indexOf(player), 1);
+        player.world = null;
+    }
+
     /** @returns {Position} */
     getRandomPos() {
         return {
-            x: this.map.x - this.map.w + 2 * Math.random() * this.map.w,
-            y: this.map.y - this.map.h + 2 * Math.random() * this.map.h,
+            x: this.border.x - this.border.w + 2 * Math.random() * this.border.w,
+            y: this.border.y - this.border.h + 2 * Math.random() * this.border.h,
         };
     }
-    /** @returns {Position} */
+    /**
+     * @param {Number} cellSize
+     * @returns {Position}
+     */
     getSafeSpawnPos(cellSize) {
         let tries = this.settings.worldSafeSpawnTries;
         while (--tries >= 0) {
@@ -130,9 +165,13 @@ class World {
             this.addCell(new Pellet(this));
         
         for (i = 0, l = this.players.length; i < l; i++) {
-            
+            const player = this.players[i];
+            player.updateVisibleCells();
         }
     }
 }
 
 module.exports = World;
+
+const Player = require("./Player");
+const ServerHandle = require("../ServerHandle");

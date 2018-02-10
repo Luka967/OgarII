@@ -21,6 +21,8 @@ class Pellet extends Cell {
     }
 
     get type() { return 1; }
+    get isSpiked() { return false; }
+    get isAgitated() { return false; }
     get avoidWhenSpawning() { return false; }
 
     getEatResult() { return 0; }

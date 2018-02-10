@@ -1,5 +1,3 @@
-const Listener = require("../sockets/Listener");
-
 /** @interface */
 class PlayingRouter {
     /**
@@ -13,6 +11,12 @@ class PlayingRouter {
         this.splitAttempts = 0;
         this.isMinionEjecting = false;
         this.minionSplitAttempts = 0;
+
+        this.player = null;
+    }
+
+    createPlayer() {
+        this.player = this.listener.handle.createPlayer(this);
     }
 
     /** @abstract */
@@ -27,3 +31,6 @@ class PlayingRouter {
 }
 
 module.exports = PlayingRouter;
+
+const Listener = require("../sockets/Listener");
+const Player = require("../worlds/Player");

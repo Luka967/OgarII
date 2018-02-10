@@ -1,5 +1,8 @@
 const WebSocket = require("uws");
-
+const Packets = {
+    UpdateVisible: require("../messages/UpdateVisible"),
+    UpdatePosition: require("../messages/UpdatePosition")
+};
 const Listener = require("./Listener");
 const PlayingRouter = require("../primitives/PlayingRouter");
 const Reader = require("../primitives/Reader");
@@ -28,11 +31,12 @@ class Connection extends PlayingRouter {
     get logger() { return this.listener.handle.logger; }
 
     /**
-     * @param {{code: Number, reason: String}} event
+     * @param {Number} code
+     * @param {String} reason
      */
-    onClose(event) {
+    onClose(code, reason) {
         this.isDisconnected = true;
-        this.listener.onDisconnection(this, event);
+        this.listener.onDisconnection(this, code, reason);
         this.webSocket.removeAllListeners();
     }
 
@@ -50,7 +54,7 @@ class Connection extends PlayingRouter {
                     return void this.closeSocket(1003, "Bad message format");
                 this.protocol = reader.readUInt32();
                 if (this.protocol < 4) {
-                    this.logger.debug("got non-existent protocol version 1, assuming 4");
+                    this.logger.debug(`got non-existent protocol version ${this.protocol}, assuming 4`);
                     this.protocol = 4;
                 } else if (this.protocol > 17)
                     return void this.closeSocket(1003, `Unsupported protocol ${this.protocol}`);
@@ -59,7 +63,7 @@ class Connection extends PlayingRouter {
             case 1:
                 if (reader.dataLength !== 5 || reader.readUInt8() !== 0xFF)
                     return void this.closeSocket(1003, "Bad message format");
-                this.protocol = reader.readUInt32();
+                this.protocolKey = reader.readUInt32();
                 this.upgradeLevel++;
                 break;
             case 2:
@@ -78,7 +82,7 @@ class Connection extends PlayingRouter {
                 // TODO: spawning
                 break;
             case 1:
-                // TODO: spectating
+                this.player && this.player.updateState(1);
                 break;
             case 16:
                 switch (reader.dataLength) {
@@ -86,8 +90,8 @@ class Connection extends PlayingRouter {
                         // 5l+
                         if (this.protocol < 5)
                             return void this.closeSocket(1003, "Unexpected message format");
-                        mouseX = reader.readInt32();
-                        mouseY = reader.readInt32();
+                        this.mouseX = reader.readInt32();
+                        this.mouseY = reader.readInt32();
                         break;
                     case 9:
                         // 5e
@@ -137,6 +141,30 @@ class Connection extends PlayingRouter {
                 // TODO: stats request
                 break;
         }
+    }
+
+    sendUpdate() {
+        if (this.isDisconnected || isNaN(this.protocolKey)) return;
+
+        const add = [], upd = [], eat = [], del = [];
+        const player = this.player;
+        const visible = player.visibleCells,
+            lastVisible = player.lastVisibleCells;
+        for (let id in visible) {
+            const cell = visible[id];
+            if (!lastVisible.hasOwnProperty(id)) add.push(cell);
+            else if (cell.shouldUpdate) upd.push(cell);
+        }
+        for (let id in lastVisible) {
+            const cell = lastVisible[id];
+            if (visible.hasOwnProperty(id)) continue;
+            if (cell.eatenBy !== null) eat.push(cell);
+            del.push(cell);
+        }
+        
+        if (player.state === 1 || player.state === 2)
+            this.send(Packets.UpdatePosition(player.viewArea));
+        this.send(Packets.UpdateVisible(this, add, upd, eat, del));
     }
 
     /**
