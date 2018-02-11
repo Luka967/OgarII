@@ -1,6 +1,7 @@
 const QuadTree = require("../primitives/QuadTree");
 const Cell = require("../cells/Cell");
 const Pellet = require("../cells/Pellet");
+const EjectedCell = require("../cells/EjectedCell");
 const PlayerCell = require("../cells/PlayerCell");
 
 /**
@@ -24,7 +25,7 @@ class World {
         /** @type {Cell[]} */
         this.boostingCells = [];
         this.pelletCount = 0;
-        /** @type {Cell[]} */
+        /** @type {EjectedCell[]} */
         this.ejectedCells = [];
         /** @type {PlayerCell[]} */
         this.playerCells = [];
@@ -46,8 +47,6 @@ class World {
             this.settings.finderMaxLevel,
             this.settings.finderMaxItems
         );
-        /** @type {{[tick: string]: Cell[]}} */
-        this.cellUpdateQueue = { };
 
         this.stats = {
             limit: -1,
@@ -82,13 +81,6 @@ class World {
         this.finder.insert(cell);
         cell.onSpawned();
     }
-    /**
-     * @param {Cell} cell
-     * @param {Number} tick
-     */
-    queueCellForUpdate(cell, tick) {
-        (this.cellUpdateQueue[tick] || (this.cellUpdateQueue[tick] = [])).push(cell);
-    }
     /** @param {Cell} cell */
     setCellAsBoosting(cell) {
         if (cell.isBoosting) return false;
@@ -116,6 +108,8 @@ class World {
         this.finder.remove(cell);
         delete cell.range;
         this.cells.splice(this.cells.indexOf(cell), 1);
+        if (cell.isBoosting)
+            this.setCellAsNotBoosting(cell);
         cell.onRemoved();
         cell.exists = false;
     }
@@ -198,12 +192,8 @@ class World {
         let i, l;
 
         // fire cell onTick
-        const updatingThisTick = this.cellUpdateQueue[this.handle.tick];
-        if (updatingThisTick !== undefined) {
-            for (i = 0, l = updatingThisTick.length; i < l; i++)
-                updatingThisTick[i].onTick();
-            delete this.cellUpdateQueue[this.handle.tick];
-        }
+        for (i = 0, l = this.cells.length; i < l; i++)
+            this.cells[i].onTick();
         
         // spawn passives
         while (this.pelletCount < this.settings.pelletCount)
@@ -215,10 +205,25 @@ class World {
             else i++;
         }
 
+        // boosting cell checks
+        for (i = 0; i < this.boostingCells.length; i++) {
+            const cell = this.boostingCells[i];
+            if (cell.type !== 2 && cell.type !== 3) continue;
+            this.finder.search(cell.range, /** @param {Cell} other */ (other) => {
+                if (cell.id === other.id) return;
+                switch (cell.getEatResult(other)) {
+                    case 1: rigid.push(cell, other); break;
+                    case 2: eat.push(cell, other); break;
+                    case 3: eat.push(other, cell); break;
+                }
+            });
+        }
+
         // player cell updates        
         for (i = 0, l = this.playerCells.length; i < l; i++) {
             const cell = this.playerCells[i];
             this.movePlayerCell(cell);
+            this.decayPlayerCell(cell);
             this.bounceCell(cell);
             this.updateCell(cell);
         }
@@ -227,6 +232,7 @@ class World {
         for (i = 0; i < l; i++) {
             const cell = this.playerCells[i];
             this.finder.search(cell.range, /** @param {Cell} other */ (other) => {
+                if (cell.id === other.id) return;
                 switch (cell.getEatResult(other)) {
                     case 1: rigid.push(cell, other); break;
                     case 2: eat.push(cell, other); break;
@@ -247,6 +253,10 @@ class World {
         for (i = 0, l = this.players.length; i < l; i++) {
             const player = this.players[i];
             const router = player.router;
+            while (router.splitAttempts > 0) {
+                router.attemptSplit();
+                router.splitAttempts--;
+            }
             if (router.ejectAttempts > 0) {
                 router.attemptEject();
                 router.ejectAttempts = 0;
@@ -316,18 +326,6 @@ class World {
         return false;
     }
 
-    /** @param {PlayerCell} cell */
-    movePlayerCell(cell) {
-        const router = cell.owner.router;
-        let dx = router.mouseX - cell.x;
-        let dy = router.mouseY - cell.y;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        if (d < 1) return; dx /= d; dy /= d;
-        const m = Math.min(cell.moveSpeed, d);
-        cell.x += dx * m;
-        cell.y += dy * m;
-    }
-
     /** @param {Cell} cell */
     bounceCell(cell) {
         const r = cell.size / 2;
@@ -347,6 +345,90 @@ class World {
         if (cell.y >= b.y + b.h - r) {
             cell.y = b.y + b.h - r;
             if (cell.isBoosting) cell.boost.dy = -cell.boost.dy;
+        }
+    }
+
+    /** @param {PlayerCell} cell */
+    movePlayerCell(cell) {
+        const router = cell.owner.router;
+        if (router.isDisconnected) return;
+        let dx = router.mouseX - cell.x;
+        let dy = router.mouseY - cell.y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 1) return; dx /= d; dy /= d;
+        const m = Math.min(cell.moveSpeed, d);
+        cell.x += dx * m;
+        cell.y += dy * m;
+    }
+    /** @param {PlayerCell} cell */
+    decayPlayerCell(cell) {
+        const newSize = cell.size - cell.size * this.settings.playerDecayMult / 40;
+        cell.size = Math.max(newSize, this.settings.playerMinSize);
+    }
+    /**
+     * @param {PlayerCell} cell
+     * @param {Number} size
+     * @param {{dx: Number, dy: Number, d: Number}} boost
+     */
+    launchPlayerCell(cell, size, boost) {
+        cell.squareSize -= size * size;
+        const newCell = new PlayerCell(cell.owner, cell.x, cell.y, size, cell.color, cell.name, cell.skin);
+        newCell.boost.dx = boost.dx;
+        newCell.boost.dy = boost.dy;
+        newCell.boost.d = boost.d;
+        this.setCellAsBoosting(newCell);
+        this.addCell(newCell);
+    }
+
+    /** @param {Player} player */
+    splitPlayer(player) {
+        const router = player.router;
+        const l = player.ownedCells.length;
+        for (let i = 0; i < l; i++) {
+            if (player.ownedCells.length >= this.settings.playerMaxCells)
+                break;
+            const cell = player.ownedCells[i];
+            if (cell.size < this.settings.playerMinSplitSize)
+                continue;
+            let dx = router.mouseX - cell.x;
+            let dy = router.mouseY - cell.y;
+            let d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 1) dx = 1, dy = 0, d = 1;
+            else dx /= d, dy /= d;
+            this.launchPlayerCell(cell, cell.size / 1.4142135623730952, {
+                dx: dx,
+                dy: dy,
+                d: this.settings.playerSplitBoostSpeed
+            });
+        }
+    }
+
+    /** @param {Player} player */
+    ejectPlayer(player) {
+        const dispersion = this.settings.ejectDispersion;
+        const loss = this.settings.ejectingLoss * this.settings.ejectingLoss;
+        const router = player.router;
+        const l = player.ownedCells.length;
+        for (let i = 0; i < l; i++) {
+            const cell = player.ownedCells[i];
+            if (cell.size < this.settings.playerMinEjectSize)
+                continue;
+            let dx = router.mouseX - cell.x;
+            let dy = router.mouseY - cell.y;
+            let d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 1) dx = 1, dy = 0, d = 1;
+            else dx /= d, dy /= d;
+            const sx = cell.x + dx * cell.size;
+            const sy = cell.y + dy * cell.size;
+            const newCell = new EjectedCell(this, sx, sy, cell.color);
+            const a = Math.atan2(dx, dy) - dispersion + Math.random() * 2 * dispersion;
+            newCell.boost.dx = Math.sin(a);
+            newCell.boost.dy = Math.cos(a);
+            newCell.boost.d = this.settings.ejectedCellBoost;
+            this.addCell(newCell);
+            this.setCellAsBoosting(newCell);
+            cell.squareSize -= loss;
+            this.updateCell(cell);
         }
     }
 }

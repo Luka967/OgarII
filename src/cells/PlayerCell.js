@@ -1,5 +1,3 @@
-const Player = require("../worlds/Player");
-const World = require("../worlds/World");
 const Cell = require("./Cell");
 
 class PlayerCell extends Cell {
@@ -58,9 +56,10 @@ class PlayerCell extends Cell {
     onTick() {
         super.onTick();
         const settings = this.world.settings;
-        if (settings.playerMergeTime === 0)
-            this._canMerge = this.age >= settings.playerNoMergeDelay;
-        else this._canMerge = this.age >= settings.playerMergeTime + ~~(this.mass * settings.playerMergeTimeIncrease);
+        const delay = settings.playerMergeTime === 0
+            ? settings.playerNoMergeDelay
+            : ~~(settings.playerMergeTime + this.mass * settings.playerMergeTimeIncrease) * 25;
+        this._canMerge = this.age >= delay;
     }
 
     onSpawned() {
@@ -77,3 +76,6 @@ class PlayerCell extends Cell {
 }
 
 module.exports = PlayerCell;
+
+const World = require("../worlds/World");
+const Player = require("../worlds/Player");

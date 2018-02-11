@@ -5,6 +5,8 @@ class PlayingRouter {
      */
     constructor(listener) {
         this.listener = listener;
+        this.isDisconnected = false;
+        
         this.mouseX = 0;
         this.mouseY = 0;
 
@@ -38,18 +40,17 @@ class PlayingRouter {
         if (this.hasProcessedQ) return;
         this.hasProcessedQ = true;
         // TODO: pass thru gamemode
+        this.player.updateState(2);
     }
     /** @virtual */
     attemptSplit() {
-        // TODO: player splitting
         // TODO: pass thru gamemode
-        // if (this.player.world !== null) this.player.world.splitPlayer(this.player);
+        if (this.player.world !== null) this.player.world.splitPlayer(this.player);
     }
     /** @virtual */
     attemptEject() {
-        // TODO: player mass ejecting
         // TODO: pass thru gamemode
-        // if (this.player.world !== null) this.player.world.ejectPlayer(this.player);
+        if (this.player.world !== null) this.player.world.ejectPlayer(this.player);
     }
 
     /** @abstract */

@@ -17,16 +17,29 @@ module.exports = Object.seal({
     pelletGrowTicks: 25 * 60,
     pelletCount: 1000,
 
+    ejectedSize: 43,
+    ejectingLoss: 48,
+    ejectDispersion: 0.3,
+    ejectedCellBoost: 780,
+    
     playerRoamSpeed: 32,
     playerRoamViewScale: 0.4,
     playerViewScaleMult: 1,
     playerMinViewScale: 0.01,
     playerMaxNameLength: 16,
     
+    playerMinSize: 32,
     playerSpawnSize: 100,
+    playerMaxSize: 1500,
+    playerMinSplitSize: 60,
+    playerMinEjectSize: 60,
+    playerMaxCells: 16,
+
     playerMoveSpeed: 1,
-    playerMergeTime: 25 * 30,
-    playerMergeTimeIncrease: 0.02,
+    playerSplitBoostSpeed: 780,
     playerNoCollideDelay: 13,
-    playerNoMergeDelay: 15
+    playerNoMergeDelay: 15,
+    playerMergeTime: 0,
+    playerMergeTimeIncrease: 0.02,
+    playerDecayMult: 0.001
 });

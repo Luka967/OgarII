@@ -33,7 +33,6 @@ class Gamemode {
 
     /** @param {Player} player @virtual */
     onNewPlayer(player) { }
-
     /** @param {Player} player @virtual */
     whenPlayerPressQ(player) {
         player.updateState(2);
@@ -46,13 +45,21 @@ class Gamemode {
     whenPlayerSplit(player) {
         // TODO: trigger player splitting
     }
-
     /** @param {Player} player @param {String} name @abstract */
     onPlayerSpawnRequest(player, name) {
         throw new Error("Must be overriden");
     }
     /** @param {Player} player @virtual */
     onPlayerDestroy(player) { }
+
+    /** @param {Cell} cell @virtual */
+    onNewCell(cell) { }
+    /** @param {Cell} a @param {Cell} b @virtual */
+    canEat(a, b) { return true; }
+    /** @param {PlayerCell} cell @virtual */
+    getPlayerCellDecayMult(cell) { return cell.world.settings.playerDecayMult; }
+    /** @param {Cell} cell @virtual */
+    onCellRemove(cell) { }
 }
 
 module.exports = Gamemode;
@@ -61,3 +68,5 @@ const ServerHandle = require("../ServerHandle");
 const World = require("../worlds/World");
 const Connection = require("../sockets/Connection");
 const Player = require("../worlds/Player");
+const Cell = require("../cells/Cell");
+const PlayerCell = require("../cells/PlayerCell");
