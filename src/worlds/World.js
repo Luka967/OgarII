@@ -3,6 +3,7 @@ const Cell = require("../cells/Cell");
 const Pellet = require("../cells/Pellet");
 const EjectedCell = require("../cells/EjectedCell");
 const PlayerCell = require("../cells/PlayerCell");
+const Virus = require("../cells/Virus");
 
 /**
  * @typedef {{x: Number, y: Number}} Position
@@ -25,6 +26,7 @@ class World {
         /** @type {Cell[]} */
         this.boostingCells = [];
         this.pelletCount = 0;
+        this.virusCount = 0;
         /** @type {EjectedCell[]} */
         this.ejectedCells = [];
         /** @type {PlayerCell[]} */
@@ -108,8 +110,7 @@ class World {
         this.finder.remove(cell);
         delete cell.range;
         this.cells.splice(this.cells.indexOf(cell), 1);
-        if (cell.isBoosting)
-            this.setCellAsNotBoosting(cell);
+        this.setCellAsNotBoosting(cell);
         cell.onRemoved();
         cell.exists = false;
     }
@@ -198,6 +199,8 @@ class World {
         // spawn passives
         while (this.pelletCount < this.settings.pelletCount)
             this.addCell(new Pellet(this));
+        while (this.virusCount < this.settings.virusMinCount)
+            this.addCell(new Virus(this));
         
         // boosting cell updates
         for (i = 0, l = this.boostingCells.length; i < l;) {
@@ -282,7 +285,7 @@ class World {
         let dx = b.x - a.x;
         let dy = b.y - a.y;
         let d = Math.sqrt(dx * dx + dy * dy);
-        if (d < 1) { d = 1; dx = 1; dy = 0; }
+        if (d <= 0) return;
         const m = a.size + b.size - d;
         if (m <= 0) return; dx /= d; dy /= d;
         const M = a.squareSize + b.squareSize;
@@ -319,33 +322,46 @@ class World {
         const d = cell.boost.d / 9;
         cell.x += cell.boost.dx * d;
         cell.y += cell.boost.dy * d;
-        this.bounceCell(cell);
+        this.bounceCell(cell, true);
         this.updateCell(cell);
         if ((cell.boost.d -= d) >= 1) return true;
         this.setCellAsNotBoosting(cell);
         return false;
     }
 
-    /** @param {Cell} cell */
-    bounceCell(cell) {
+    /**
+     * @param {Cell} cell
+     * @param {Boolean=} bounce
+    */
+    bounceCell(cell, bounce) {
         const r = cell.size / 2;
         const b = this.border;
         if (cell.x <= b.x - b.w + r) {
             cell.x = b.x - b.w + r;
-            if (cell.isBoosting) cell.boost.dx = -cell.boost.dx;
+            if (bounce) cell.boost.dx = -cell.boost.dx;
         }
         if (cell.x >= b.x + b.w - r) {
             cell.x = b.x + b.w - r;
-            if (cell.isBoosting) cell.boost.dx = -cell.boost.dx;
+            if (bounce) cell.boost.dx = -cell.boost.dx;
         }
         if (cell.y <= b.y - b.h + r) {
             cell.y = b.y - b.h + r;
-            if (cell.isBoosting) cell.boost.dy = -cell.boost.dy;
+            if (bounce) cell.boost.dy = -cell.boost.dy;
         }
         if (cell.y >= b.y + b.h - r) {
             cell.y = b.y + b.h - r;
-            if (cell.isBoosting) cell.boost.dy = -cell.boost.dy;
+            if (bounce) cell.boost.dy = -cell.boost.dy;
         }
+    }
+
+    /** @param {Virus} virus */
+    splitVirus(virus) {
+        const newVirus = new Virus(this, virus.x, virus.y);
+        newVirus.boost.dx = virus.boost.dx;
+        newVirus.boost.dy = virus.boost.dy;
+        newVirus.boost.d = this.settings.virusSplitBoost;
+        this.addCell(newVirus);
+        this.setCellAsBoosting(newVirus);
     }
 
     /** @param {PlayerCell} cell */
@@ -376,8 +392,8 @@ class World {
         newCell.boost.dx = boost.dx;
         newCell.boost.dy = boost.dy;
         newCell.boost.d = boost.d;
-        this.setCellAsBoosting(newCell);
         this.addCell(newCell);
+        this.setCellAsBoosting(newCell);
     }
 
     /** @param {Player} player */
@@ -398,7 +414,7 @@ class World {
             this.launchPlayerCell(cell, cell.size / 1.4142135623730952, {
                 dx: dx,
                 dy: dy,
-                d: this.settings.playerSplitBoostSpeed
+                d: this.settings.playerSplitBoost
             });
         }
     }
@@ -430,6 +446,57 @@ class World {
             cell.squareSize -= loss;
             this.updateCell(cell);
         }
+    }
+
+    /**
+     * @param {PlayerCell} cell
+     */
+    popPlayerCell(cell) {
+        const splits = this.distributeCellMass(cell);
+        for (let i = 0, l = splits.length; i < l; i++) {
+            const size = Math.sqrt(splits[i] * 100);
+            const angle = Math.random() * 2 * Math.PI;
+            this.launchPlayerCell(cell, size, {
+                dx: Math.sin(angle),
+                dy: Math.cos(angle),
+                d: this.settings.playerSplitBoost
+            });
+        }
+    }
+
+    /**
+     * @param {PlayerCell} cell
+     */
+    distributeCellMass(cell) {
+        const player = cell.owner;
+        let cellsLeft = this.settings.playerMaxCells - player.ownedCells.length;
+        if (cellsLeft <= 0) return [];
+        let splitMin = this.settings.playerMinSplitSize;
+        splitMin = splitMin * splitMin / 100;
+        const cellMass = cell.mass;
+        if (this.settings.virusMonotonePops) {
+            const amount = Math.min(Math.floor(cellMass / splitMin), cellsLeft);
+            const perPiece = cellMass / (amount + 1);
+            return new Array(amount).fill(perPiece);
+        }
+        if (cellMass / cellsLeft < splitMin) {
+            let amount = 2, perPiece = NaN;
+            while ((perPiece = cellMass / (amount + 1)) >= splitMin && amount * 2 <= cellsLeft)
+                amount *= 2;
+            return new Array(amount).fill(perPiece);
+        }
+        const splits = [];
+        let nextMass = cellMass / 2;
+        let massLeft = cellMass / 2;
+        while (cellsLeft-- > 0) {
+            if (nextMass / cellsLeft < splitMin) break;
+            while (nextMass >= massLeft && cellsLeft > 0)
+                nextMass /= 2;
+            splits.push(nextMass);
+            massLeft -= nextMass;
+        }
+        nextMass = massLeft / cellsLeft;
+        return splits.concat(new Array(cellsLeft + 1).fill(nextMass));
     }
 }
 

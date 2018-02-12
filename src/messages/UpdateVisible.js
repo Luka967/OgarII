@@ -15,7 +15,13 @@ const protocols = {
     8: writeCellData6,
     9: writeCellData6,
     10: writeCellData6,
-    11: writeCellData11
+    11: writeCellData11,
+    12: writeCellData11,
+    13: writeCellData11,
+    14: writeCellData11,
+    15: writeCellData11,
+    16: writeCellData11,
+    17: writeCellData11
 }
 
 /**

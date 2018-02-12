@@ -4,6 +4,7 @@ const Listener = require("./sockets/Listener");
 const Settings = require("./Settings");
 const Ticker = require("./primitives/Ticker");
 const Logger = require("./primitives/Logger");
+const Stopwatch = require("./primitives/Stopwatch");
 // DEBUG
 const FFA = require("./gamemodes/FFA");
 
@@ -18,6 +19,7 @@ class ServerHandle {
         this.logger = new Logger();
         this.ticker = new Ticker(40);
         this.ticker.add(this._onTick.bind(this));
+        this.stopwatch = new Stopwatch();
 
         /** @type {{[id: string]: World}} */
         this.worlds = { };
@@ -27,6 +29,7 @@ class ServerHandle {
         /** @type {Gamemode} */
         this.gamemode = new FFA(this);
         this.running = false;
+        this.avgTickTime = NaN;
         this.tick = NaN;
     }
 
@@ -34,7 +37,7 @@ class ServerHandle {
         if (this.running) return false;
         this.logger.inform("starting");
         this.listener.open();
-        this.tick = 0;
+        this.avgTickTime = this.tick = 0;
         this.ticker.start();
         this.logger.inform("ticker begin");
         // DEBUG
@@ -47,7 +50,7 @@ class ServerHandle {
         this.logger.inform("stopping");
         this.listener.close();
         this.ticker.stop();
-        this.tick = NaN;
+        this.avgTickTime = this.tick = NaN;
         this.logger.inform("ticker stop");
         return true;
     }
@@ -100,9 +103,12 @@ class ServerHandle {
     }
 
     _onTick() {
+        this.stopwatch.begin();
         this.tick++;
         for (let id in this.worlds) this.worlds[id].update();
         this.listener.update();
+        this.avgTickTime = this.stopwatch.elapsed();
+        this.stopwatch.stop();
     }
 }
 

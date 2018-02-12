@@ -57,7 +57,7 @@ class Player {
     updateState(targetState) {
         if (this.world === null) this.state = -1;
         else if (this.ownedCells.length > 0) this.state = 0;
-        else if (this.world.largestPlayer === null) this.state = 2;
+        else if (this.world.largestPlayer === null) this.state = targetState === -1 ? -1 : 2;
         else if (this.state === 1 && targetState === 2) this.state = 2;
         else if (this.state === 2 && targetState === 1) this.state = 1;
         else this.state = -1;

@@ -17,6 +17,15 @@ module.exports = Object.seal({
     pelletGrowTicks: 25 * 60,
     pelletCount: 1000,
 
+    virusMinCount: 30,
+    virusMaxCount: 90,
+    virusSize: 100,
+    virusFeedTimes: 7,
+    virusPushing: false,
+    virusSplitBoost: 780,
+    virusPushBoost: 120,
+    virusMonotonePops: false,
+
     ejectedSize: 43,
     ejectingLoss: 48,
     ejectDispersion: 0.3,
@@ -35,11 +44,11 @@ module.exports = Object.seal({
     playerMinEjectSize: 60,
     playerMaxCells: 16,
 
-    playerMoveSpeed: 1,
-    playerSplitBoostSpeed: 780,
+    playerMoveMult: 1,
+    playerSplitBoost: 780,
     playerNoCollideDelay: 13,
     playerNoMergeDelay: 15,
-    playerMergeTime: 0,
+    playerMergeTime: 30,
     playerMergeTimeIncrease: 0.02,
     playerDecayMult: 0.001
 });
