@@ -3,6 +3,7 @@ const Cell = require("../cells/Cell");
 const Pellet = require("../cells/Pellet");
 const EjectedCell = require("../cells/EjectedCell");
 const PlayerCell = require("../cells/PlayerCell");
+const Virus = require("../cells/Virus");
 
 /**
  * @typedef {{x: Number, y: Number}} Position
@@ -25,11 +26,13 @@ class World {
         /** @type {Cell[]} */
         this.boostingCells = [];
         this.pelletCount = 0;
+        this.virusCount = 0;
         /** @type {EjectedCell[]} */
         this.ejectedCells = [];
         /** @type {PlayerCell[]} */
         this.playerCells = [];
-
+        /** @type {Virus[]} */
+        this.viruses = [];
         /** @type {Player[]} */
         this.players = [];
         /** @type {Player=} */
@@ -198,7 +201,11 @@ class World {
         // spawn passives
         while (this.pelletCount < this.settings.pelletCount)
             this.addCell(new Pellet(this));
-        
+
+        // spawn viruses
+        while (this.virusCount < this.settings.virusAmount)
+            this.addCell(new Virus(this));
+
         // boosting cell updates
         for (i = 0, l = this.boostingCells.length; i < l;) {
             if (!this.boostCell(this.boostingCells[i])) l--;
