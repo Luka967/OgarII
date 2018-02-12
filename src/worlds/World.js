@@ -266,7 +266,7 @@ class World {
                 player.updateState(1);
                 router.requestingSpectate = false;
             }
-            if (router.spawningName !== null) {
+            if (router.spawningName !== null && router.player.state !== 0) {
                 this.handle.gamemode.onPlayerSpawnRequest(player, router.spawningName);
                 router.spawningName = null;
             }
