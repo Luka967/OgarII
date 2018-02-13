@@ -1,8 +1,9 @@
-const Packets = {
+const Messages = {
+    UpdateVisibleCells: require("../messages/UpdateVisibleCells"),
     SetNewOwnedCell: require("../messages/SetNewOwnedCell"),
     SetWorldBounds: require("../messages/SetWorldBounds"),
-    UpdateVisible: require("../messages/UpdateVisible"),
     UpdatePosition: require("../messages/UpdatePosition"),
+    GetStats: require("../messages/GetStats")
 };
 const PlayingRouter = require("../primitives/PlayingRouter");
 const Reader = require("../primitives/Reader");
@@ -27,6 +28,8 @@ class Connection extends PlayingRouter {
         webSocket.on("pong", this.closeSocket.bind(webSocket, 1003, "Unexpected message format"));
     }
 
+    get isExternal() { return true; }
+
     /** @private */
     get logger() { return this.listener.handle.logger; }
 
@@ -36,6 +39,7 @@ class Connection extends PlayingRouter {
      */
     onClose(code, reason) {
         this.isDisconnected = true;
+        this.disconnectionTick = this.listener.handle.tick;
         this.listener.onDisconnection(this, code, reason);
         this.webSocket.removeAllListeners();
     }
@@ -118,7 +122,10 @@ class Connection extends PlayingRouter {
             case 24: /* TODO: minion freeze */ break;
             case 25: /* TODO: minion mode change */ break;
             case 99: /* TODO: chat message send */ break;
-            case 254: /* TODO: stats request */ break;
+            case 254:
+                if (this.player.world !== null)
+                    this.send(Messages.GetStats(this.player.world.stats, this.protocol));
+                break;
         }
     }
 
@@ -142,8 +149,10 @@ class Connection extends PlayingRouter {
         }
         
         if (player.state === 1 || player.state === 2)
-            this.send(Packets.UpdatePosition(player.viewArea));
-        this.send(Packets.UpdateVisible(this, add, upd, eat, del));
+            this.send(Messages.UpdatePosition(player.viewArea));
+        this.send(Messages.UpdateVisibleCells(this, add, upd, eat, del));
+        if (this.listener.handle.tick % 4 === 0)
+            this.listener.handle.gamemode.sendLeaderboard(this);
     }
 
     /**
@@ -158,13 +167,13 @@ class Connection extends PlayingRouter {
         this.closeSocket(1001, "Manual connection close call");
     }
     onWorldSet() {
-        this.send(Packets.SetWorldBounds(this.player.world, true, this.protocol));
+        this.send(Messages.SetWorldBounds(this.player.world, true, this.protocol));
     }
     /**
      * @param {PlayerCell} cell
      */
     onNewOwnedCell(cell) {
-        this.send(Packets.SetNewOwnedCell(cell.id));
+        this.send(Messages.SetNewOwnedCell(cell.id));
     }
 
     /**

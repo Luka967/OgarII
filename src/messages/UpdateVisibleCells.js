@@ -1,6 +1,4 @@
-const Connection = require("../sockets/Connection");
 const Writer = require("../primitives/Writer");
-const Cell = require("../cells/Cell");
 
 /**
  * @typedef {(writer: Writer, protocol: Numer, cell: Cell, includeType: Boolean, includeSize: Boolean, includePos: Boolean, includeColor: Boolean, includeName: Boolean, includeSkin: Boolean) => void} writeCellData
@@ -22,7 +20,7 @@ const protocols = {
     15: writeCellData11,
     16: writeCellData11,
     17: writeCellData11
-}
+};
 
 /**
  * @param {Connection} requesting
@@ -30,7 +28,6 @@ const protocols = {
  * @param {Cell[]} upd
  * @param {Cell[]} eat
  * @param {Cell[]} del
- * @returns {Buffer}
  */
 module.exports = (requesting, add, upd, eat, del) => {
     const writer = new Writer();
@@ -57,7 +54,7 @@ module.exports = (requesting, add, upd, eat, del) => {
     writer.writeUInt32(0);
 
     l = del.length;
-    writer[protocol >= 6 ? "writeUInt16" : "writeUInt32"](l);
+    writer[protocol < 6 ? "writeUInt32" : "writeUInt16"](l);
     for (i = 0; i < l; i++) writer.writeUInt32(del[i].id);
     return writer.finalize();
 };
@@ -162,3 +159,6 @@ function writeCellData11(writer, protocol, cell, includeType, includeSize, inclu
     if (includeSkin) writer.writeZTStringUTF8(cell.skin);
     if (includeName) writer.writeZTStringUTF8(cell.name);
 }
+
+const Connection = require("../sockets/Connection");
+const Cell = require("../cells/Cell");

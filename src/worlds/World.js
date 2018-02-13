@@ -50,14 +50,17 @@ class World {
             this.settings.finderMaxItems
         );
 
+        /**
+         * @type {{limit: Number, internal: Number, external: Number, playing: Number, spectating: Number, name: String, gamemode: String, loadTime: Number, uptime: Number}}
+         */
         this.stats = {
-            limit: -1,
-            players: -1,
-            playing: -1,
-            spectating: -1,
-            bots: -1,
-            loadTime: 0,
-            uptime: 0
+            limit: NaN,
+            internal: NaN,
+            external: NaN,
+            playing: NaN,
+            spectating: NaN,
+            loadTime: NaN,
+            uptime: NaN
         };
     }
 
@@ -67,7 +70,14 @@ class World {
     }
 
     destroy() {
-        
+        // TODO: Move the players back to the matchmaker
+        while (this.players.length > 0) {
+            const player = this.players[0];
+            this.handle.removePlayer(player.id);
+            player.router.close();
+        }
+        while (this.cells.length > 0)
+            this.removeCell(this.cells[0]);
     }
 
     /** @param {Cell} cell */
@@ -82,6 +92,7 @@ class World {
         this.cells.push(cell);
         this.finder.insert(cell);
         cell.onSpawned();
+        this.handle.gamemode.onNewCell(cell);
     }
     /** @param {Cell} cell */
     setCellAsBoosting(cell) {
@@ -107,11 +118,12 @@ class World {
     }
     /** @param {Cell} cell */
     removeCell(cell) {
+        this.handle.gamemode.onCellRemove(cell);
+        cell.onRemoved();
         this.finder.remove(cell);
         delete cell.range;
-        this.cells.splice(this.cells.indexOf(cell), 1);
         this.setCellAsNotBoosting(cell);
-        cell.onRemoved();
+        this.cells.splice(this.cells.indexOf(cell), 1);
         cell.exists = false;
     }
 
@@ -123,8 +135,10 @@ class World {
     }
     /** @param {Player} player */
     removePlayer(player) {
-        this.players.push(this.players.indexOf(player), 1);
+        this.players.splice(this.players.indexOf(player), 1);
         player.world = null;
+        while (player.ownedCells.length > 0)
+            this.removeCell(player.ownedCells[0]);
         player.router.onWorldReset();
     }
 
@@ -253,8 +267,11 @@ class World {
             this.resolveEatCheck(eat[i++], eat[i++]);
 
         // update players
+        this.largestPlayer = null;
         for (i = 0, l = this.players.length; i < l; i++) {
             const player = this.players[i];
+            player.checkDisconnect();
+            if (!player.exists) { i--; l--; continue; }
             const router = player.router;
             while (router.splitAttempts > 0) {
                 router.attemptSplit();
@@ -273,8 +290,13 @@ class World {
                 this.handle.gamemode.onPlayerSpawnRequest(player, router.spawningName);
                 router.spawningName = null;
             }
-            player.updateVisibleCells();
+            player.update();
+            if (!isNaN(player.score) && (this.largestPlayer === null || player.score > this.largestPlayer.score))
+                this.largestPlayer = player;
         }
+        this.compileStatistics();
+        this.handle.gamemode.compileLeaderboard(this);
+        this.handle.gamemode.onWorldTick(this);
     }
 
     /**
@@ -311,6 +333,7 @@ class World {
         const dy = b.y - a.y;
         const d = Math.sqrt(dx * dx + dy * dy);
         if (d > a.size - b.size / 3) return;
+        if (!this.handle.gamemode.canEat(a, b)) return;
         a.whenAte(b);
         b.whenEatenBy(a);
         this.removeCell(b);
@@ -378,7 +401,7 @@ class World {
     }
     /** @param {PlayerCell} cell */
     decayPlayerCell(cell) {
-        const newSize = cell.size - cell.size * this.settings.playerDecayMult / 40;
+        const newSize = cell.size - cell.size * this.handle.gamemode.getDecayMult(cell) / 25;
         cell.size = Math.max(newSize, this.settings.playerMinSize);
     }
     /**
@@ -420,7 +443,7 @@ class World {
     }
 
     /** @param {Player} player */
-    ejectPlayer(player) {
+    ejectFromPlayer(player) {
         const dispersion = this.settings.ejectDispersion;
         const loss = this.settings.ejectingLoss * this.settings.ejectingLoss;
         const router = player.router;
@@ -488,15 +511,37 @@ class World {
         const splits = [];
         let nextMass = cellMass / 2;
         let massLeft = cellMass / 2;
-        while (cellsLeft-- > 0) {
+        while (cellsLeft > 0) {
             if (nextMass / cellsLeft < splitMin) break;
             while (nextMass >= massLeft && cellsLeft > 0)
                 nextMass /= 2;
             splits.push(nextMass);
             massLeft -= nextMass;
+            cellsLeft--;
         }
         nextMass = massLeft / cellsLeft;
-        return splits.concat(new Array(cellsLeft + 1).fill(nextMass));
+        return splits.concat(new Array(cellsLeft).fill(nextMass));
+    }
+
+    compileStatistics() {
+        let internal = 0, external = 0, playing = 0, spectating = 0;
+        for (let i = 0, l = this.players.length; i < l; i++) {
+            const player = this.players[i];
+            if (!player.router.isExternal) { internal++; continue; }
+            external++;
+            if (player.state === 0) playing++;
+            else if (player.state === 1 || player.state === 2)
+                spectating++;
+        }
+        this.stats.limit = this.settings.listenerMaxConnections - this.handle.listener.connections.length + external;
+        this.stats.internal = internal;
+        this.stats.external = external;
+        this.stats.playing = playing;
+        this.stats.spectating = spectating;
+        this.stats.name = this.settings.serverName;
+        this.stats.gamemode = this.handle.gamemode.name;
+        this.stats.loadTime = this.handle.averageTickTime;
+        this.stats.uptime = Math.floor((Date.now() - this.handle.startTime.getTime()) / 1000);
     }
 }
 

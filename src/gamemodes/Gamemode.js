@@ -8,6 +8,8 @@ class Gamemode {
     get id() { throw new Error("Must be overriden"); }
     /** @returns {Number} @abstract */
     get gamemodeType() { throw new Error("Must be overriden"); }
+    /** @returns {String} @abstract */
+    get name() { throw new Error("Must be overriden"); }
 
     /** @virtual */
     onHandleStart() { }
@@ -21,7 +23,7 @@ class Gamemode {
     /** @param {World} world @virtual */
     onWorldTick(world) { }
     /** @param {World} world @abstract */
-    updateLeaderboard(world) {
+    compileLeaderboard(world) {
         throw new Error("Must be overriden");
     }
     /** @param {Connection} connection @abstract */
@@ -39,11 +41,13 @@ class Gamemode {
     }
     /** @param {Player} player @virtual */
     whenPlayerEject(player) {
-        // TODO: trigger player ejecting
+        if (player.world === null) return;
+        player.world.ejectFromPlayer(player);
     }
     /** @param {Player} player @virtual */
     whenPlayerSplit(player) {
-        // TODO: trigger player splitting
+        if (player.world === null) return;
+        player.world.splitPlayer(player);
     }
     /** @param {Player} player @param {String} name @abstract */
     onPlayerSpawnRequest(player, name) {
@@ -57,7 +61,7 @@ class Gamemode {
     /** @param {Cell} a @param {Cell} b @virtual */
     canEat(a, b) { return true; }
     /** @param {PlayerCell} cell @virtual */
-    getPlayerCellDecayMult(cell) { return cell.world.settings.playerDecayMult; }
+    getDecayMult(cell) { return cell.world.settings.playerDecayMult; }
     /** @param {Cell} cell @virtual */
     onCellRemove(cell) { }
 }

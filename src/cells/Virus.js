@@ -64,6 +64,7 @@ class Virus extends Cell {
      * @param {Cell} cell
      */
     whenEatenBy(cell) {
+        super.whenEatenBy(cell);
         if (cell.type === 0) this.world.popPlayerCell(cell);
     }
 

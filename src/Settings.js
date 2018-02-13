@@ -1,7 +1,10 @@
 module.exports = Object.seal({
     /** @type {String} */
-    socketAcceptedOrigins: null,
-    socketPort: 443,
+    listenerAcceptedOrigins: null,
+    listenerMaxConnections: 100,
+    listeningPort: 443,
+
+    serverName: "An unnamed server",
 
     mapX: 0,
     mapY: 0,
@@ -10,6 +13,7 @@ module.exports = Object.seal({
     finderMaxLevel: 32,
     finderMaxItems: 32,
     safeSpawnTries: 16,
+    playerDisposeDelay: 1500,
     safeSpawnFromEjected: 0.8,
 
     pelletMinSize: 10,

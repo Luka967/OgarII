@@ -6,6 +6,7 @@ class PlayingRouter {
     constructor(listener) {
         this.listener = listener;
         this.isDisconnected = false;
+        this.disconnectionTick = NaN;
         
         this.mouseX = 0;
         this.mouseY = 0;
@@ -24,6 +25,9 @@ class PlayingRouter {
         this.player = null;
     }
 
+    /** @abstract @returns {Boolean} */
+    get isExternal() { throw new Error("Must be overriden"); }
+
     createPlayer() {
         this.player = this.listener.handle.createPlayer(this);
     }
@@ -39,18 +43,18 @@ class PlayingRouter {
     onQPress() {
         if (this.hasProcessedQ) return;
         this.hasProcessedQ = true;
-        // TODO: pass thru gamemode
-        this.player.updateState(2);
+        if (this.player === null) return;
+        this.listener.handle.gamemode.whenPlayerPressQ(this.player);
     }
     /** @virtual */
     attemptSplit() {
-        // TODO: pass thru gamemode
-        if (this.player.world !== null) this.player.world.splitPlayer(this.player);
+        if (this.player === null) return;
+        this.listener.handle.gamemode.whenPlayerSplit(this.player);
     }
     /** @virtual */
     attemptEject() {
-        // TODO: pass thru gamemode
-        if (this.player.world !== null) this.player.world.ejectPlayer(this.player);
+        if (this.player === null) return;
+        this.listener.handle.gamemode.whenPlayerEject(this.player);
     }
 
     /** @abstract */

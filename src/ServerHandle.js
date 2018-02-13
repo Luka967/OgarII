@@ -23,13 +23,15 @@ class ServerHandle {
 
         /** @type {{[id: string]: World}} */
         this.worlds = { };
-        /** @type {{[id: string]: World}} */
+        /** @type {{[id: string]: Player}} */
         this.players = { };
 
         /** @type {Gamemode} */
         this.gamemode = new FFA(this);
         this.running = false;
-        this.avgTickTime = NaN;
+        this.averageTickTime = NaN;
+        /** @type {Date} */
+        this.startTime = null;
         this.tick = NaN;
     }
 
@@ -37,8 +39,10 @@ class ServerHandle {
         if (this.running) return false;
         this.logger.inform("starting");
         this.listener.open();
-        this.avgTickTime = this.tick = 0;
+        this.startTime = new Date();
+        this.averageTickTime = this.tick = 0;
         this.ticker.start();
+        this.gamemode.onHandleStart();
         this.logger.inform("ticker begin");
         // DEBUG
         this.createWorld();
@@ -48,9 +52,11 @@ class ServerHandle {
     stop() {
         if (!this.running) return false;
         this.logger.inform("stopping");
+        this.gamemode.onHandleStop();
         this.listener.close();
         this.ticker.stop();
-        this.avgTickTime = this.tick = NaN;
+        this.startTime = null;
+        this.averageTickTime = this.tick = NaN;
         this.logger.inform("ticker stop");
         return true;
     }
@@ -61,6 +67,7 @@ class ServerHandle {
         while (this.worlds.hasOwnProperty(++id)) ;
         const newWorld = new World(this, id);
         this.worlds[id] = newWorld;
+        this.gamemode.onNewWorld(newWorld);
         this.logger.debug(`added a world with id ${id}`);
         return newWorld;
     }
@@ -71,6 +78,7 @@ class ServerHandle {
      */
     removeWorld(id) {
         if (!this.worlds.hasOwnProperty(id)) return false;
+        this.gamemode.onWorldDestroy(this.worlds[id]);
         this.worlds[id].destroy();
         delete this.worlds[id];
         this.logger.debug(`removed world with id ${id}`);
@@ -86,6 +94,7 @@ class ServerHandle {
         while (this.players.hasOwnProperty(++id)) ;
         const newPlayer = new Player(this, id, router);
         this.players[id] = newPlayer;
+        this.gamemode.onNewPlayer(newPlayer);
         this.logger.debug(`added a player with id ${id}`);
         return newPlayer;
     }
@@ -96,7 +105,9 @@ class ServerHandle {
      */
     removePlayer(id) {
         if (!this.players.hasOwnProperty(id)) return false;
+        this.gamemode.onPlayerDestroy(this.players[id]);
         this.players[id].destroy();
+        this.players[id].exists = false;
         delete this.players[id];
         this.logger.debug(`removed player with id ${id}`);
         return true;
@@ -107,7 +118,8 @@ class ServerHandle {
         this.tick++;
         for (let id in this.worlds) this.worlds[id].update();
         this.listener.update();
-        this.avgTickTime = this.stopwatch.elapsed();
+        this.gamemode.onHandleTick();
+        this.averageTickTime = this.stopwatch.elapsed();
         this.stopwatch.stop();
     }
 }

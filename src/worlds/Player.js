@@ -14,6 +14,7 @@ class Player {
         this.handle = handle;
         this.id = id;
         this.router = router;
+        this.exists = true;
 
         /**
          * -1 - Idle
@@ -48,7 +49,9 @@ class Player {
     get settings() { return this.handle.settings; }
 
     destroy() {
-        
+        if (this.world !== null)
+            this.world.removePlayer(this);
+        this.exists = false;
     }
 
     /**
@@ -57,13 +60,13 @@ class Player {
     updateState(targetState) {
         if (this.world === null) this.state = -1;
         else if (this.ownedCells.length > 0) this.state = 0;
-        else if (this.world.largestPlayer === null) this.state = targetState === -1 ? -1 : 2;
+        else if (targetState === -1) this.state = -1;
+        else if (this.world.largestPlayer === null) this.state = 2;
         else if (this.state === 1 && targetState === 2) this.state = 2;
-        else if (this.state === 2 && targetState === 1) this.state = 1;
-        else this.state = -1;
+        else this.state = 1;
     }
 
-    updateVisibleCells() {
+    update() {
         let s;
         switch (this.state) {
             case -1: this.score = NaN; break;
@@ -117,6 +120,14 @@ class Player {
             visibleCells[cell.id] = cell;
         }
         this.world.finder.search(this.viewArea, (cell) => visibleCells[cell.id] = cell);
+    }
+
+    checkDisconnect() {
+        if (!this.router.isDisconnected) return;
+        if (this.state !== 0) return void this.handle.removePlayer(this.id);
+        const disposeDelay = this.settings.playerDisposeDelay;
+        if (disposeDelay > 0 && this.handle.tick - this.router.disconnectionTick >= disposeDelay)
+            this.handle.removePlayer(this.id);
     }
 }
 

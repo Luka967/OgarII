@@ -23,9 +23,9 @@ class Listener {
 
     open() {
         if (this.listenerSocket !== null) return false;
-        this.logger.debug(`listener opening at ${this.settings.socketPort}`);
+        this.logger.debug(`listener opening at ${this.settings.listeningPort}`);
         this.listenerSocket = new WebSocketServer({
-            port: this.settings.socketPort,
+            port: this.settings.listeningPort,
             verifyClient: this.verifyClient.bind(this)
         }, this.onOpen.bind(this));
         this.listenerSocket.on("connection", this.onConnection.bind(this));
@@ -42,14 +42,18 @@ class Listener {
     }
 
     verifyClient(info, response) {
-        this.logger.debug("client verification called");
-        if (this.settings.socketAcceptedOrigins !== null) {
-            const split = this.settings.socketAcceptedOrigins.split(" ");
+        this.logger.onAccess(`REQUEST FROM ${info.req.socket.remoteAddress}, ${info.secure ? "" : "not "}secure, Origin: ${info.origin}`);
+        if (this.settings.listenerAcceptedOrigins !== null) {
+            const split = this.settings.listenerAcceptedOrigins.split(" ");
             let matches = false;
             for (let i = 0, l = split.length; i < l; i++)
                 if (info.origin === split[i]) { matches = true; break; }
             this.logger.debug(`socketAcceptedOrigins is defined; did ${info.origin} pass: ${matches}`);
-            if (!matches) return void response(false, 400, "Bad Request");
+            if (!matches) return void response(false, 403, "Forbidden");
+        }
+        if (this.connections.length > this.settings.listenerMaxConnections) {
+            this.logger.debug("too many connections, drop new ones!");
+            return void response(false, 503, "Service Unavailable");
         }
         // TODO: check IPs
         this.logger.debug("client verification passed");
@@ -64,7 +68,7 @@ class Listener {
      */
     onConnection(webSocket) {
         const newConnection = new Connection(this, webSocket);
-        this.logger.debug(`new connection from ${newConnection.remoteAddress}`);
+        this.logger.onAccess(`CONNECTION FROM ${newConnection.remoteAddress}`);
         this.connections.push(newConnection);
         newConnection.createPlayer();
         // DEBUG
@@ -77,7 +81,7 @@ class Listener {
      * @param {String} reason
      */
     onDisconnection(connection, code, reason) {
-        this.logger.debug(`disconnection from ${connection.remoteAddress} (${code} '${reason}')`);
+        this.logger.onAccess(`DISCONNECTION FROM ${connection.remoteAddress} (${code} '${reason}')`);
         this.connections.splice(this.connections.indexOf(connection), 1);
     }
 
