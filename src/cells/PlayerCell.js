@@ -44,7 +44,7 @@ class PlayerCell extends Cell {
                 return (other.age < delay || this.age < delay) ? 0 : 1;
             return this.getDefaultEatResult(other);
         }
-        if (other.type === 4 && other.size > this.size) return 3;
+        if (other.type === 4 && other.size > this.size * 1.14075183) return 3;
         if (other.type === 1) return 2;
         return this.getDefaultEatResult(other);
     }

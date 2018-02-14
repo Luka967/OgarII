@@ -5,6 +5,7 @@ const Settings = require("./Settings");
 const Ticker = require("./primitives/Ticker");
 const Logger = require("./primitives/Logger");
 const Stopwatch = require("./primitives/Stopwatch");
+
 // DEBUG
 const FFA = require("./gamemodes/FFA");
 
@@ -17,6 +18,13 @@ class ServerHandle {
         this.settings = Object.assign(Object.create(Settings), settings);
         this.listener = new Listener(this);
         this.logger = new Logger();
+        
+        this.running = false;
+        /** @type {Date} */
+        this.startTime = null;
+        this.averageTickTime = NaN;
+        this.tick = NaN;
+
         this.ticker = new Ticker(40);
         this.ticker.add(this._onTick.bind(this));
         this.stopwatch = new Stopwatch();
@@ -25,14 +33,8 @@ class ServerHandle {
         this.worlds = { };
         /** @type {{[id: string]: Player}} */
         this.players = { };
-
         /** @type {Gamemode} */
         this.gamemode = new FFA(this);
-        this.running = false;
-        this.averageTickTime = NaN;
-        /** @type {Date} */
-        this.startTime = null;
-        this.tick = NaN;
     }
 
     start() {

@@ -53,13 +53,21 @@ class Reader {
     }
     readZTStringUCS2() {
         var start = this.offset;
-        while (this.readUInt16() !== 0) ;
-        return this.data.slice(start, this.offset - 2).toString("ucs2");
+        var index = this.offset;
+        while (index + 2 < this.dataLength && this.readUInt16() !== 0) index += 2;
+        return this.data.slice(start, index).toString("ucs2");
     }
     readZTStringUTF8() {
         var start = this.offset;
-        while (this.readUInt8() !== 0) ;
-        return this.data.slice(start, this.offset - 1).toString("utf-8");
+        var index = this.offset;
+        while (index + 1 < this.dataLength && this.readUInt8() !== 0) index++;
+        return this.data.slice(start, index).toString("utf-8");
+    }
+    /**
+     * @param {Number} protocol
+     */
+    readZTString(protocol) {
+        return this[protocol < 6 ? "readZTStringUCS2" : "readZTStringUTF8"]();
     }
 }
 

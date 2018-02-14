@@ -121,11 +121,23 @@ class Connection extends PlayingRouter {
             case 23: this.minionEjectAttempts++; break;
             case 24: /* TODO: minion freeze */ break;
             case 25: /* TODO: minion mode change */ break;
-            case 99: /* TODO: chat message send */ break;
+            case 99:
+                if (this.player === null) break;
+                if (reader.dataLength < 2)
+                    return void this.closeSocket(1003, "Unexpected message format");
+                const flags = reader.readUInt8();
+                const skipLen = 2 * ((flags & 2) + (flags & 4) + (flags & 8))
+                if (reader.dataLength < 2 + skipLen)
+                    return void this.closeSocket(1003, "Unexpected message format");
+                reader.skip(skipLen);
+                const message = reader.readZTString(this.protocol).trim();
+                message && this.listener.globalChat.broadcast(this, message);
+                break;
             case 254:
                 if (this.player.world !== null)
                     this.send(Messages.GetStats(this.player.world.stats, this.protocol));
                 break;
+            default: return void this.closeSocket(1003, "Unknown message type");
         }
     }
 

@@ -3,16 +3,11 @@ const Cell = require("./Cell");
 class Virus extends Cell {
     /**
      * @param {World} world
-     * @param {Number=} x
-     * @param {Number=} y
+     * @param {Number} x
+     * @param {Number} y
      */
     constructor(world, x, y) {
         const size = world.settings.virusSize;
-        if (x === undefined) {
-            const pos = world.getSafeSpawnPos(size);
-            x = pos.x;
-            y = pos.y;
-        }
         super(world, x, y, size, { r: 51, g: 255, b: 51 });
 
         this.fedTimes = 0;

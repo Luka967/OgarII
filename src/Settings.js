@@ -13,11 +13,11 @@ module.exports = Object.seal({
     finderMaxLevel: 32,
     finderMaxItems: 32,
     safeSpawnTries: 16,
-    playerDisposeDelay: 1500,
+    playerDisposeDelay: 60 * 25,
     safeSpawnFromEjected: 0.8,
 
     pelletMinSize: 10,
-    pelletMaxSize: 40,
+    pelletMaxSize: 20,
     pelletGrowTicks: 25 * 60,
     pelletCount: 1000,
 
@@ -34,6 +34,13 @@ module.exports = Object.seal({
     ejectingLoss: 48,
     ejectDispersion: 0.3,
     ejectedCellBoost: 780,
+
+    mothercellSize: 149,
+    mothercellCount: 6,
+    mothercellPassiveSpawnChance: 0.05,
+    mothercellPelletBoost: 90,
+    mothercellMaxPellets: 96,
+    mothercellMaxSize: 65535,
     
     playerRoamSpeed: 32,
     playerRoamViewScale: 0.4,

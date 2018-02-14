@@ -2,6 +2,7 @@ const WebSocket = require("uws");
 const WebSocketServer = WebSocket.Server;
 
 const Connection = require("./Connection");
+const ChatChannel = require("./ChatChannel");
 
 class Listener {
     /**
@@ -11,6 +12,7 @@ class Listener {
         /** @type {WebSocketServer} */
         this.listenerSocket = null;
         this.handle = handle;
+        this.globalChat = new ChatChannel(this);
 
         /** @type {PlayingRouter[]} */
         this.allPlayingRouters = [];
@@ -55,7 +57,7 @@ class Listener {
             this.logger.debug("too many connections, drop new ones!");
             return void response(false, 503, "Service Unavailable");
         }
-        // TODO: check IPs
+        // TODO: IP checks
         this.logger.debug("client verification passed");
         response(true);
     }
@@ -69,8 +71,9 @@ class Listener {
     onConnection(webSocket) {
         const newConnection = new Connection(this, webSocket);
         this.logger.onAccess(`CONNECTION FROM ${newConnection.remoteAddress}`);
-        this.connections.push(newConnection);
         newConnection.createPlayer();
+        this.connections.push(newConnection);
+        this.globalChat.add(newConnection);
         // DEBUG
         this.handle.worlds[1].addPlayer(newConnection.player);
     }
@@ -82,6 +85,7 @@ class Listener {
      */
     onDisconnection(connection, code, reason) {
         this.logger.onAccess(`DISCONNECTION FROM ${connection.remoteAddress} (${code} '${reason}')`);
+        this.globalChat.remove(connection);
         this.connections.splice(this.connections.indexOf(connection), 1);
     }
 

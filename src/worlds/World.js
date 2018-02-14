@@ -3,6 +3,7 @@ const Cell = require("../cells/Cell");
 const Pellet = require("../cells/Pellet");
 const EjectedCell = require("../cells/EjectedCell");
 const PlayerCell = require("../cells/PlayerCell");
+const Mothercell = require("../cells/Mothercell");
 const Virus = require("../cells/Virus");
 
 /**
@@ -26,6 +27,7 @@ class World {
         /** @type {Cell[]} */
         this.boostingCells = [];
         this.pelletCount = 0;
+        this.mothercellCount = 0;
         this.virusCount = 0;
         /** @type {EjectedCell[]} */
         this.ejectedCells = [];
@@ -211,10 +213,18 @@ class World {
             this.cells[i].onTick();
         
         // spawn passives
-        while (this.pelletCount < this.settings.pelletCount)
-            this.addCell(new Pellet(this));
-        while (this.virusCount < this.settings.virusMinCount)
-            this.addCell(new Virus(this));
+        while (this.pelletCount < this.settings.pelletCount) {
+            const pos = this.getRandomPos(this.settings.pelletMinSize);
+            this.addCell(new Pellet(this, this, pos.x, pos.y));
+        }
+        while (this.virusCount < this.settings.virusMinCount) {
+            const pos = this.getSafeSpawnPos(this.settings.virusSize);
+            this.addCell(new Virus(this, pos.x, pos.y));
+        }
+        while (this.mothercellCount < this.settings.mothercellCount) {
+            const pos = this.getSafeSpawnPos(this.settings.mothercellSize);
+            this.addCell(new Mothercell(this, pos.x, pos.y));
+        }
         
         // boosting cell updates
         for (i = 0, l = this.boostingCells.length; i < l;) {
@@ -239,6 +249,7 @@ class World {
         // player cell updates        
         for (i = 0, l = this.playerCells.length; i < l; i++) {
             const cell = this.playerCells[i];
+            this.autosplitPlayerCell(cell);
             this.movePlayerCell(cell);
             this.decayPlayerCell(cell);
             this.bounceCell(cell);
@@ -418,6 +429,24 @@ class World {
         this.addCell(newCell);
         this.setCellAsBoosting(newCell);
     }
+    /** @param {PlayerCell} cell */
+    autosplitPlayerCell(cell) {
+        const minSplit = this.settings.playerMaxSize * this.settings.playerMaxSize;
+        const cellsLeft = this.settings.playerMaxCells - cell.owner.ownedCells.length;
+        const overflow = Math.ceil(cell.squareSize / minSplit);
+        if (overflow === 1) return;
+        const splitTimes = Math.min(overflow, cellsLeft);
+        const splitSize = Math.min(Math.sqrt(cell.squareSize / splitTimes), this.settings.playerMaxSize);
+        for (let i = 1; i < splitTimes; i++) {
+            const angle = Math.random() * 2 * Math.PI;
+            this.launchPlayerCell(cell, splitSize, {
+                dx: Math.sin(angle),
+                dy: Math.cos(angle),
+                d: this.settings.playerSplitBoost
+            });
+        }
+        cell.size = splitSize;
+    }
 
     /** @param {Player} player */
     splitPlayer(player) {
@@ -441,7 +470,6 @@ class World {
             });
         }
     }
-
     /** @param {Player} player */
     ejectFromPlayer(player) {
         const dispersion = this.settings.ejectDispersion;

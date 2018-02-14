@@ -1,4 +1,4 @@
-const World = require("../worlds/World");
+const { throwIfBadNumber } = require("../primitives/Misc");
 
 /** @abstract */
 class Cell {
@@ -74,13 +74,13 @@ class Cell {
     get x() { return this._x; }
     get y() { return this._y; }
     /** @param {Number} value */
-    set x(value) { this._x = value; this.posChanged = true; }
+    set x(value) { throwIfBadNumber(value); this._x = value; this.posChanged = true; }
     /** @param {Number} value */
-    set y(value) { this._y = value; this.posChanged = true; }
+    set y(value) { throwIfBadNumber(value); this._y = value; this.posChanged = true; }
 
     get size() { return this._size; }
     /** @param {Number} value */
-    set size(value) { this._size = value; this.sizeChanged = true; }
+    set size(value) { throwIfBadNumber(value); this._size = value; this.sizeChanged = true; }
 
     get squareSize() { return this.size * this.size; }
     /** @param {Number} value */
@@ -134,3 +134,5 @@ class Cell {
 }
 
 module.exports = Cell;
+
+const World = require("../worlds/World");
