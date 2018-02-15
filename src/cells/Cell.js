@@ -11,6 +11,9 @@ class Cell {
      */
     constructor(world, x, y, size, color) {
         this.world = world;
+        throwIfBadNumber(x);
+        throwIfBadNumber(y);
+        throwIfBadNumber(size);
 
         this.id = world.nextCellId;
         this.birthTick = world.handle.tick;

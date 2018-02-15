@@ -16,6 +16,7 @@ require("./log-handler")(currentHandle);
 currentHandle.start();
 
 process.once("SIGINT", () => {
+    console.log("(caught SIGINT)");
     currentHandle.stop();
     process.exitCode = 0;
 });

@@ -40,11 +40,15 @@ class ServerHandle {
     start() {
         if (this.running) return false;
         this.logger.inform("starting");
-        this.listener.open();
+
         this.startTime = new Date();
         this.averageTickTime = this.tick = 0;
+        this.running = true;
+
+        this.listener.open();
         this.ticker.start();
         this.gamemode.onHandleStart();
+
         this.logger.inform("ticker begin");
         // DEBUG
         this.createWorld();
@@ -54,11 +58,17 @@ class ServerHandle {
     stop() {
         if (!this.running) return false;
         this.logger.inform("stopping");
+
+        this.ticker.stop();
+        for (let id in this.worlds)
+            this.removeWorld(id);
         this.gamemode.onHandleStop();
         this.listener.close();
-        this.ticker.stop();
+
         this.startTime = null;
         this.averageTickTime = this.tick = NaN;
+        this.running = false;
+
         this.logger.inform("ticker stop");
         return true;
     }

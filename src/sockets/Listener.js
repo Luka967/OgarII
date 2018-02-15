@@ -35,9 +35,7 @@ class Listener {
     }
     close() {
         if (this.listenerSocket === null) return false;
-        this.logger.debug("closing");
-        for (let i = 0, l = this.connections.length; i < l; i++)
-            this.connections[i].close();
+        this.logger.debug("listener closing");
         this.listenerSocket.close();
         this.listenerSocket = null;
         return true;

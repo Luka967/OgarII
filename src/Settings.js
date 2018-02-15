@@ -38,7 +38,7 @@ module.exports = Object.seal({
     ejectedCellBoost: 780,
 
     mothercellSize: 149,
-    mothercellCount: 6,
+    mothercellCount: 0,
     mothercellPassiveSpawnChance: 0.05,
     mothercellPelletBoost: 90,
     mothercellMaxPellets: 96,

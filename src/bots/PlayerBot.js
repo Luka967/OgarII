@@ -79,7 +79,7 @@ class PlayerBot extends Bot {
             mouseY += dy * influence / d;
         }
 
-        if (willSplit && bestPrey !== null && !hasPredator && this.splitCooldownTicks <= 0) {
+        if (willSplit && bestPrey !== null && bestPrey.size * 2 > cell.size && !hasPredator && this.splitCooldownTicks <= 0) {
             this.mouseX = bestPrey.x;
             this.mouseY = bestPrey.y;
             this.splitAttempts++;

@@ -225,7 +225,7 @@ class World {
         
         // spawn passives
         while (this.pelletCount < this.settings.pelletCount) {
-            const pos = this.getRandomPos(this.settings.pelletMinSize);
+            const pos = this.getSafeSpawnPos(this.settings.pelletMinSize);
             this.addCell(new Pellet(this, this, pos.x, pos.y));
         }
         while (this.virusCount < this.settings.virusMinCount) {
