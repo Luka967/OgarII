@@ -4,7 +4,7 @@ const ServerHandle = require("../src/ServerHandle");
 if (!fs.existsSync("./settings.json")) {
     const defaultSettings = require("../src/Settings");
     const beautifulJson = require("json-beautify");
-    fs.writeFileSync("./settings.json", beautifulJson(defaultSettings, null, 2), "utf-8");
+    fs.writeFileSync("./settings.json", beautifulJson(defaultSettings, null, 4), "utf-8");
     console.log("the default settings have been written to settings.json as one wasn't detected");
     console.log("re-run this script to start the server");
     process.exit(0);

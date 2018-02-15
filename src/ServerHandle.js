@@ -97,7 +97,6 @@ class ServerHandle {
         const newPlayer = new Player(this, id, router);
         this.players[id] = newPlayer;
         this.gamemode.onNewPlayer(newPlayer);
-        this.logger.debug(`added a player with id ${id}`);
         return newPlayer;
     }
 
@@ -111,7 +110,6 @@ class ServerHandle {
         this.players[id].destroy();
         this.players[id].exists = false;
         delete this.players[id];
-        this.logger.debug(`removed player with id ${id}`);
         return true;
     }
 

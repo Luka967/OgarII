@@ -43,10 +43,22 @@ function time(date) {
     return `${th}:${tm}:${ts}`;
 }
 
+const showing = {
+    DEBUG: true,
+    ACCESS: true,
+    INFO: true,
+    WARN: true,
+    ERROR: true,
+    FATAL: true
+};
+
 /**
  * @param {ServerHandle} handle
  */
 module.exports = (handle) => {
-    handle.logger.onlog = (date, level, message) => console.log(`${dateTime(date)} [${level}] ${message}`);
+    handle.logger.onlog = (date, level, message) => {
+        if (!showing[level]) return;
+        console.log(`${dateTime(date)} [${level}] ${message}`);
+    };
     // TODO: logging to file
 };

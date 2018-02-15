@@ -15,7 +15,7 @@ module.exports = (world, includeServerInfo, protocol) => {
     if (includeServerInfo) {
         writer.writeUInt32(world.handle.gamemode.gamemodeType);
         // TODO: Have a single endpoint for changing the version
-        writer.writeZTString("OgarII 0.9.13", protocol);
+        writer.writeZTString("OgarII 0.9.15", protocol);
     }
     return writer.finalize();
 };

@@ -66,7 +66,7 @@ class Player {
         else this.state = 1;
     }
 
-    update() {
+    updateViewArea() {
         let s;
         switch (this.state) {
             case -1: this.score = NaN; break;
@@ -111,7 +111,9 @@ class Player {
                 this.viewArea.h = 1080 / s / 2 * this.settings.playerViewScaleMult;
                 break;
         }
+    }
 
+    updateVisibleCells() {
         delete this.lastVisibleCells;
         this.lastVisibleCells = this.visibleCells;
         let visibleCells = this.visibleCells = { };

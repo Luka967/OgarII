@@ -62,7 +62,20 @@ class Listener {
         response(true);
     }
     onOpen() {
-        this.logger.inform("listener open");
+        this.logger.inform(`listener open at ${this.settings.listeningPort}`);
+    }
+
+    /**
+     * @param {PlayingRouter} router
+     */
+    addPlayingRouter(router) {
+        this.allPlayingRouters.push(router);
+    }
+    /**
+     * @param {PlayingRouter} router
+     */
+    removePlayingRouter(router) {
+        this.allPlayingRouters.splice(this.allPlayingRouters.indexOf(router), 1);
     }
 
     /**
@@ -91,8 +104,11 @@ class Listener {
 
     update() {
         let i, l;
-        for (i = 0, l = this.connections.length; i < l; i++)
-            this.connections[i].sendUpdate();
+        for (i = 0, l = this.allPlayingRouters.length; i < l; i++) {
+            const router = this.allPlayingRouters[i];
+            router.update();
+            if (router.isDisconnected) i--, l--;
+        }
     }
 }
 

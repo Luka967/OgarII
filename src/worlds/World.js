@@ -1,5 +1,8 @@
 const QuadTree = require("../primitives/QuadTree");
-const Cell = require("../cells/Cell");
+
+const Minion = require("../bots/Minion");
+const PlayerBot = require("../bots/PlayerBot");
+
 const Pellet = require("../cells/Pellet");
 const EjectedCell = require("../cells/EjectedCell");
 const PlayerCell = require("../cells/PlayerCell");
@@ -64,6 +67,9 @@ class World {
             loadTime: NaN,
             uptime: NaN
         };
+
+        for (let i = 0; i < this.settings.playerBotsPerWorld; i++)
+            new PlayerBot(this);
     }
 
     get settings() { return this.handle.settings; }
@@ -134,6 +140,9 @@ class World {
         this.players.push(player);
         player.world = this;
         player.router.onWorldSet();
+        if (!player.router.isExternal) return;
+        for (let i = 0; i < this.settings.minionsPerPlayer; i++)
+            new Minion(player.router);
     }
     /** @param {Player} player */
     removePlayer(player) {
@@ -182,8 +191,10 @@ class World {
             let tries = this.settings.safeSpawnTries;
             while (--tries >= 0) {
                 const cell = this.ejectedCells[~~(Math.random() * this.ejectedCells.length)];
-                if (this.isSafeSpawnPos({ x: cell.x, y: cell.y, w: cellSize, h: cellSize }))
+                if (this.isSafeSpawnPos({ x: cell.x, y: cell.y, w: cellSize, h: cellSize })) {
+                    this.removeCell(cell);
                     return { color: cell.color, pos: { x: cell.x, y: cell.y } };
+                }
             }
         }
         return { color: null, pos: this.getSafeSpawnPos(cellSize) };
@@ -292,16 +303,20 @@ class World {
                 router.attemptEject();
                 router.ejectAttempts = 0;
             }
-            if (router.isPressingQ) router.onQPress();
+            if (router.isPressingQ) {
+                if (!router.hasProcessedQ)
+                    router.onQPress();
+                router.hasProcessedQ = true;
+            } else router.hasProcessedQ = false;
             if (router.requestingSpectate) {
-                player.updateState(1);
+                router.onSpectateRequest();
                 router.requestingSpectate = false;
             }
             if (router.spawningName !== null) {
-                this.handle.gamemode.onPlayerSpawnRequest(player, router.spawningName);
+                router.onSpawnRequest();
                 router.spawningName = null;
             }
-            player.update();
+            player.updateViewArea();
             if (!isNaN(player.score) && (this.largestPlayer === null || player.score > this.largestPlayer.score))
                 this.largestPlayer = player;
         }
@@ -575,5 +590,6 @@ class World {
 
 module.exports = World;
 
+const Cell = require("../cells/Cell");
 const Player = require("./Player");
 const ServerHandle = require("../ServerHandle");

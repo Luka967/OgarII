@@ -44,13 +44,13 @@ class PlayerCell extends Cell {
                 return (other.age < delay || this.age < delay) ? 0 : 1;
             return this.getDefaultEatResult(other);
         }
-        if (other.type === 4 && other.size > this.size * 1.14075183) return 3;
+        if (other.type === 4 && other.size > this.size * 1.140175425099138) return 3;
         if (other.type === 1) return 2;
         return this.getDefaultEatResult(other);
     }
     /** @param {Cell} other */
     getDefaultEatResult(other) {
-        return other.size * 1.14075183 > this.size ? 0 : 2;
+        return other.size * 1.140175425099138 > this.size ? 0 : 2;
     }
 
     onTick() {

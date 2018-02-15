@@ -79,10 +79,10 @@ function writeCellData45(writer, protocol, cell, includeType, includeSize, inclu
     writer.writeUInt8(cell.color.b);
 
     var flags = 0;
-    if (includeType && cell.isSpiked) flags |= 0x01;
+    if (cell.isSpiked) flags |= 0x01;
     if (includeSkin) flags |= 0x04;
-    if (includeType && cell.isAgitated) flags |= 0x10;
-    if (includeType && cell.type === 3) flags |= 0x20;
+    if (cell.isAgitated) flags |= 0x10;
+    if (cell.type === 3) flags |= 0x20;
     writer.writeUInt8(flags);
 
     if (includeSkin) writer.writeZTStringUTF8(cell.skin);
@@ -107,12 +107,12 @@ function writeCellData6(writer, protocol, cell, includeType, includeSize, includ
     writer.writeUInt16(cell.size);
 
     var flags = 0;
-    if (includeType && cell.isSpiked) flags |= 0x01;
+    if (cell.isSpiked) flags |= 0x01;
     if (includeColor) flags |= 0x02;
     if (includeSkin) flags |= 0x04;
     if (includeName) flags |= 0x08;
-    if (includeType && cell.isAgitated) flags |= 0x10;
-    if (includeType && cell.type === 3) flags |= 0x20;
+    if (cell.isAgitated) flags |= 0x10;
+    if (cell.type === 3) flags |= 0x20;
     writer.writeUInt8(flags);
 
     if (includeColor) {
@@ -141,12 +141,12 @@ function writeCellData11(writer, protocol, cell, includeType, includeSize, inclu
     writer.writeUInt16(cell.size);
 
     var flags = 0;
-    if (includeType && cell.isSpiked) flags |= 0x01;
+    if (cell.isSpiked) flags |= 0x01;
     if (includeColor) flags |= 0x02;
     if (includeSkin) flags |= 0x04;
     if (includeName) flags |= 0x08;
-    if (includeType && cell.isAgitated) flags |= 0x10;
-    if (includeType && cell.type === 3) flags |= 0x20;
+    if (cell.isAgitated) flags |= 0x10;
+    if (cell.type === 3) flags |= 0x20;
     if (includeType && cell.type === 1) flags |= 0x80;
     writer.writeUInt8(flags);
 

@@ -22,6 +22,9 @@ class Connection extends PlayingRouter {
         this.protocol = NaN;
         this.protocolKey = NaN;
 
+        /** @type {Minion[]} */
+        this.minions = [];
+
         webSocket.on("close", this.onClose.bind(this));
         webSocket.on("message", this._onMessage.bind(this));
         webSocket.on("ping", this.closeSocket.bind(webSocket, 1003, "Unexpected message format"));
@@ -38,6 +41,7 @@ class Connection extends PlayingRouter {
      * @param {String} reason
      */
     onClose(code, reason) {
+        super.close();
         this.isDisconnected = true;
         this.disconnectionTick = this.listener.handle.tick;
         this.listener.onDisconnection(this, code, reason);
@@ -49,7 +53,7 @@ class Connection extends PlayingRouter {
      */
     _onMessage(data) {
         if (data instanceof String) return void this.closeSocket(1003, "Unexpected message format");
-        if (data.byteLength > 128 || data.byteLength === 0)
+        if (data.byteLength > 256 || data.byteLength === 0)
             return void this.closeSocket(1009, "Unexpected message size");
         const reader = new Reader(Buffer.from(data), 0);
         switch (this.upgradeLevel) {
@@ -117,9 +121,19 @@ class Connection extends PlayingRouter {
             case 18: this.isPressingQ = true; break;
             case 19: this.isPressingQ = this.hasProcessedQ = false; break;
             case 21: this.ejectAttempts++; break;
-            case 22: this.minionSplitAttempts++; break;
-            case 23: this.minionEjectAttempts++; break;
-            case 24: /* TODO: minion freeze */ break;
+            case 22:
+                for (let i = 0, l = this.minions.length; i < l; i++)
+                    this.minions[i].splitAttempts++;
+                break;
+            case 23:
+                for (let i = 0, l = this.minions.length; i < l; i++)
+                    this.minions[i].ejectAttempts++;
+                break;
+            case 24:
+                // TODO: Make it synchronous so that new minions don't move when the old ones are frozen
+                for (let i = 0, l = this.minions.length; i < l; i++)
+                    this.minions[i].isFrozen = !this.minions[i].isFrozen;
+                break;
             case 25: /* TODO: minion mode change */ break;
             case 99:
                 if (this.player === null) break;
@@ -141,8 +155,10 @@ class Connection extends PlayingRouter {
         }
     }
 
-    sendUpdate() {
+    update() {
         if (this.isDisconnected || isNaN(this.protocolKey)) return;
+        if (this.player === null) return;
+        this.player.updateVisibleCells();
 
         const add = [], upd = [], eat = [], del = [];
         const player = this.player;
@@ -203,3 +219,4 @@ module.exports = Connection;
 
 const WebSocket = require("uws");
 const Listener = require("./Listener");
+const Minion = require("../bots/Minion");

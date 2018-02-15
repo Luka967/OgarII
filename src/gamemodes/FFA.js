@@ -24,16 +24,7 @@ class FFA extends Gamemode {
 
     /** @param {World} world */
     compileLeaderboard(world) {
-        /** @type {Player[]} */
-        const leaderboard = world.leaderboard = [];
-        for (let i = 0, l = world.players.length; i < l; i++) {
-            const player = world.players[i];
-            if (isNaN(player.score)) continue;
-            let listI = 0;
-            for (let k = leaderboard.length; listI < k; listI++)
-                if (player.score > leaderboard[listI].score) break;
-            leaderboard.splice(listI, 0, player);
-        }
+        world.leaderboard = world.players.slice(0).filter((v) => !isNaN(v.score)).sort((a, b) => b.score - a.score);
     }
 
     /** @param {Connection} connection */

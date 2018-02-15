@@ -12,9 +12,11 @@ module.exports = Object.seal({
     mapH: 7071,
     finderMaxLevel: 32,
     finderMaxItems: 32,
+    playerBotsPerWorld: 0,
+    minionsPerPlayer: 0,
     safeSpawnTries: 16,
-    playerDisposeDelay: 60 * 25,
     safeSpawnFromEjected: 0.8,
+    playerDisposeDelay: 25 * 60,
 
     pelletMinSize: 10,
     pelletMaxSize: 20,

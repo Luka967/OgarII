@@ -16,13 +16,11 @@ class PlayingRouter {
         this.requestingSpectate = false;
         this.isPressingQ = false;
         this.hasProcessedQ = false;
-
         this.splitAttempts = 0;
-        this.minionSplitAttempts = 0;
         this.ejectAttempts = 0;
-        this.minionEjectAttempts = 0;
 
         this.player = null;
+        this.listener.addPlayingRouter(this);
     }
 
     /** @abstract @returns {Boolean} */
@@ -40,9 +38,17 @@ class PlayingRouter {
     onNewOwnedCell(cell) { }
     
     /** @virtual */
+    onSpawnRequest() {
+        if (this.player === null) return;
+        this.listener.handle.gamemode.onPlayerSpawnRequest(this.player, this.spawningName);
+    }
+    /** @virtual */
+    onSpectateRequest() {
+        if (this.player === null) return;
+        this.player.updateState(1);
+    }
+    /** @virtual */
     onQPress() {
-        if (this.hasProcessedQ) return;
-        this.hasProcessedQ = true;
         if (this.player === null) return;
         this.listener.handle.gamemode.whenPlayerPressQ(this.player);
     }
@@ -57,13 +63,13 @@ class PlayingRouter {
         this.listener.handle.gamemode.whenPlayerEject(this.player);
     }
 
-    /** @abstract */
+    /** @virtual */
     close() {
-        throw new Error("Must be overriden");
+        this.listener.removePlayingRouter(this);
     }
 
     /** @abstract */
-    sendUpdate() {
+    update() {
         throw new Error("Must be overriden");
     }
 }
