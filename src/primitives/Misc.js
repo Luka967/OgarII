@@ -1,3 +1,10 @@
+const fs = require("fs");
+const http = require("http");
+
+/**
+ * @typedef {{x: Number, y: Number, w: Number, h: Number}} Range
+ */
+
 module.exports = {
     /**
      * @returns {{r: Number, g: Number, b: Number}}
@@ -28,5 +35,26 @@ module.exports = {
     /** @param {n} */
     throwIfBadNumber(n) {
         if (isNaN(n) || !isFinite(n) || n == null) throw new Error("Bad number");
+    },
+
+    /**
+     * @param {Range} a
+     * @param {Range} b
+     */
+    intersects(a, b) {
+        return a.x - a.w <= b.x + b.w &&
+            a.x + a.w >= b.x - b.w &&
+            a.y - a.h <= b.y + b.h &&
+            a.y + a.h >= b.y - b.h;
+    },
+    /**
+     * @param {Range} a
+     * @param {Range} b
+     */
+    fullyIntersects(a, b) {
+        return a.x - a.w >= b.x + b.w &&
+               a.x + a.w <= b.x - b.w &&
+               a.y - a.h >= b.y + b.h &&
+               a.y + a.h <= b.y - b.h;
     }
 };

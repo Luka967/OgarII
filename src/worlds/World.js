@@ -9,6 +9,8 @@ const PlayerCell = require("../cells/PlayerCell");
 const Mothercell = require("../cells/Mothercell");
 const Virus = require("../cells/Virus");
 
+const { fullyIntersects } = require("../primitives/Misc");
+
 /**
  * @typedef {{x: Number, y: Number}} Position
  * @typedef {{r: Number, g: Number, b: Number}} Color
@@ -25,35 +27,21 @@ class World {
         this.id = id;
 
         this._nextCellId = 1;
-        /** @type {Cell[]} */
-        this.cells = [];
-        /** @type {Cell[]} */
-        this.boostingCells = [];
+        /** @type {Cell[]} */ this.cells = [];
+        /** @type {Cell[]} */ this.boostingCells = [];
         this.pelletCount = 0;
         this.mothercellCount = 0;
         this.virusCount = 0;
-        /** @type {EjectedCell[]} */
-        this.ejectedCells = [];
-        /** @type {PlayerCell[]} */
-        this.playerCells = [];
+        /** @type {EjectedCell[]} */ this.ejectedCells = [];
+        /** @type {PlayerCell[]} */ this.playerCells = [];
 
-        /** @type {Player[]} */
-        this.players = [];
-        /** @type {Player=} */
-        this.largestPlayer = null;
+        /** @type {Player[]} */ this.players = [];
+        /** @type {Player=} */ this.largestPlayer = null;
 
         /** @type {{x: Number, y: Number, w: Number, h: Number}} */
-        this.border = {
-            x: this.settings.mapX,
-            y: this.settings.mapY,
-            w: this.settings.mapW,
-            h: this.settings.mapH
-        };
-        this.finder = new QuadTree(
-            this.border, 
-            this.settings.finderMaxLevel,
-            this.settings.finderMaxItems
-        );
+        this.border = { x: NaN, y: NaN, w: NaN, h: NaN };
+        /** @type {QuadTree} */
+        this.finder = null;
 
         /**
          * @type {{limit: Number, internal: Number, external: Number, playing: Number, spectating: Number, name: String, gamemode: String, loadTime: Number, uptime: Number}}
@@ -68,6 +56,7 @@ class World {
             uptime: NaN
         };
 
+        this.setBorder({ x: this.settings.mapX, y: this.settings.mapY, w: this.settings.mapW, h: this.settings.mapH });
         for (let i = 0; i < this.settings.playerBotsPerWorld; i++)
             new PlayerBot(this);
     }
@@ -86,6 +75,27 @@ class World {
         }
         while (this.cells.length > 0)
             this.removeCell(this.cells[0]);
+    }
+
+    /** @param {{x: Number, y: Number, w: Number, h: Number}} range */
+    setBorder(range) {
+        this.border.x = range.x;
+        this.border.y = range.y;
+        this.border.w = range.w;
+        this.border.h = range.h;
+        if (this.finder !== null) this.finder.destroy();
+        this.finder = new QuadTree(
+            this.border,
+            this.settings.finderMaxLevel,
+            this.settings.finderMaxItems
+        );
+        for (let i = 0, l = this.cells.length; i < l; i++) {
+            const cell = this.cells[i];
+            if (cell.type === 0) continue;
+            this.finder.insert(cell);
+            if (!fullyIntersects(this.border, cell.range))
+                this.removeCell(cell);
+        }
     }
 
     /** @param {Cell} cell */
@@ -427,7 +437,7 @@ class World {
     }
     /** @param {PlayerCell} cell */
     decayPlayerCell(cell) {
-        const newSize = cell.size - cell.size * this.handle.gamemode.getDecayMult(cell) / 25;
+        const newSize = cell.size - cell.size * this.handle.gamemode.getDecayMult(cell) / 50;
         cell.size = Math.max(newSize, this.settings.playerMinSize);
     }
     /**
@@ -556,7 +566,7 @@ class World {
         let massLeft = cellMass / 2;
         while (cellsLeft > 0) {
             if (nextMass / cellsLeft < splitMin) break;
-            while (nextMass >= massLeft && cellsLeft > 0)
+            while (nextMass >= massLeft && cellsLeft > 1)
                 nextMass /= 2;
             splits.push(nextMass);
             massLeft -= nextMass;

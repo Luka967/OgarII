@@ -1,3 +1,5 @@
+const { intersects, fullyIntersects } = require("../primitives/Misc");
+
 /**
  * @typedef {{x: Number, y: Number, w: Number, h: Number}} Range
  * @typedef {{__root: undefined, range: Range}} QuadItem
@@ -23,6 +25,13 @@ class QuadTree {
         /** @type {InsertedQuadItem[]} */
         this.items = [];
         this.hasSplit = false;
+    }
+
+    destroy() {
+        for (var i = 0, l = this.items.length; i < l; i++)
+            delete this.items[i].__root;
+        if (!this.hasSplit) return;
+        for (i = 0; i < 4; i++) this.branches[i].destroy();
     }
 
     /** 
@@ -202,27 +211,6 @@ class QuadTree {
         }
         return -1;
     }
-}
-
-/**
- * @param {Range} a
- * @param {Range} b
- */
-function intersects(a, b) {
-    return a.x - a.w <= b.x + b.w &&
-           a.x + a.w >= b.x - b.w &&
-           a.y - a.h <= b.y + b.h &&
-           a.y + a.h >= b.y - b.h;
-}
-/**
- * @param {Range} a
- * @param {Range} b
- */
-function fullyIntersects(a, b) {
-    return a.x - a.w >= b.x + b.w &&
-           a.x + a.w <= b.x - b.w &&
-           a.y - a.h >= b.y + b.h &&
-           a.y + a.h <= b.y - b.h;
 }
 
 module.exports = QuadTree;

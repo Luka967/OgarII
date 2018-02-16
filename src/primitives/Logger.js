@@ -8,7 +8,7 @@ class Logger {
 
     get onlog() { return this._onLog; }
     /**
-     * @param {(date: Date, level: "DEBUG"|"ACCESS"|"INFO"|"WARN"|"ERROR"|"FATAL", message: String) => void} value
+     * @param {(date: Date=, level: null|"DEBUG"|"ACCESS"|"INFO"|"WARN"|"ERROR"|"FATAL", message: String) => void} value
      */
     set onlog(value) {
         if (!(value instanceof Function) || value.length !== 3) throw new Error("Bad value");
@@ -20,6 +20,19 @@ class Logger {
      * @private
      */
     _formatMessage(...message) { return util.format.apply(null, ...message); }
+
+    /**
+     * @param {any[]} message
+     */
+    print(...message) {
+        this._onLog && this._onLog(new Date(), "PRINT", this._formatMessage(message));
+    }
+    /**
+     * @param {any[]} message
+     */
+    printFile(...message) {
+        this._onLog && this._onLog(new Date(), "FILE", this._formatMessage(message));
+    }
 
     /**
      * @param {any[]} message

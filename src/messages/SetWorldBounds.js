@@ -14,8 +14,8 @@ module.exports = (world, includeServerInfo, protocol) => {
     writer.writeFloat64(world.border.y + world.border.h);
     if (includeServerInfo) {
         writer.writeUInt32(world.handle.gamemode.gamemodeType);
-        // TODO: Have a single endpoint for changing the version
-        writer.writeZTString("OgarII 0.9.15", protocol);
+        // TODO: have a single endpoint for changing the version
+        writer.writeZTString("OgarII 0.9.16", protocol);
     }
     return writer.finalize();
 };

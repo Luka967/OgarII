@@ -1,10 +1,15 @@
-const World = require("./worlds/World");
-const Player = require("./worlds/Player");
-const Listener = require("./sockets/Listener");
 const Settings = require("./Settings");
-const Ticker = require("./primitives/Ticker");
-const Logger = require("./primitives/Logger");
+
+const { CommandList } = require("./commands/Commands");
+const DefaultCommands = require("./commands/DefaultCommands");
+
 const Stopwatch = require("./primitives/Stopwatch");
+const Logger = require("./primitives/Logger");
+const Ticker = require("./primitives/Ticker");
+
+const Listener = require("./sockets/Listener");
+const Player = require("./worlds/Player");
+const World = require("./worlds/World");
 
 // DEBUG
 const FFA = require("./gamemodes/FFA");
@@ -16,25 +21,28 @@ class ServerHandle {
     constructor(settings) {
         /** @type {Settings} */
         this.settings = Object.assign(Object.create(Settings), settings);
-        this.listener = new Listener(this);
-        this.logger = new Logger();
-        
+
+        /** @type {Gamemode} */
+        this.gamemode = new FFA(this);
+        this.commands = new CommandList(this);
+        DefaultCommands(this.commands);
+
         this.running = false;
         /** @type {Date} */
         this.startTime = null;
         this.averageTickTime = NaN;
         this.tick = NaN;
-
+        
         this.ticker = new Ticker(40);
         this.ticker.add(this._onTick.bind(this));
         this.stopwatch = new Stopwatch();
-
+        this.logger = new Logger();
+        
+        this.listener = new Listener(this);
         /** @type {{[id: string]: World}} */
         this.worlds = { };
         /** @type {{[id: string]: Player}} */
         this.players = { };
-        /** @type {Gamemode} */
-        this.gamemode = new FFA(this);
     }
 
     start() {

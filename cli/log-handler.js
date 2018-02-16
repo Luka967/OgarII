@@ -5,7 +5,6 @@ const fs = require("fs");
  * @param {Date=} date
  */
 function dateTime(date) {
-    var date = date || new Date();
     var dy = date.getFullYear();
     var dm = ("00" + (date.getMonth() + 1)).slice(-2);
     var dd = ("00" + (date.getDate())).slice(-2);
@@ -45,6 +44,8 @@ function time(date) {
 
 const logging = {
     showingConsole: {
+        PRINT: true,
+        FILE: false,
         DEBUG: true,
         ACCESS: true,
         INFO: true,
@@ -53,6 +54,8 @@ const logging = {
         FATAL: true
     },
     showingFile: {
+        PRINT: true,
+        FILE: true,
         DEBUG: true,
         ACCESS: true,
         INFO: true,
@@ -84,12 +87,28 @@ var fprocessing = false;
 var synchronous = false;
 var flushed = false;
 
+function formatConsole(date, level, message) {
+    switch (level) {
+        case "PRINT":
+        case "FILE":
+            return message;
+        default: return `${dateTime(date)} [${level}] ${message}`;
+    }
+}
+function formatFile(date, level, message) {
+    switch (level) {
+        case "PRINT":
+        case "FILE":
+            return `${dateTime(date)} ${message}`;
+        default: return `${dateTime(date)} [${level}] ${message}`;
+    }
+}
+
 function write(date, level, message) {
-    const writing = `${dateTime(date)} [${level}] ${message}${EOL}`;
     if (logging.showingConsole[level])
-        process.stdout.write(writing);
+        console.log(formatConsole(date, level, message));
     if (logging.showingFile[level]) {
-        fqueue.push(writing);
+        fqueue.push(formatFile(date, level, message) + EOL);
         if (!fprocessing && !synchronous) fprocess();
     }
 }
