@@ -8,7 +8,6 @@ class Minion extends Bot {
         super(following.player.world);
         
         this.following = following;
-        this.isFrozen = false;
         following.minions.push(this);
     }
 
@@ -24,12 +23,12 @@ class Minion extends Bot {
         if (this.following.player.world !== this.player.world) return void this.close();
         const player = this.player;
         if (player.state === -1) {
-            this.spawningName = "Minion";
+            this.spawningName = this.listener.settings.minionName;
             this.onSpawnRequest();
             this.spawningName = null;
         }
-        this.mouseX = this.isFrozen ? this.player.viewArea.x : this.following.mouseX;
-        this.mouseY = this.isFrozen ? this.player.viewArea.y : this.following.mouseY;
+        this.mouseX = this.following.minionsFrozen ? this.player.viewArea.x : this.following.mouseX;
+        this.mouseY = this.following.minionsFrozen ? this.player.viewArea.y : this.following.mouseY;
     }
 }
 

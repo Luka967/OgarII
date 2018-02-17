@@ -2,6 +2,7 @@ module.exports = Object.seal({
     /** @type {String} */
     listenerAcceptedOrigins: null,
     listenerMaxConnections: 100,
+    listenerMaxClientDormancy: 1000 * 60,
     listeningPort: 443,
 
     serverName: "An unnamed server",
@@ -22,6 +23,10 @@ module.exports = Object.seal({
     maxWorldCount: 2,
     matchmakerNeedsQueuing: false,
     matchmakerBulkSize: 1,
+
+    minionName: "Minion",
+    minionEnableERTPControls: false,
+    minionEnableQBasedControl: true,
 
     pelletMinSize: 10,
     pelletMaxSize: 20,

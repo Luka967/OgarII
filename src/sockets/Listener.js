@@ -109,6 +109,12 @@ class Listener {
             router.update();
             if (router.isDisconnected) i--, l--;
         }
+        
+        for (i = 0, l = this.connections.length; i < l; i++) {
+            const connection = this.connections[i];
+            if (Date.now() - connection.lastActivityTime < this.settings.listenerMaxClientDormancy) continue;
+            connection.closeSocket(1003, "Maximum dormancy time exceeded");
+        }
     }
 }
 

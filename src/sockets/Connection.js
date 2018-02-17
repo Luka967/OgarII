@@ -17,6 +17,7 @@ class Connection extends PlayingRouter {
         super(listener);
         this.remoteAddress = webSocket._socket.remoteAddress;
         this.webSocket = webSocket;
+        this.lastActivityTime = Date.now();
         
         this.upgradeLevel = 0;
         this.protocol = NaN;
@@ -24,6 +25,8 @@ class Connection extends PlayingRouter {
 
         /** @type {Minion[]} */
         this.minions = [];
+        this.minionsFrozen = false;
+        this.controllingMinions = false;
 
         webSocket.on("close", this.onClose.bind(this));
         webSocket.on("message", this._onMessage.bind(this));
@@ -55,6 +58,7 @@ class Connection extends PlayingRouter {
         if (data instanceof String) return void this.closeSocket(1003, "Unexpected message format");
         if (data.byteLength > 256 || data.byteLength === 0)
             return void this.closeSocket(1009, "Unexpected message size");
+        this.lastActivityTime = Date.now();
         const reader = new Reader(Buffer.from(data), 0);
         switch (this.upgradeLevel) {
             case 0:
@@ -108,22 +112,31 @@ class Connection extends PlayingRouter {
                     default: return void this.closeSocket(1003, "Unexpected message format");
                 }
                 break;
-            case 17: this.splitAttempts++; break;
+            case 17:
+                if (this.controllingMinions) for (let i = 0, l = this.minions.length; i < l; i++)
+                        this.minions[i].splitAttempts++;
+                else this.splitAttempts++;
+                break;
             case 18: this.isPressingQ = true; break;
             case 19: this.isPressingQ = this.hasProcessedQ = false; break;
-            case 21: this.ejectAttempts++; break;
+            case 21:
+                if (this.controllingMinions) for (let i = 0, l = this.minions.length; i < l; i++)
+                        this.minions[i].ejectAttempts++;
+                else this.ejectAttempts++;
+                break;
             case 22:
+                if (!this.listener.settings.minionEnableERTPControls) break;
                 for (let i = 0, l = this.minions.length; i < l; i++)
                     this.minions[i].splitAttempts++;
                 break;
             case 23:
+                if (!this.listener.settings.minionEnableERTPControls) break;
                 for (let i = 0, l = this.minions.length; i < l; i++)
                     this.minions[i].ejectAttempts++;
                 break;
             case 24:
-                // TODO: Make it synchronous so that new minions don't move when the old ones are frozen
-                for (let i = 0, l = this.minions.length; i < l; i++)
-                    this.minions[i].isFrozen = !this.minions[i].isFrozen;
+                if (!this.listener.settings.minionEnableERTPControls) break;
+                this.minionsFrozen = !this.minionsFrozen;
                 break;
             case 25: /* TODO: minion mode change */ break;
             case 99:
@@ -146,6 +159,13 @@ class Connection extends PlayingRouter {
         }
     }
 
+    onQPress() {
+        if (this.player === null) return;
+        if (this.listener.settings.minionEnableQBasedControl)
+            this.controllingMinions = !this.controllingMinions;
+        else this.listener.handle.gamemode.whenPlayerPressQ(this.player);
+    }
+
     update() {
         if (this.isDisconnected || isNaN(this.protocolKey)) return;
         if (this.player === null) return;
@@ -153,6 +173,11 @@ class Connection extends PlayingRouter {
             if (this.spawningName !== null)
                 this.listener.handle.matchmaker.enqueue(this);
             this.spawningName = null;
+            this.splitAttempts = 0;
+            this.ejectAttempts = 0;
+            this.requestingSpectate = false;
+            this.isPressingQ = false;
+            this.hasProcessedQ = false;
             return;
         }
         this.player.updateVisibleCells();
