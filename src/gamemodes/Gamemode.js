@@ -19,6 +19,9 @@ class Gamemode {
     onHandleStop() { }
 
     /** @param {World} world @virtual */
+    canJoinWorld(world) { return !world.frozen; }
+
+    /** @param {World} world @virtual */
     onNewWorld(world) { }
     /** @param {World} world @virtual */
     onWorldTick(world) { }

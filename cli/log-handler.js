@@ -46,8 +46,8 @@ const logging = {
     showingConsole: {
         PRINT: true,
         FILE: false,
-        DEBUG: true,
-        ACCESS: true,
+        DEBUG: false,
+        ACCESS: false,
         INFO: true,
         WARN: true,
         ERROR: true,

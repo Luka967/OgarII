@@ -8,6 +8,7 @@ const Logger = require("./primitives/Logger");
 const Ticker = require("./primitives/Ticker");
 
 const Listener = require("./sockets/Listener");
+const Matchmaker = require("./worlds/Matchmaker");
 const Player = require("./worlds/Player");
 const World = require("./worlds/World");
 
@@ -20,7 +21,8 @@ class ServerHandle {
      */
     constructor(settings) {
         /** @type {Settings} */
-        this.settings = Object.assign(Object.create(Settings), settings);
+        this.settings = Settings;
+        this.setSettings(settings);
 
         /** @type {Gamemode} */
         this.gamemode = new FFA(this);
@@ -39,10 +41,18 @@ class ServerHandle {
         this.logger = new Logger();
         
         this.listener = new Listener(this);
+        this.matchmaker = new Matchmaker(this);
         /** @type {{[id: string]: World}} */
         this.worlds = { };
         /** @type {{[id: string]: Player}} */
         this.players = { };
+    }
+
+    /**
+     * @param {Settings} settings
+     */
+    setSettings(settings) {
+        this.settings = Object.assign({ }, Settings, settings);
     }
 
     start() {
@@ -58,8 +68,6 @@ class ServerHandle {
         this.gamemode.onHandleStart();
 
         this.logger.inform("ticker begin");
-        // DEBUG
-        this.createWorld();
         return true;
     }
 
@@ -134,9 +142,13 @@ class ServerHandle {
     _onTick() {
         this.stopwatch.begin();
         this.tick++;
-        for (let id in this.worlds) this.worlds[id].update();
+
+        for (let id in this.worlds)
+            this.worlds[id].update();
         this.listener.update();
         this.gamemode.onHandleTick();
+        this.matchmaker.update();
+
         this.averageTickTime = this.stopwatch.elapsed();
         this.stopwatch.stop();
     }

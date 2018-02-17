@@ -85,8 +85,10 @@ class Listener {
         newConnection.createPlayer();
         this.connections.push(newConnection);
         this.globalChat.add(newConnection);
-        // DEBUG
-        this.handle.worlds[1].addPlayer(newConnection.player);
+        if (this.settings.matchmakerNeedsQueuing) {
+            this.globalChat.directMessage(null, newConnection, "This server requires players to be queued.");
+            this.globalChat.directMessage(null, newConnection, "Try spawning to enqueue.");
+        } else this.handle.matchmaker.enqueue(newConnection);
     }
 
     /**

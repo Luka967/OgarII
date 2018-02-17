@@ -26,6 +26,8 @@ class World {
         this.handle = handle;
         this.id = id;
 
+        this.frozen = false;
+
         this._nextCellId = 1;
         /** @type {Cell[]} */ this.cells = [];
         /** @type {Cell[]} */ this.boostingCells = [];
@@ -38,10 +40,8 @@ class World {
         /** @type {Player[]} */ this.players = [];
         /** @type {Player=} */ this.largestPlayer = null;
 
-        /** @type {{x: Number, y: Number, w: Number, h: Number}} */
-        this.border = { x: NaN, y: NaN, w: NaN, h: NaN };
-        /** @type {QuadTree} */
-        this.finder = null;
+        /** @type {Range} */ this.border = { x: NaN, y: NaN, w: NaN, h: NaN };
+        /** @type {QuadTree} */ this.finder = null;
 
         /**
          * @type {{limit: Number, internal: Number, external: Number, playing: Number, spectating: Number, name: String, gamemode: String, loadTime: Number, uptime: Number}}
@@ -52,6 +52,8 @@ class World {
             external: NaN,
             playing: NaN,
             spectating: NaN,
+            name: null,
+            gamemode: null,
             loadTime: NaN,
             uptime: NaN
         };
@@ -67,12 +69,8 @@ class World {
     }
 
     destroy() {
-        // TODO: Move the players back to the matchmaker
-        while (this.players.length > 0) {
-            const player = this.players[0];
-            this.handle.removePlayer(player.id);
-            player.router.close();
-        }
+        while (this.players.length > 0)
+            this.removePlayer(this.player[0]);
         while (this.cells.length > 0)
             this.removeCell(this.cells[0]);
     }

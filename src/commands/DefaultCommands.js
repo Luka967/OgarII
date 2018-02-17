@@ -11,8 +11,7 @@ module.exports = (list) => {
             desc: "display all registered commands and their relevant information",
             exec: (handle, args) => {
                 const list = handle.commands.list;
-                const logger = handle.logger;
-                for (let name in list) logger.print(list[name].toString());
+                for (let name in list) handle.logger.print(list[name].toString());
             }
         }),
         genCommand({
@@ -51,6 +50,48 @@ module.exports = (list) => {
             desc: "start the server",
             exec: (handle, args) => {
                 if (!handle.start()) handle.logger.print("failed");
+            }
+        }),
+        genCommand({
+            name: "eval",
+            args: "",
+            desc: "evaluate javascript code in the context of the handle and print the output",
+            exec: (handle, args) => {
+                handle.logger.print(
+                    (function() {
+                        try { return eval("function(){" + args.join(" ") + "}.apply(handle)"); }
+                        catch (e) { return !e ? e : (e.name || e); }
+                    }).apply(handle)
+                );
+            }
+        }),
+        genCommand({
+            name: "test",
+            args: "",
+            desc: "test command",
+            exec: (handle, args) => handle.logger.print("success successful")
+        }),
+        genCommand({
+            name: "stats",
+            args: "",
+            desc: "display critical information about the server",
+            exec: (handle, args) => {
+                const logger = handle.logger;
+                if (!handle.running)
+                    logger.print("not running");
+                else {
+                    const memory = process.memoryUsage();
+                    memory.heapUsed /= 1048576;
+                    memory.heapTotal /= 1048576;
+                    memory.rss /= 1048576;
+                    const { heapUsed, heapTotal, rss } = memory;
+                    logger.print(`average tick time: ${handle.averageTickTime.toFixed(2)} ms / 40 ms`);
+                    logger.print(`${heapUsed.toFixed(1)} MiB used heap / ${heapTotal.toFixed(1)} MiB total heap / ${rss.toFixed(1)} MiB allocated`);
+                    logger.print(`${Object.keys(handle.worlds).length} worlds with ids ${Object.keys(handle.worlds).join(", ")}`);
+                    const connections = handle.listener.connections.length;
+                    const bots = handle.listener.connections.length - connections;
+                    logger.print(`${Object.keys(handle.players).length} players, ${connections} connections, ${bots} bots`);
+                }
             }
         }),
     );

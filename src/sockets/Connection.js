@@ -94,25 +94,16 @@ class Connection extends PlayingRouter {
             case 16:
                 switch (reader.dataLength) {
                     case 13:
-                        // 5l+
-                        if (this.protocol < 5)
-                            return void this.closeSocket(1003, "Unexpected message format");
                         this.mouseX = reader.readInt32();
                         this.mouseY = reader.readInt32();
                         break;
                     case 9:
-                        // 5e
-                        if (this.protocol !== 5)
-                            return void this.closeSocket(1003, "Unexpected message format");
-                        mouseX = reader.readInt16();
-                        mouseY = reader.readInt16();
+                        this.mouseX = reader.readInt16();
+                        this.mouseY = reader.readInt16();
                         break;
                     case 21:
-                        // 4-
-                        if (this.protocol !== 4)
-                            return void this.closeSocket(1003, "Unexpected message format");
-                        mouseX = ~~reader.readFloat64();
-                        mouseY = ~~reader.readFloat64();
+                        this.mouseX = ~~reader.readFloat64();
+                        this.mouseY = ~~reader.readFloat64();
                         break;
                     default: return void this.closeSocket(1003, "Unexpected message format");
                 }
@@ -158,6 +149,12 @@ class Connection extends PlayingRouter {
     update() {
         if (this.isDisconnected || isNaN(this.protocolKey)) return;
         if (this.player === null) return;
+        if (this.player.world === null) {
+            if (this.spawningName !== null)
+                this.listener.handle.matchmaker.enqueue(this);
+            this.spawningName = null;
+            return;
+        }
         this.player.updateVisibleCells();
 
         const add = [], upd = [], eat = [], del = [];
