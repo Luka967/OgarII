@@ -1,15 +1,16 @@
+/** @abstract */
 class Gamemode {
     /** @param {ServerHandle} handle */
     constructor(handle) {
         this.handle = handle;
     }
 
-    /** Reserved for possible future plugin system @returns {Number} @abstract */
-    get id() { throw new Error("Must be overriden"); }
     /** @returns {Number} @abstract */
     get gamemodeType() { throw new Error("Must be overriden"); }
     /** @returns {String} @abstract */
-    get name() { throw new Error("Must be overriden"); }
+    static get gamemodeName() { throw new Error("Must be overriden"); }
+    /** @returns {String} */
+    get gamemodeName() { return this.constructor.gamemodeName; }
 
     /** @virtual */
     onHandleStart() { }

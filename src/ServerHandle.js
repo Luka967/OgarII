@@ -6,6 +6,7 @@ const DefaultCommands = require("./commands/DefaultCommands");
 const Stopwatch = require("./primitives/Stopwatch");
 const Logger = require("./primitives/Logger");
 const Ticker = require("./primitives/Ticker");
+const { version } = require("./primitives/Misc");
 
 const Listener = require("./sockets/Listener");
 const Matchmaker = require("./worlds/Matchmaker");
@@ -13,7 +14,7 @@ const Player = require("./worlds/Player");
 const World = require("./worlds/World");
 
 // DEBUG
-const FFA = require("./gamemodes/FFA");
+const GamemodeList = require("./gamemodes/GamemodeList");
 
 class ServerHandle {
     /**
@@ -24,8 +25,9 @@ class ServerHandle {
         this.settings = Settings;
         this.setSettings(settings);
 
+        this.gamemodes = new GamemodeList(this);
         /** @type {Gamemode} */
-        this.gamemode = new FFA(this);
+        this.gamemode = null;
         this.commands = new CommandList(this);
         DefaultCommands(this.commands);
 
@@ -58,7 +60,8 @@ class ServerHandle {
     start() {
         if (this.running) return false;
         this.logger.inform("starting");
-
+        
+        this.gamemodes.setGamemode(this.settings.gamemode);
         this.startTime = new Date();
         this.averageTickTime = this.tick = 0;
         this.running = true;
@@ -68,6 +71,7 @@ class ServerHandle {
         this.gamemode.onHandleStart();
 
         this.logger.inform("ticker begin");
+        this.logger.inform(`\u001B[1m\u001B[32mOgarII\u001B[0m\u001B[32m ${version}\u001B[0m`);
         return true;
     }
 

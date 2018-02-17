@@ -6,6 +6,7 @@ module.exports = Object.seal({
     listeningPort: 443,
 
     serverName: "An unnamed server",
+    gamemode: "FFA",
 
     mapX: 0,
     mapY: 0,

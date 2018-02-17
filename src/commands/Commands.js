@@ -30,7 +30,7 @@ class CommandList {
     register(...commands) {
         for (let i = 0, l = commands.length; i < l; i++) {
             const command = commands[i];
-            if (this.list.hasOwnProperty(command)) throw new Error("Command conflicts with another already registered one");
+            if (this.list.hasOwnProperty(command)) throw new Error("command conflicts with another already registered one");
             this.list[command.name] = command;
         }
     }

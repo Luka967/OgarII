@@ -70,7 +70,7 @@ class World {
 
     destroy() {
         while (this.players.length > 0)
-            this.removePlayer(this.player[0]);
+            this.removePlayer(this.players[0]);
         while (this.cells.length > 0)
             this.removeCell(this.cells[0]);
     }
@@ -590,7 +590,7 @@ class World {
         this.stats.playing = playing;
         this.stats.spectating = spectating;
         this.stats.name = this.settings.serverName;
-        this.stats.gamemode = this.handle.gamemode.name;
+        this.stats.gamemode = this.handle.gamemode.gamemodeName;
         this.stats.loadTime = this.handle.averageTickTime;
         this.stats.uptime = Math.floor((Date.now() - this.handle.startTime.getTime()) / 1000);
     }

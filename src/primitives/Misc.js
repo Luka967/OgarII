@@ -56,5 +56,7 @@ module.exports = {
                a.x + a.w <= b.x - b.w &&
                a.y - a.h >= b.y + b.h &&
                a.y + a.h <= b.y - b.h;
-    }
+    },
+
+    version: "0.9.17"
 };

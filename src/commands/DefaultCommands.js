@@ -59,9 +59,9 @@ module.exports = (list) => {
             exec: (handle, args) => {
                 handle.logger.print(
                     (function() {
-                        try { return eval("function(){" + args.join(" ") + "}.apply(handle)"); }
-                        catch (e) { return !e ? e : (e.name || e); }
-                    }).apply(handle)
+                        try { return eval(args.join(" ")); }
+                        catch (e) { return !e ? e : (e.toString() || e); }
+                    }).bind(handle)()
                 );
             }
         }),
