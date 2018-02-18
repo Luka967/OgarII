@@ -1,3 +1,29 @@
+const settings = {
+    showingConsole: {
+        PRINT: true,
+        FILE: false,
+        DEBUG: false,
+        ACCESS: false,
+        INFO: true,
+        WARN: true,
+        ERROR: true,
+        FATAL: true
+    },
+    showingFile: {
+        PRINT: true,
+        FILE: true,
+        DEBUG: true,
+        ACCESS: true,
+        INFO: true,
+        WARN: true,
+        ERROR: true,
+        FATAL: true
+    },
+    fileLogDirectory: "./logs/",
+    fileLogSaveOld: true
+};
+
+
 const { EOL } = require("os");
 const fs = require("fs");
 
@@ -42,40 +68,15 @@ function time(date) {
     return `${th}:${tm}:${ts}`;
 }
 
-const logging = {
-    showingConsole: {
-        PRINT: true,
-        FILE: false,
-        DEBUG: false,
-        ACCESS: false,
-        INFO: true,
-        WARN: true,
-        ERROR: true,
-        FATAL: true
-    },
-    showingFile: {
-        PRINT: true,
-        FILE: true,
-        DEBUG: true,
-        ACCESS: true,
-        INFO: true,
-        WARN: true,
-        ERROR: true,
-        FATAL: true
-    },
-    fileLogDirectory: "./logs/",
-    fileLogSaveOld: false
-};
-
-const logFolderLoc = logging.fileLogDirectory;
-const logLoc = `${logging.fileLogDirectory}latest.log`;
-const oldLogsFolderLoc = logging.fileLogDirectory + "old/";
+const logFolderLoc = settings.fileLogDirectory;
+const logLoc = `${settings.fileLogDirectory}latest.log`;
+const oldLogsFolderLoc = settings.fileLogDirectory + "old/";
 
 if (!fs.existsSync(logFolderLoc)) fs.mkdirSync(logFolderLoc);
 if (fs.existsSync(logLoc)) {
-    if (logging.fileLogSaveOld) {
+    if (settings.fileLogSaveOld) {
         if (!fs.existsSync(oldLogsFolderLoc)) fs.mkdirSync(oldLogsFolderLoc);
-        const oldLogLoc = `${logging.fileLogDirectory}old/${filename(fs.statSync(logLoc).ctime)}`;
+        const oldLogLoc = `${settings.fileLogDirectory}old/${filename(fs.statSync(logLoc).ctime)}`;
         fs.renameSync(logLoc, oldLogLoc);
     } else fs.unlinkSync(logLoc);
 }
@@ -105,9 +106,9 @@ function formatFile(date, level, message) {
 }
 
 function write(date, level, message) {
-    if (logging.showingConsole[level])
+    if (settings.showingConsole[level])
         console.log(formatConsole(date, level, message));
-    if (logging.showingFile[level]) {
+    if (settings.showingFile[level]) {
         fqueue.push(formatFile(date, level, message) + EOL);
         if (!fprocessing && !synchronous) fprocess();
     }
