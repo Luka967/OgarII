@@ -1,6 +1,6 @@
 # OgarII
 
-**Ask all your questions over on the MultiOgar-Edited Discord guild:
+**Ask all your questions over on the MultiOgar-Edited Discord guild**:
 
 [![link](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/27v68Sb)
 
