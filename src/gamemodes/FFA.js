@@ -48,7 +48,7 @@ module.exports = FFA;
  */
 function getLeaderboardData(player, requesting, index) {
     return {
-        name: player.ownedCells[0].name,
+        name: player.ownedCells[0].name || "An unnamed cell",
         highlighted: requesting.id === player.id,
         cellId: player.ownedCells[0].id,
         position: 1 + index
