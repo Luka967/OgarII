@@ -331,6 +331,8 @@ class World {
         this.compileStatistics();
         this.handle.gamemode.compileLeaderboard(this);
         this.handle.gamemode.onWorldTick(this);
+
+        if (this.stats.external <= 0) this.handle.removeWorld(this.id);
     }
 
     /**

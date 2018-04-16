@@ -67,6 +67,7 @@ class Player {
     }
 
     updateViewArea() {
+        if (this.world === null) return;        
         let s;
         switch (this.state) {
             case -1: this.score = NaN; break;
@@ -114,6 +115,7 @@ class Player {
     }
 
     updateVisibleCells() {
+        if (this.world === null) return;
         delete this.lastVisibleCells;
         this.lastVisibleCells = this.visibleCells;
         let visibleCells = this.visibleCells = { };

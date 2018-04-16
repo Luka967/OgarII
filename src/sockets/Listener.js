@@ -18,6 +18,8 @@ class Listener {
         this.allPlayingRouters = [];
         /** @type {Connection[]} */
         this.connections = [];
+        /** @type {{[ip: string]: Number}} */
+        this.connectionsByIP = { };
     }
 
     get settings() { return this.handle.settings; }
@@ -43,19 +45,24 @@ class Listener {
 
     verifyClient(info, response) {
         this.logger.onAccess(`REQUEST FROM ${info.req.socket.remoteAddress}, ${info.secure ? "" : "not "}secure, Origin: ${info.origin}`);
-        if (this.settings.listenerAcceptedOrigins !== null) {
-            const split = this.settings.listenerAcceptedOrigins.split(" ");
-            let matches = false;
-            for (let i = 0, l = split.length; i < l; i++)
-                if (info.origin === split[i]) { matches = true; break; }
-            this.logger.debug(`socketAcceptedOrigins is defined; did ${info.origin} pass: ${matches}`);
-            if (!matches) return void response(false, 403, "Forbidden");
+        if (this.settings.listenerAcceptedOrigins.length > 0) {
+            let index = this.settings.listenerAcceptedOrigins.indexOf(info.origin);
+            this.logger.debug(`socketAcceptedOrigins index of ${info.origin}: ${index}`);
+            if (index === -1) return void response(false, 403, "Forbidden");
         }
         if (this.connections.length > this.settings.listenerMaxConnections) {
-            this.logger.debug("too many connections, drop new ones!");
+            this.logger.debug("listenerMaxConnections reached, dropping new connections!");
             return void response(false, 503, "Service Unavailable");
         }
-        // TODO: IP checks
+        if (this.settings.listenerMaxConnectionsPerIP > 0) {
+            const address = info.req.connection.remoteAddress;
+            const count = this.connectionsByIP[address];
+            if (count && count >= this.settings.listenerMaxConnectionsPerIP) {
+                this.logger.debug(`listenerMaxConnectionsPerIP reached for '${address}', dropping its new connections`);
+                return void response(false, 403, "Forbidden");
+            }
+        }
+
         this.logger.debug("client verification passed");
         response(true);
     }
@@ -82,6 +89,8 @@ class Listener {
     onConnection(webSocket) {
         const newConnection = new Connection(this, webSocket);
         this.logger.onAccess(`CONNECTION FROM ${newConnection.remoteAddress}`);
+        this.connectionsByIP[newConnection.remoteAddress] =
+            this.connectionsByIP[newConnection.remoteAddress] + 1 || 1;
         newConnection.createPlayer();
         this.connections.push(newConnection);
         this.globalChat.add(newConnection);
@@ -98,6 +107,8 @@ class Listener {
      */
     onDisconnection(connection, code, reason) {
         this.logger.onAccess(`DISCONNECTION FROM ${connection.remoteAddress} (${code} '${reason}')`);
+        if (--this.connectionsByIP[connection.remoteAddress] <= 0)
+            delete this.connectionsByIP[connection.remoteAddress];
         this.globalChat.remove(connection);
         this.connections.splice(this.connections.indexOf(connection), 1);
     }

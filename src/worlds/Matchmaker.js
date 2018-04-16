@@ -15,7 +15,7 @@ class Matchmaker {
         return this.queued.indexOf(connection) !== -1;
     }
     broadcastQueueLength() {
-        if (this.handle.settings.matchmakerNeedsQueuing) return;
+        if (!this.handle.settings.matchmakerNeedsQueuing) return;
         const message = `${this.queued.length}/${this.handle.settings.matchmakerBulkSize} are in queue`;
         for (let i = 0, l = this.queued.length; i < l; i++)
             this.handle.listener.globalChat.directMessage(null, this.queued[i], message);
@@ -58,9 +58,9 @@ class Matchmaker {
         for (let id in this.handle.worlds) {
             const world = this.handle.worlds[id];
             if (!this.handle.gamemode.canJoinWorld(world)) continue;
-            if (world.players.length >= this.handle.settings.worldMaxPlayers)
+            if (world.stats.external >= this.handle.settings.worldMaxPlayers)
                 continue;
-            if (bestWorld === null || world.players.length < bestWorld.players.length)
+            if (bestWorld === null || world.stats.external < bestWorld.stats.external)
                 bestWorld = world;
         }
         if (bestWorld !== null) return bestWorld;

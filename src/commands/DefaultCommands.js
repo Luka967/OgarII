@@ -89,7 +89,7 @@ module.exports = (list) => {
                     logger.print(`${heapUsed.toFixed(1)} MiB used heap / ${heapTotal.toFixed(1)} MiB total heap / ${rss.toFixed(1)} MiB allocated`);
                     logger.print(`${Object.keys(handle.worlds).length} worlds with ids ${Object.keys(handle.worlds).join(", ")}`);
                     const connections = handle.listener.connections.length;
-                    const bots = handle.listener.connections.length - connections;
+                    const bots = handle.listener.allPlayingRouters.length - connections;
                     logger.print(`${Object.keys(handle.players).length} players, ${connections} connections, ${bots} bots`);
                 }
             }

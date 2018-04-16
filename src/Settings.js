@@ -1,8 +1,9 @@
-module.exports = Object.seal({
-    /** @type {String} */
+const value = Object.seal({
+    /** @type {String[] | null} */
     listenerAcceptedOrigins: null,
     listenerMaxConnections: 100,
     listenerMaxClientDormancy: 1000 * 60,
+    listenerMaxConnectionsPerIP: -1,
     listeningPort: 443,
 
     serverName: "An unnamed server",
@@ -76,3 +77,5 @@ module.exports = Object.seal({
     playerMergeTimeIncrease: 0.02,
     playerDecayMult: 0.001
 });
+
+module.exports = value;

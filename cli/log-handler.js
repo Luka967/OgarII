@@ -1,4 +1,4 @@
-const settings = {
+let settings = {
     showingConsole: {
         PRINT: true,
         FILE: false,
@@ -23,9 +23,12 @@ const settings = {
     fileLogSaveOld: true
 };
 
-
 const { EOL } = require("os");
 const fs = require("fs");
+
+if (fs.existsSync("./log-settings.json"))
+    settings = Object.assign(settings, JSON.parse(fs.readFileSync("./log-settings.json", "utf-8")));
+else fs.writeFileSync("./log-settings.json", JSON.stringify(settings, null, 4), "utf-8");
 
 /**
  * @param {Date=} date

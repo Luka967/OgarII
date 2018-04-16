@@ -2,14 +2,11 @@ const fs = require("fs");
 const ServerHandle = require("../src/ServerHandle");
 const { genCommand } = require("../src/commands/Commands");
 const readline = require("readline");
-const beautifulJson = require("json-beautify");
 
 if (!fs.existsSync("./settings.json")) {
     const defaultSettings = require("../src/Settings");
-    fs.writeFileSync("./settings.json", beautifulJson(defaultSettings, null, 4), "utf-8");
-    console.log("the default settings have been written to settings.json as one wasn't detected");
-    console.log("re-run this script to start the server");
-    process.exit(0);
+    fs.writeFileSync("./settings.json", JSON.stringify(defaultSettings, null, 4), "utf-8");
+    console.log("using default settings - settings.json wasn't detected");
 }
 let settings = null;
 try { settings = JSON.parse(fs.readFileSync("./settings.json", "utf-8")); }
@@ -29,7 +26,7 @@ const commandStream = readline.createInterface({
     output: process.stdout,
     terminal: true,
     prompt: "",
-    historySize: 50,
+    historySize: 64,
     removeHistoryDuplicates: true
 });
 
@@ -79,7 +76,7 @@ currentHandle.commands.register(
         args: "",
         desc: "save the current settings to settings.json",
         exec: (handle, args) => {
-            fs.writeFileSync("./settings.json", beautifulJson(handle.settings, null, 4), "utf-8");
+            fs.writeFileSync("./settings.json", JSON.stringify(handle.settings, null, 4), "utf-8");
             logger.print("done");
         }
     }),

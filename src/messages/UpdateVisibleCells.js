@@ -6,8 +6,8 @@ const Writer = require("../primitives/Writer");
 
 /** @type {{[protocol: string]: writeCellData}} */
 const protocols = {
-    4: writeCellData45,
-    5: writeCellData45,
+    4: writeCellData4,
+    5: writeCellData4,
     6: writeCellData6,
     7: writeCellData6,
     8: writeCellData6,
@@ -69,7 +69,7 @@ module.exports = (requesting, add, upd, eat, del) => {
  * @param {Boolean} includeName
  * @param {Boolean} includeSkin
  */
-function writeCellData45(writer, protocol, cell, includeType, includeSize, includePos, includeColor, includeName, includeSkin) {
+function writeCellData4(writer, protocol, cell, includeType, includeSize, includePos, includeColor, includeName, includeSkin) {
     writer.writeUInt32(cell.id);
     writer[protocol === 4 ? "writeUInt16" : "writeUInt32"](cell.x);
     writer[protocol === 4 ? "writeUInt16" : "writeUInt32"](cell.y);
