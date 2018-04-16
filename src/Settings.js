@@ -1,6 +1,6 @@
 const value = Object.seal({
-    /** @type {String[] | null} */
-    listenerAcceptedOrigins: null,
+    /** @type {String[]} */
+    listenerAcceptedOrigins: [],
     listenerMaxConnections: 100,
     listenerMaxClientDormancy: 1000 * 60,
     listenerMaxConnectionsPerIP: -1,
