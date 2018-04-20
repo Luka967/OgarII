@@ -18,7 +18,6 @@ module.exports = {
             case 3: return { r: colors[1], g: colors[0], b: colors[2] };
             case 4: return { r: colors[2], g: colors[0], b: colors[1] };
             case 5: return { r: colors[2], g: colors[1], b: colors[0] };
-            default: throw new Error("?");
         }
     },
     /**
@@ -32,9 +31,10 @@ module.exports = {
         else weight = 0x7F + ~~(Math.random() * 0x80);
         return { r: weight, g: weight, b: weight };
     },
-    /** @param {n} */
-    throwIfBadNumber(n) {
-        if (isNaN(n) || !isFinite(n) || n == null) throw new Error("Bad number");
+    /** @param {Number[]} n */
+    throwIfBadNumber(...n) {
+        for (let i = 0; i < n.length; i++)
+            if (isNaN(n[i]) || !isFinite(n[i]) || n[i] == null) throw new Error(`bad number (${n[i]}, index ${i})`);
     },
 
     /**
@@ -58,5 +58,5 @@ module.exports = {
                a.y + a.h <= b.y - b.h;
     },
 
-    version: "0.9.18"
+    version: "0.9.19"
 };

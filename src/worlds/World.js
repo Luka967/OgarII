@@ -194,7 +194,7 @@ class World {
      * @param {Number} cellSize
      * @returns {{color: Color, pos: Position}}
      */
-    getPlayerSpawnPos(cellSize) {
+    getPlayerSpawn(cellSize) {
         if (this.settings.safeSpawnFromEjected > Math.random() && this.ejectedCells.length > 0) {
             let tries = this.settings.safeSpawnTries;
             while (--tries >= 0) {
@@ -529,12 +529,11 @@ class World {
      */
     popPlayerCell(cell) {
         const splits = this.distributeCellMass(cell);
+        const angles = this.distributePopAngles(cell, splits);
         for (let i = 0, l = splits.length; i < l; i++) {
-            const size = Math.sqrt(splits[i] * 100);
-            const angle = Math.random() * 2 * Math.PI;
-            this.launchPlayerCell(cell, size, {
-                dx: Math.sin(angle),
-                dy: Math.cos(angle),
+            this.launchPlayerCell(cell, splits[i], {
+                dx: Math.sin(angles[i]),
+                dy: Math.cos(angles[i]),
                 d: this.settings.playerSplitBoost
             });
         }
@@ -542,6 +541,7 @@ class World {
 
     /**
      * @param {PlayerCell} cell
+     * @returns {Number[]}
      */
     distributeCellMass(cell) {
         const player = cell.owner;
@@ -574,6 +574,33 @@ class World {
         }
         nextMass = massLeft / cellsLeft;
         return splits.concat(new Array(cellsLeft).fill(nextMass));
+    }
+
+    /**
+     * @param {Cell} cell
+     * @param {Number[]} splits
+     */
+    distributePopAngles(cell, splits) {
+        splits.sort((a, b) => Math.round(Math.random() * 3 - 1.5));
+        /** @type {Number[]} */
+        const angles = [];
+        const l = splits.length;
+        let cellSize = cell.squareSize;
+        let angleSum = 0;
+        for (let i = 0; i < l; i++) {
+            splits[i] = Math.sqrt(100 * splits[i]);
+            cellSize -= splits[i] * splits[i];
+        }
+        cellSize = Math.sqrt(cellSize);
+        for (let i = 0; i < l; i++) {
+            angles.push(angleSum);
+            angleSum += splits[i] / (splits[i] + cellSize) / Math.PI / 2;
+        }
+
+        const start = Math.random() * 2 * Math.PI;
+        for (let i = 0; i < l; i++)
+            angles[i] = start + angles[i] * 8 * Math.PI;
+        return angles;
     }
 
     compileStatistics() {

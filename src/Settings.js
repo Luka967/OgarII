@@ -52,6 +52,7 @@ const value = Object.seal({
     mothercellSize: 149,
     mothercellCount: 0,
     mothercellPassiveSpawnChance: 0.05,
+    mothercellActiveSpawnSpeed: 1,
     mothercellPelletBoost: 90,
     mothercellMaxPellets: 96,
     mothercellMaxSize: 65535,
@@ -63,7 +64,7 @@ const value = Object.seal({
     playerMaxNameLength: 16,
     
     playerMinSize: 32,
-    playerSpawnSize: 100,
+    playerSpawnSize: 32,
     playerMaxSize: 1500,
     playerMinSplitSize: 60,
     playerMinEjectSize: 60,

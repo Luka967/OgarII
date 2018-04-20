@@ -24,7 +24,8 @@ class Mothercell extends Cell {
         const mothercellSize = settings.mothercellSize;
         const pelletSize = settings.pelletMinSize;
         const minSpawnSqSize = mothercellSize * mothercellSize + pelletSize * pelletSize;
-        if (this.squareSize > minSpawnSqSize) {
+        const l = settings.mothercellActiveSpawnSpeed;
+        for (let i = 0; i < l && this.squareSize > minSpawnSqSize; i++) {
             this.spawnPellet();
             this.squareSize -= pelletSize * pelletSize;
         }

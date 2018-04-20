@@ -79,7 +79,8 @@ class ServerHandle {
         if (!this.running) return false;
         this.logger.inform("stopping");
 
-        this.ticker.stop();
+        if (this.ticker.isRunning)
+            this.ticker.stop();
         for (let id in this.worlds)
             this.removeWorld(id);
         this.gamemode.onHandleStop();

@@ -16,8 +16,8 @@ class FFA extends Gamemode {
     /** @param {Player} player @param {String} name */
     onPlayerSpawnRequest(player, name) {
         if (player.state === 0) return;
-        const size = player.settings.playerSpawnSize;
-        const spawnInfo = player.world.getPlayerSpawnPos(size);
+        const size = this.handle.settings.playerSpawnSize;
+        const spawnInfo = player.world.getPlayerSpawn(size);
         player.world.spawnPlayer(player, spawnInfo.color || Misc.randomColor(), spawnInfo.pos, size, name, null);
     }
 

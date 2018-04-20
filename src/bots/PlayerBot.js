@@ -9,10 +9,15 @@ class PlayerBot extends Bot {
         super(world);
 
         this.splitCooldownTicks = 0;
+        /** @type {Cell} */
+        this.target = null;
     }
 
     update() {
+        if (this.player.world === null) return void this.close();
         if (this.splitCooldownTicks > 0) this.splitCooldownTicks--;
+        else this.target = null;
+
         this.player.updateVisibleCells();
         var player = this.player;
         if (player.state === -1) {
@@ -27,6 +32,16 @@ class PlayerBot extends Bot {
             if (cell === null || player.ownedCells[i] > cell.size)
                 cell = player.ownedCells[i];
         if (cell === null) return; // ???
+        
+        if (this.target != null) {
+            if (!this.target.exists || !this.canEat(cell.size, this.target.size))
+                this.target = null;
+            else {
+                this.mouseX = this.target.x;
+                this.mouseY = this.target.y;
+                return;
+            }
+        }
 
         var atMaxCells = player.ownedCells.length >= this.listener.settings.playerMaxCells;
         var willSplit = player.ownedCells.length <= 2;
@@ -53,7 +68,7 @@ class PlayerBot extends Bot {
                             bestPrey = check;
                     } else if (this.canEat(check.size, cell.size)) {
                         influence = -1;
-                        if (hasPredator || !this.canSplitkill(check.size, cell.size)) break;
+                        if (hasPredator || !this.canSplitkill(check.size, cell.size, d)) break;
                         hasPredator = true;
                     }
                     break;
@@ -73,13 +88,15 @@ class PlayerBot extends Bot {
             }
 
             if (influence === 0) continue;
-            dx /= d; dy /= d;
             if (influence < 0) d -= check.size;
+            if (d === 0) d = 1;
+            dx /= d; dy /= d;
             mouseX += dx * influence / d;
             mouseY += dy * influence / d;
         }
 
         if (willSplit && bestPrey !== null && bestPrey.size * 2 > cell.size && !hasPredator && this.splitCooldownTicks <= 0) {
+            this.target = bestPrey;
             this.mouseX = bestPrey.x;
             this.mouseY = bestPrey.y;
             this.splitAttempts++;

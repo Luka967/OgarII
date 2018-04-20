@@ -17,6 +17,7 @@ class Minion extends Bot {
     }
 
     update() {
+        if (this.player.world === null) return void this.close();
         if (this.following.isDisconnected) return void this.close();
         if (this.following.player === null) return void this.close();
         if (!this.following.player.exists) return void this.close();
