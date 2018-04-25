@@ -18,6 +18,7 @@ const value = Object.seal({
     safeSpawnTries: 16,
     safeSpawnFromEjected: 0.8,
     playerDisposeDelay: 25 * 60,
+    ticksPerSecond: 25,
     
     playerBotsPerWorld: 0,
     minionsPerPlayer: 0,

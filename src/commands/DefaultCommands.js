@@ -45,9 +45,11 @@ module.exports = (list) => {
             exec: (handle, args) => {
                 if (args.length < 1) return void handle.logger.print("no setting name provided");
                 if (!handle.settings.hasOwnProperty(args[0]))
-                    return void handle.logger.print("unknown setting");
-                if (args.length >= 2)
+                    return void handle.logger.print("no such setting");
+                if (args.length >= 2) {
                     handle.settings[args[0]] = eval(args.slice(1).join(" "));
+                    handle.setSettings(handle.settings);
+                }
                 handle.logger.print(handle.settings[args[0]]);
             }
         }),
@@ -109,7 +111,7 @@ module.exports = (list) => {
                     memory.heapTotal /= 1048576;
                     memory.rss /= 1048576;
                     const { heapUsed, heapTotal, rss } = memory;
-                    logger.print(`average tick time: ${handle.averageTickTime.toFixed(2)} ms / 40 ms`);
+                    logger.print(`average tick time: ${handle.averageTickTime.toFixed(2)} ms / ${handle.tickDelay} ms`);
                     logger.print(`${heapUsed.toFixed(1)} MiB used heap / ${heapTotal.toFixed(1)} MiB total heap / ${rss.toFixed(1)} MiB allocated`);
                     logger.print(`running for ${prettyPrintTime(Math.floor((Date.now() - handle.startTime.getTime()) / 1000))}`);
                     const connections = handle.listener.connections.length;

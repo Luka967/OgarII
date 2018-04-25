@@ -138,7 +138,7 @@ class Connection extends PlayingRouter {
                 if (!this.listener.settings.minionEnableERTPControls) break;
                 this.minionsFrozen = !this.minionsFrozen;
                 break;
-            case 25: /* TODO: minion mode change */ break;
+            case 25: /* minion mode change? */ break;
             case 99:
                 if (this.player === null) break;
                 if (reader.dataLength < 2)
@@ -161,7 +161,7 @@ class Connection extends PlayingRouter {
 
     onQPress() {
         if (this.player === null) return;
-        if (this.listener.settings.minionEnableQBasedControl)
+        if (this.listener.settings.minionEnableQBasedControl && this.minions.length > 0)
             this.controllingMinions = !this.controllingMinions;
         else this.listener.handle.gamemode.whenPlayerPressQ(this.player);
     }

@@ -73,7 +73,7 @@ class Cell {
             this.colorChanged || this.nameChanged || this.skinChanged;
     }
 
-    get age() { return this.world.handle.tick - this.birthTick; }
+    get age() { return (this.world.handle.tick - this.birthTick) * this.world.handle.stepMult; }
     get x() { return this._x; }
     get y() { return this._y; }
     /** @param {Number} value */

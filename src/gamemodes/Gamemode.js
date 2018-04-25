@@ -21,6 +21,10 @@ class Gamemode {
 
     /** @param {World} world @virtual */
     canJoinWorld(world) { return !world.frozen; }
+    /** @param {Player} player @param {World} world @virtual */
+    onPlayerJoinWorld(player, world) { }
+    /** @param {Player} player @param {World} world @virtual */
+    onPlayerLeaveWorld(player, world) { }
 
     /** @param {World} world @virtual */
     onNewWorld(world) { }

@@ -58,5 +58,5 @@ module.exports = {
                a.y + a.h <= b.y - b.h;
     },
 
-    version: "0.9.19"
+    version: "1.0.0"
 };

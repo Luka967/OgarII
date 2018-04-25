@@ -1,4 +1,5 @@
 const FFA = require("./FFA");
+const Teams = require("./Teams");
 
 class GamemodeList {
     /**
@@ -9,6 +10,7 @@ class GamemodeList {
         /** @type {{[gamemodeName: string]: typeof Gamemode}} */
         this.list = { };
         this.register(FFA);
+        this.register(Teams);
     }
 
     /**

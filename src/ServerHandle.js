@@ -23,7 +23,6 @@ class ServerHandle {
     constructor(settings) {
         /** @type {Settings} */
         this.settings = Settings;
-        this.setSettings(settings);
 
         this.gamemodes = new GamemodeList(this);
         /** @type {Gamemode} */
@@ -36,6 +35,8 @@ class ServerHandle {
         this.startTime = null;
         this.averageTickTime = NaN;
         this.tick = NaN;
+        this.tickDelay = NaN;
+        this.stepMult = NaN;
         
         this.ticker = new Ticker(40);
         this.ticker.add(this._onTick.bind(this));
@@ -48,6 +49,8 @@ class ServerHandle {
         this.worlds = { };
         /** @type {{[id: string]: Player}} */
         this.players = { };
+
+        this.setSettings(settings);
     }
 
     /**
@@ -55,6 +58,9 @@ class ServerHandle {
      */
     setSettings(settings) {
         this.settings = Object.assign({ }, Settings, settings);
+        this.tickDelay = 1000 / this.settings.ticksPerSecond;
+        this.ticker.step = this.tickDelay;
+        this.stepMult = this.tickDelay / 40;
     }
 
     start() {
@@ -83,6 +89,8 @@ class ServerHandle {
             this.ticker.stop();
         for (let id in this.worlds)
             this.removeWorld(id);
+        for (let id in this.players)
+            this.removePlayer(id);
         this.gamemode.onHandleStop();
         this.listener.close();
 
@@ -101,6 +109,7 @@ class ServerHandle {
         const newWorld = new World(this, id);
         this.worlds[id] = newWorld;
         this.gamemode.onNewWorld(newWorld);
+        newWorld.afterCreation();
         this.logger.debug(`added a world with id ${id}`);
         return newWorld;
     }

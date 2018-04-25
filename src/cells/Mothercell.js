@@ -10,6 +10,8 @@ class Mothercell extends Cell {
         super(world, x, y, size, { r: 206, g: 99, b: 99 });
 
         this.pelletCount = 0;
+        this.activePelletFormQueue = 0;
+        this.passivePelletFormQueue = 0;
     }
 
     get type() { return 4; }
@@ -24,13 +26,22 @@ class Mothercell extends Cell {
         const mothercellSize = settings.mothercellSize;
         const pelletSize = settings.pelletMinSize;
         const minSpawnSqSize = mothercellSize * mothercellSize + pelletSize * pelletSize;
-        const l = settings.mothercellActiveSpawnSpeed;
-        for (let i = 0; i < l && this.squareSize > minSpawnSqSize; i++) {
-            this.spawnPellet();
-            this.squareSize -= pelletSize * pelletSize;
+
+        this.activePelletFormQueue += settings.mothercellActiveSpawnSpeed * this.world.handle.stepMult;
+        this.passivePelletFormQueue += Math.random() * settings.mothercellPassiveSpawnChance * this.world.handle.stepMult;
+    
+        while (this.activePelletFormQueue > 0) {
+            if (this.squareSize > minSpawnSqSize)
+                this.spawnPellet(), this.squareSize -= pelletSize * pelletSize;
+            else if (this.size > mothercellSize)
+                this.size = mothercellSize;
+            this.activePelletFormQueue--;
         }
-        if (this.pelletCount < settings.mothercellMaxPellets && Math.random() < settings.mothercellPassiveSpawnChance)
-            this.spawnPellet();
+        while (this.passivePelletFormQueue > 0) {
+            if (this.pelletCount < settings.mothercellMaxPellets)
+                this.spawnPellet();
+            this.passivePelletFormQueue--;            
+        }
     }
     spawnPellet() {
         const angle = Math.random() * 2 * Math.PI;

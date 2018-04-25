@@ -59,8 +59,6 @@ class World {
         };
 
         this.setBorder({ x: this.settings.mapX, y: this.settings.mapY, w: this.settings.mapW, h: this.settings.mapH });
-        for (let i = 0; i < this.settings.playerBotsPerWorld; i++)
-            new PlayerBot(this);
     }
 
     get settings() { return this.handle.settings; }
@@ -68,6 +66,10 @@ class World {
         return this._nextCellId === 4294967296 ? (this._nextCellId = 1) : this._nextCellId++;
     }
 
+    afterCreation() {
+        for (let i = 0; i < this.settings.playerBotsPerWorld; i++)
+            new PlayerBot(this);
+    }
     destroy() {
         while (this.players.length > 0)
             this.removePlayer(this.players[0]);
@@ -147,6 +149,7 @@ class World {
     addPlayer(player) {
         this.players.push(player);
         player.world = this;
+        this.handle.gamemode.onPlayerJoinWorld(player, this);
         player.router.onWorldSet();
         if (!player.router.isExternal) return;
         for (let i = 0; i < this.settings.minionsPerPlayer; i++)
@@ -155,6 +158,7 @@ class World {
     /** @param {Player} player */
     removePlayer(player) {
         this.players.splice(this.players.indexOf(player), 1);
+        this.handle.gamemode.onPlayerLeaveWorld(player, this);
         player.world = null;
         while (player.ownedCells.length > 0)
             this.removeCell(player.ownedCells[0]);
@@ -378,7 +382,7 @@ class World {
 
     /** @param {Cell} cell */
     boostCell(cell) {
-        const d = cell.boost.d / 9;
+        const d = cell.boost.d / 9 * this.handle.stepMult;
         cell.x += cell.boost.dx * d;
         cell.y += cell.boost.dy * d;
         this.bounceCell(cell, true);
@@ -431,13 +435,13 @@ class World {
         let dy = router.mouseY - cell.y;
         const d = Math.sqrt(dx * dx + dy * dy);
         if (d < 1) return; dx /= d; dy /= d;
-        const m = Math.min(cell.moveSpeed, d);
+        const m = Math.min(cell.moveSpeed, d) * this.handle.stepMult;
         cell.x += dx * m;
         cell.y += dy * m;
     }
     /** @param {PlayerCell} cell */
     decayPlayerCell(cell) {
-        const newSize = cell.size - cell.size * this.handle.gamemode.getDecayMult(cell) / 50;
+        const newSize = cell.size - cell.size * this.handle.gamemode.getDecayMult(cell) / 50 * this.handle.stepMult;
         cell.size = Math.max(newSize, this.settings.playerMinSize);
     }
     /**
@@ -620,7 +624,7 @@ class World {
         this.stats.spectating = spectating;
         this.stats.name = this.settings.serverName;
         this.stats.gamemode = this.handle.gamemode.gamemodeName;
-        this.stats.loadTime = this.handle.averageTickTime;
+        this.stats.loadTime = this.handle.averageTickTime / this.handle.stepMult;
         this.stats.uptime = Math.floor((Date.now() - this.handle.startTime.getTime()) / 1000);
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "ogarii",
-    "version": "0.9.19",
+    "version": "1.0.0",
     "description": "FOSS implementation of a private Agar.io gameserver",
     "author": {
         "name": "Luka Djokovic",
