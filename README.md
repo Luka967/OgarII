@@ -1,6 +1,6 @@
 # OgarII
 
-**Ask all your questions over on the MultiOgar-Edited Discord guild**:
+**Ask all your questions over on the Agar.io Private Servers guild**:
 
 [![link](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/msMVwQC)
 
@@ -34,7 +34,7 @@ This is a full rewrite based off of Ogar/MultiOgar/MultiOgar-Edited that ended u
 
 ## Questions
 
-Ask questions about running, modifying & expanding in the [MultiOgar-Edited Discord guild](https://discord.gg/27v68Sb).
+Ask questions about running, modifying & expanding in the [Agar.io Private Servers guild](https://discord.gg/27v68Sb).
 
 **DON'T** ask what additional features will it bring.
 
