@@ -1,4 +1,4 @@
-const { Command, genCommand } = require("./Commands");
+const { Command, genCommand } = require("./CommandList");
 
 /**
  * @param {String} str
@@ -10,15 +10,16 @@ function padRight(str, pad, len) {
 }
 
 /**
- * @param {CommandList} list
+ * @param {CommandList} commands
+ * @param {CommandList} chatCommands
  */
-module.exports = (list) => {
-    list.register(
+module.exports = (commands, chatCommands) => {
+    commands.register(
         genCommand({
             name: "help",
             args: "",
             desc: "display all registered commands and their relevant information",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 const list = handle.commands.list;
                 const keys = Object.keys(list).sort();
                 let nameLen = 4, argsLen = 10;
@@ -42,7 +43,7 @@ module.exports = (list) => {
             name: "setting",
             args: "<name> [value]",
             desc: "change/print the value of a setting",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 if (args.length < 1) return void handle.logger.print("no setting name provided");
                 if (!handle.settings.hasOwnProperty(args[0]))
                     return void handle.logger.print("no such setting");
@@ -57,7 +58,7 @@ module.exports = (list) => {
             name: "stop",
             args: "",
             desc: "close the server",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 if (!handle.stop()) handle.logger.print("failed");
             }
         }),
@@ -65,7 +66,7 @@ module.exports = (list) => {
             name: "restart",
             args: "",
             desc: "restart the server",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 if (!handle.stop()) return void handle.logger.print("failed");
                 handle.start();
             }
@@ -74,7 +75,7 @@ module.exports = (list) => {
             name: "start",
             args: "",
             desc: "start the server",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 if (!handle.start()) handle.logger.print("failed");
             }
         }),
@@ -82,7 +83,7 @@ module.exports = (list) => {
             name: "eval",
             args: "",
             desc: "evaluate javascript code in the context of the handle and print the output",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 handle.logger.print(
                     (function() {
                         try { return eval(args.join(" ")); }
@@ -95,13 +96,13 @@ module.exports = (list) => {
             name: "test",
             args: "",
             desc: "test command",
-            exec: (handle, args) => handle.logger.print("success successful")
+            exec: (handle, context, args) => handle.logger.print("success successful")
         }),
         genCommand({
             name: "stats",
             args: "",
             desc: "display critical information about the server",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 const logger = handle.logger;
                 if (!handle.running)
                     logger.print("not running");
@@ -130,7 +131,7 @@ module.exports = (list) => {
             name: "pause",
             args: "",
             desc: "pause the server",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 if (!handle.running) return void handle.logger.print("handle not started");
                 if (!handle.ticker.isRunning) return void handle.logger.print("not running");
                 handle.ticker.stop();
@@ -140,7 +141,7 @@ module.exports = (list) => {
             name: "resume",
             args: "",
             desc: "unpause the server",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 if (!handle.running) return void handle.logger.print("handle not started");
                 if (handle.ticker.isRunning) return void handle.logger.print("already running");
                 handle.ticker.start();
@@ -150,7 +151,7 @@ module.exports = (list) => {
             name: "mass",
             args: "<id> <mass>",
             desc: "set cell mass to all of a player's cells",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 if (args.length === 0) return void handle.logger.print("missing player id");
                 if (args.length === 1) return void handle.logger.print("missing mass input");
                 const id = parseInt(args[0]);
@@ -170,7 +171,7 @@ module.exports = (list) => {
             name: "merge",
             args: "<id>",
             desc: "instantly merge a player",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 if (args.length === 0) return void handle.logger.print("missing player id");
                 const id = parseInt(args[0]);
                 if (isNaN(id)) return void handle.logger.print("invalid number for player id");
@@ -192,7 +193,7 @@ module.exports = (list) => {
             name: "kill",
             args: "<id>",
             desc: "instantly kill a player",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 if (args.length === 0) return void handle.logger.print("missing player id");
                 const id = parseInt(args[0]);
                 if (isNaN(id)) return void handle.logger.print("invalid number for player id");
@@ -209,7 +210,7 @@ module.exports = (list) => {
             name: "pop",
             args: "<id>",
             desc: "instantly pop a player's first cell",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 if (args.length === 0) return void handle.logger.print("missing player id");
                 const id = parseInt(args[0]);
                 if (isNaN(id)) return void handle.logger.print("invalid number for player id");
@@ -225,7 +226,7 @@ module.exports = (list) => {
             name: "addminion",
             args: "<id> [count=1]",
             desc: "assign minions to a player",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 const Connection = require("../sockets/Connection");
                 const Minion = require("../bots/Minion");
                 if (args.length === 0) return void handle.logger.print("missing player id");
@@ -247,7 +248,7 @@ module.exports = (list) => {
             name: "killminion",
             args: "<id> [count=1]",
             desc: "remove assigned minions from a player",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 const Connection = require("../sockets/Connection");
                 const Minion = require("../bots/Minion");
                 if (args.length === 0) return void handle.logger.print("missing player id");
@@ -273,7 +274,7 @@ module.exports = (list) => {
             name: "addbot",
             args: "<world id> [count=1]",
             desc: "assign player bots to a world",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 const PlayerBot = require("../bots/PlayerBot");
                 if (args.length === 0) return void handle.logger.print("missing world id");
                 if (args.length === 1) args[1] = "1";
@@ -292,7 +293,7 @@ module.exports = (list) => {
             name: "killbot",
             args: "<world id> [count=1]",
             desc: "remove player bots from a world",
-            exec: (handle, args) => {
+            exec: (handle, context, args) => {
                 const PlayerBot = require("../bots/PlayerBot");
                 if (args.length === 0) return void handle.logger.print("missing world id");
                 if (args.length === 1) args[1] = "1";
@@ -313,18 +314,51 @@ module.exports = (list) => {
             }
         })
     );
+    chatCommands.register(
+        genCommand({
+            name: "help",
+            args: "",
+            desc: "display all registered commands and their relevant information",
+            exec: (handle, context, args) => {
+                const list = handle.chatCommands.list;
+                for (let name in list)
+                    handle.listener.globalChat.directMessage(
+                        null, context,
+                        `${name}${list[name].args.length > 0 ? " " : ""}${list[name].args} - ${list[name].description}`
+                    );
+            }
+        }),
+        genCommand({
+            name: "id",
+            args: "",
+            desc: "get your id",
+            exec: (handle, context, args) => {
+                handle.listener.globalChat.directMessage(
+                    null,
+                    context,
+                    context.player !== null ? `your ID is ${context.player.id}` : "You don't have a player instance associated with yourself"
+                );
+            }
+        })
+    );
 };
 
 function prettyPrintTime(seconds) {
     seconds = ~~seconds;
+
     var minutes = ~~(seconds / 60);
-    if (minutes < 1) return seconds + " seconds";
+    if (minutes < 1) return `${seconds} seconds`;
+    if (seconds === 60) return `1 minute`;
+
     var hours = ~~(minutes / 60);
-    if (hours < 1) return minutes + " minutes";
+    if (hours < 1) return `${minutes} minute${minutes === 1 ? "" : "s"} ${seconds % 60} second${seconds === 1 ? "" : "s"}`;
+    if (minutes === 60) return `1 hour`;
+
     var days = ~~(hours / 24);
-    if (days < 1) return hours + " hours " + minutes + " minutes";
-    return days + " days " + hours + " hours";
+    if (days < 1) return `${hours} hour${hours === 1 ? "" : "s"} ${minutes} minute${minutes === 1 ? "" : "s"}`;
+    if (hours === 24) return `1 day`;
+    return `${days} day${days === 1 ? "" : "s"} ${hours % 24} hour${hours === 1 ? "" : "s"}`;
 }
 
-const { CommandList } = require("./Commands");
+const { CommandList } = require("./CommandList");
 const ServerHandle = require("../ServerHandle");

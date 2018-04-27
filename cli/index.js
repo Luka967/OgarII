@@ -1,6 +1,6 @@
 const fs = require("fs");
 const ServerHandle = require("../src/ServerHandle");
-const { genCommand } = require("../src/commands/Commands");
+const { genCommand } = require("../src/commands/CommandList");
 const readline = require("readline");
 
 if (!fs.existsSync("./settings.json")) {
@@ -35,7 +35,7 @@ function ask() {
     commandStream.question("@ ", (input) => {
         if (!(input = input.trim())) return;
         logger.printFile(`@ ${input}`);
-        if (!currentHandle.commands.execute(input))
+        if (!currentHandle.commands.execute(null, input))
             logger.warn(`unknown command ${input}`);
         process.nextTick(ask);
     });
@@ -44,7 +44,7 @@ logger.inform("command stream open");
 setTimeout(ask, 1000);
 
 process.once("SIGINT", () => {
-    console.log("(caught SIGINT)");
+    logger.inform("(caught SIGINT)");
     currentHandle.stop();
     process.exitCode = 0;
 });
@@ -54,7 +54,7 @@ currentHandle.commands.register(
         name: "exit",
         args: "",
         desc: "stop the handle and close the command stream",
-        exec: (handle, args) => {
+        exec: (handle, context, args) => {
             handle.stop();
             commandStream.close();
             commandStreamClosing = true;
@@ -64,9 +64,10 @@ currentHandle.commands.register(
         name: "reload",
         args: "",
         desc: "reload the settings from local settings.json",
-        exec: (handle, args) => {
+        exec: (handle, context, args) => {
             try {
                 currentHandle.setSettings(JSON.parse(fs.readFileSync("./settings.json", "utf-8")));
+                logger.print("done");
             }
             catch (e) { logger.warn("caught error, possibly while parsing/reading settings.json:", e.stack); }
         }
@@ -75,7 +76,7 @@ currentHandle.commands.register(
         name: "save",
         args: "",
         desc: "save the current settings to settings.json",
-        exec: (handle, args) => {
+        exec: (handle, context, args) => {
             fs.writeFileSync("./settings.json", JSON.stringify(handle.settings, null, 4), "utf-8");
             logger.print("done");
         }

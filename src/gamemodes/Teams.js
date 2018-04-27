@@ -76,21 +76,14 @@ class Teams extends Gamemode {
      * @param {World} world
      */
     compileLeaderboard(world) {
-        world.leaderboard = [];
-        let sumAllSqSize = 0;
-        for (let i = 0; i < teamCount; i++) {
-            const sumSqSize =
-                world.teams[i].length === 0 ? 0 :
-                world.teams[i].map(v => {
-                    if (v.ownedCells.length === 0) return 0;
-                    const ret = v.ownedCells.reduce((a, b) => (a.squareSize || a) + b.squareSize);
-                    return ret.squareSize || ret;
-                }).reduce((a, b) => a + b);
-            world.leaderboard.push(sumSqSize);
-            sumAllSqSize += sumSqSize;
+        const teams = world.leaderboard = new Array(teamCount).fill(0);
+        let sum = 0;
+        for (let i = 0; i < world.playerCells.length; i++) {
+            const cell = world.playerCells[i];
+            teams[cell.owner.team] += cell.size;
+            sum += cell.size;
         }
-        for (let i = 0; i < teamCount; i++)
-            world.leaderboard[i] /= sumAllSqSize;
+        for (let i = 0; i < teamCount; i++) teams[i] /= sum;
     }
 
     /** @param {Connection} connection */

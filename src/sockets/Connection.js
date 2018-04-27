@@ -138,21 +138,25 @@ class Connection extends PlayingRouter {
                 if (!this.listener.settings.minionEnableERTPControls) break;
                 this.minionsFrozen = !this.minionsFrozen;
                 break;
-            case 25: /* minion mode change? */ break;
             case 99:
                 if (this.player === null) break;
                 if (reader.dataLength < 2)
-                    return void this.closeSocket(1003, "Unexpected message format");
+                    return void this.closeSocket(1003, "Bad message format");
                 const flags = reader.readUInt8();
                 const skipLen = 2 * ((flags & 2) + (flags & 4) + (flags & 8))
                 if (reader.dataLength < 2 + skipLen)
-                    return void this.closeSocket(1003, "Unexpected message format");
+                    return void this.closeSocket(1003, "Bad message format");
                 reader.skip(skipLen);
                 const message = reader.readZTString(this.protocol).trim();
-                message && this.listener.globalChat.broadcast(this, message);
+                const globalChat = this.listener.globalChat;
+                if (message.length >= 2 && message[0] === "/") {
+                    if (!this.listener.handle.chatCommands.execute(this, message.slice(1)))
+                        globalChat.directMessage(null, this, "unknown command, execute /help for the list of commands");
+                }
+                else message && globalChat.broadcast(this, message);
                 break;
             case 254:
-                if (this.player.world !== null)
+                if (this.player !== null && this.player.world !== null)
                     this.send(Messages.GetStats(this.player.world.stats, this.protocol));
                 break;
             default: return void this.closeSocket(1003, "Unknown message type");
@@ -171,7 +175,7 @@ class Connection extends PlayingRouter {
         if (this.player === null) return;
         if (this.player.world === null) {
             if (this.spawningName !== null)
-                this.listener.handle.matchmaker.enqueue(this);
+                this.listener.handle.matchmaker.toggleQueued(this);
             this.spawningName = null;
             this.splitAttempts = 0;
             this.ejectAttempts = 0;

@@ -30,6 +30,7 @@ class Matchmaker {
      * @param {Connection} connection
      */
     enqueue(connection) {
+        this.handle.listener.globalChat.directMessage(null, connection, "Joined the queue");
         this.queued.push(connection);
         this.broadcastQueueLength();
     }
@@ -37,6 +38,7 @@ class Matchmaker {
      * @param {Connection} connection
      */
     dequeue(connection) {
+        this.handle.listener.globalChat.directMessage(null, connection, "Left the queue");
         this.queued.splice(this.queued.indexOf(connection), 1);
         this.broadcastQueueLength();
     }

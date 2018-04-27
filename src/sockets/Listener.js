@@ -97,7 +97,7 @@ class Listener {
         if (this.settings.matchmakerNeedsQueuing) {
             this.globalChat.directMessage(null, newConnection, "This server requires players to be queued.");
             this.globalChat.directMessage(null, newConnection, "Try spawning to enqueue.");
-        } else this.handle.matchmaker.enqueue(newConnection);
+        } else this.handle.matchmaker.toggleQueued(newConnection);
     }
 
     /**

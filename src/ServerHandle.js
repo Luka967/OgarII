@@ -1,6 +1,6 @@
 const Settings = require("./Settings");
 
-const { CommandList } = require("./commands/Commands");
+const { CommandList } = require("./commands/CommandList");
 const DefaultCommands = require("./commands/DefaultCommands");
 
 const Stopwatch = require("./primitives/Stopwatch");
@@ -28,7 +28,7 @@ class ServerHandle {
         /** @type {Gamemode} */
         this.gamemode = null;
         this.commands = new CommandList(this);
-        DefaultCommands(this.commands);
+        this.chatCommands = new CommandList(this);
 
         this.running = false;
         /** @type {Date} */
@@ -51,6 +51,7 @@ class ServerHandle {
         this.players = { };
 
         this.setSettings(settings);
+        DefaultCommands(this.commands, this.chatCommands);
     }
 
     /**
@@ -136,6 +137,7 @@ class ServerHandle {
         while (this.players.hasOwnProperty(++id)) ;
         const newPlayer = new Player(this, id, router);
         this.players[id] = newPlayer;
+        router.player = newPlayer;
         this.gamemode.onNewPlayer(newPlayer);
         return newPlayer;
     }
@@ -149,6 +151,7 @@ class ServerHandle {
         this.gamemode.onPlayerDestroy(this.players[id]);
         this.players[id].destroy();
         this.players[id].exists = false;
+        this.players[id].router.player = null;
         delete this.players[id];
         return true;
     }
