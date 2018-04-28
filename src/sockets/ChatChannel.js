@@ -36,7 +36,6 @@ class ChatChannel {
      */
     add(connection) {
         this.connections.push(connection);
-        this.directMessage(null, connection, "Connected to chat");
     }
     /**
      * @param {Connection} connection

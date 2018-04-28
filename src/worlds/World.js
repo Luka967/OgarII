@@ -8,6 +8,7 @@ const EjectedCell = require("../cells/EjectedCell");
 const PlayerCell = require("../cells/PlayerCell");
 const Mothercell = require("../cells/Mothercell");
 const Virus = require("../cells/Virus");
+const ChatChannel = require("../sockets/ChatChannel");
 
 const { fullyIntersects } = require("../primitives/Misc");
 
@@ -39,6 +40,7 @@ class World {
 
         /** @type {Player[]} */ this.players = [];
         /** @type {Player=} */ this.largestPlayer = null;
+        this.worldChat = new ChatChannel(this.handle);
 
         /** @type {Range} */ this.border = { x: NaN, y: NaN, w: NaN, h: NaN };
         /** @type {QuadTree} */ this.finder = null;
@@ -149,6 +151,7 @@ class World {
     addPlayer(player) {
         this.players.push(player);
         player.world = this;
+        this.worldChat.add(player.router);
         this.handle.gamemode.onPlayerJoinWorld(player, this);
         player.router.onWorldSet();
         if (!player.router.isExternal) return;
@@ -160,6 +163,7 @@ class World {
         this.players.splice(this.players.indexOf(player), 1);
         this.handle.gamemode.onPlayerLeaveWorld(player, this);
         player.world = null;
+        this.worldChat.remove(player.router);        
         while (player.ownedCells.length > 0)
             this.removeCell(player.ownedCells[0]);
         player.router.onWorldReset();
@@ -227,6 +231,24 @@ class World {
     }
 
     update() {
+        this.handle.gamemode.onWorldTick(this);
+
+        if (this.frozen) {
+            for (let i = 0, l = this.players.length; i < l; i++) {
+                const router = this.players[i].router;
+                router.splitAttempts = 0;
+                router.ejectAttempts = 0;
+                if (router.isPressingQ) {
+                    if (!router.hasProcessedQ)
+                        router.onQPress();
+                    router.hasProcessedQ = true;
+                } else router.hasProcessedQ = false;
+                router.requestingSpectate = false;
+                router.spawningName = null;
+            }
+            return;
+        }
+
         const self = this;
         const eat = [], rigid = [];
         let i, l;
@@ -334,7 +356,6 @@ class World {
         }
         this.compileStatistics();
         this.handle.gamemode.compileLeaderboard(this);
-        this.handle.gamemode.onWorldTick(this);
 
         if (this.stats.external <= 0) this.handle.removeWorld(this.id);
     }

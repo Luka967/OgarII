@@ -321,6 +321,7 @@ module.exports = (commands, chatCommands) => {
             desc: "display all registered commands and their relevant information",
             exec: (handle, context, args) => {
                 const list = handle.chatCommands.list;
+                handle.listener.globalChat.directMessage(null, context, "available commands:");
                 for (let name in list)
                     handle.listener.globalChat.directMessage(
                         null, context,
@@ -336,8 +337,56 @@ module.exports = (commands, chatCommands) => {
                 handle.listener.globalChat.directMessage(
                     null,
                     context,
-                    context.player !== null ? `your ID is ${context.player.id}` : "You don't have a player instance associated with yourself"
+                    context.player !== null ? `your ID is ${context.player.id}` : "you don't have a player instance associated with yourself"
                 );
+            }
+        }),
+        genCommand({
+            name: "worldid",
+            args: "",
+            desc: "get your world's id",
+            exec: (handle, context, args) => {
+                const worldId = context.player !== null ? context.player.world !== null ? context.player.world.id : null : null;
+                handle.listener.globalChat.directMessage(
+                    null,
+                    context,
+                    worldId !== null ? `your world ID is ${worldId}` : "you're not in a world"
+                );
+            }
+        }),
+        genCommand({
+            name: "leaveworld",
+            args: "",
+            desc: "leave your world",
+            exec: (handle, context, args) => {
+                const chat = handle.listener.globalChat;
+                if (context.player === null)
+                    return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
+                if (context.player.world === null)
+                    return void chat.directMessage(null, context, "you're not in a world");
+                context.player.world.removePlayer(context.player);
+            }
+        }),
+        genCommand({
+            name: "joinworld",
+            args: "<id>",
+            desc: "try to join a world",
+            exec: (handle, context, args) => {
+                const chat = handle.listener.globalChat;
+                if (args.length === 0)
+                    return void chat.directMessage(null, context, "missing world id argument");
+                const id = parseInt(args[0]);
+                if (isNaN(id))
+                    return void chat.directMessage(null, context, "invalid world id number format");
+                if (context.player === null)
+                    return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
+                if (context.player.world !== null)
+                    return void chat.directMessage(null, context, "you're already in a world");
+                if (!handle.worlds.hasOwnProperty(id))
+                    return void chat.directMessage(null, context, "this world doesn't exist");
+                if (!handle.gamemode.canJoinWorld(handle.worlds[id]))
+                    return void chat.directMessage(null, context, "uou can't join this world");
+                handle.worlds[id].addPlayer(context.player);
             }
         })
     );

@@ -30,7 +30,7 @@ class Matchmaker {
      * @param {Connection} connection
      */
     enqueue(connection) {
-        this.handle.listener.globalChat.directMessage(null, connection, "Joined the queue");
+        this.handle.listener.globalChat.directMessage(null, connection, "joined the queue");
         this.queued.push(connection);
         this.broadcastQueueLength();
     }
@@ -38,7 +38,7 @@ class Matchmaker {
      * @param {Connection} connection
      */
     dequeue(connection) {
-        this.handle.listener.globalChat.directMessage(null, connection, "Left the queue");
+        this.handle.listener.globalChat.directMessage(null, connection, "left the queue");
         this.queued.splice(this.queued.indexOf(connection), 1);
         this.broadcastQueueLength();
     }
@@ -49,8 +49,11 @@ class Matchmaker {
             if (this.queued.length < bulkSize) return;
             const world = this.getSuitableWorld();
             if (world === null) return;
-            for (let i = 0; i < bulkSize; i++)
-                world.addPlayer(this.queued.shift().player);
+            for (let i = 0; i < bulkSize; i++) {
+                const next = this.queued.shift();
+                this.handle.listener.globalChat.directMessage(null, next, "match found! Try spawning again");
+                world.addPlayer(next.player);
+            }
         }
     }
 

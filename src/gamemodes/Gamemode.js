@@ -6,7 +6,9 @@ class Gamemode {
     }
 
     /** @returns {Number} @abstract */
-    get gamemodeType() { throw new Error("Must be overriden"); }
+    static get gamemodeType() { throw new Error("Must be overriden"); }
+    /** @returns {Number} */
+    get gamemodeType() { return this.constructor.gamemodeType; }
     /** @returns {String} @abstract */
     static get gamemodeName() { throw new Error("Must be overriden"); }
     /** @returns {String} */

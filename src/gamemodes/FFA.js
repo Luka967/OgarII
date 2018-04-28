@@ -10,7 +10,7 @@ class FFA extends Gamemode {
         super(handle);
     }
 
-    get gamemodeType() { return 0; }
+    static get gamemodeType() { return 0; }
     static get gamemodeName() { return "FFA"; }
 
     /** @param {Player} player @param {String} name */
@@ -31,6 +31,7 @@ class FFA extends Gamemode {
         const player = connection.player;
         if (player === null) return;
         if (player.world === null) return;
+        if (player.world.frozen) return;
         /** @type {Player[]} */
         const leaderboard = player.world.leaderboard;
         const data = leaderboard.map((v, i) => getLeaderboardData(v, player, i));
