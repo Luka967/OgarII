@@ -29,7 +29,7 @@ class PlayerBot extends Bot {
         /** @type {PlayerCell} */
         var cell = null;
         for (let i = 0, l = player.ownedCells.length; i < l; i++)
-            if (cell === null || player.ownedCells[i] > cell.size)
+            if (cell === null || player.ownedCells[i].size > cell.size)
                 cell = player.ownedCells[i];
         if (cell === null) return; // ???
         
@@ -43,68 +43,75 @@ class PlayerBot extends Bot {
             }
         }
 
-        var atMaxCells = player.ownedCells.length >= this.listener.settings.playerMaxCells;
-        var willSplit = player.ownedCells.length <= 2;
+        const atMaxCells = player.ownedCells.length >= this.listener.settings.playerMaxCells;
+        const willingToSplit = player.ownedCells.length <= 2;
+        const cellCount = Object.keys(player.visibleCells).length;
 
-        var mouseX = 0;
-        var mouseY = 0;
-        var bestPrey = null;
-        var hasPredator = false;
+        let mouseX = 0;
+        let mouseY = 0;
+        let bestPrey = null;
+        let splitkillObstacleNearby = false;
 
         for (let id in player.visibleCells) {
             const check = player.visibleCells[id];
+            const truncatedInfluence = Math.log10(cell.squareSize);
             let dx = check.x - cell.x;
             let dy = check.y - cell.y;
-            let d = Math.sqrt(dx * dx + dy * dy);
+            let d = Math.sqrt(dx * dx + dy * dy) - cell.size - check.size;
             let influence = 0;
             switch (check.type) {
                 case 0:
                     if (player.id === check.owner.id) break;
                     if (player.team !== null && player.team === check.owner.team) break;
                     if (this.canEat(cell.size, check.size)) {
-                        influence = check.size;
+                        influence = truncatedInfluence;
                         if (!this.canSplitkill(cell.size, check.size, d)) break;
                         if (bestPrey === null || check.size > bestPrey.size)
                             bestPrey = check;
-                    } else if (this.canEat(check.size, cell.size)) {
-                        influence = -1;
-                        if (hasPredator || !this.canSplitkill(check.size, cell.size, d)) break;
-                        hasPredator = true;
+                    } else {
+                        influence = this.canEat(check.size, cell.size) ? -truncatedInfluence : -1;
+                        splitkillObstacleNearby = true;
                     }
                     break;
-                case 1: influence = 1; break;
+                case 1: influence = 1 / cellCount; break;
                 case 2:
-                    if (atMaxCells) influence = check.size;
-                    else influence = -1;
+                    if (atMaxCells) influence = truncatedInfluence / cellCount;
+                    else if (this.canEat(cell.size, check.size)) {
+                        influence = -1;
+                        if (this.canSplitkill(cell.size, check.size, d))
+                            splitkillObstacleNearby = true;
+                    }
                     break;
-                case 3: if (this.canEat(cell.size, check.size)) influence = check.size; break;
+                case 3: if (this.canEat(cell.size, check.size)) influence = truncatedInfluence / cellCount; break;
                 case 4:
                     if (this.canEat(check.size, cell.size)) influence = -1;
                     else if (this.canEat(cell.size, check.size)) {
-                        if (atMaxCells) influence = check.size;
+                        if (atMaxCells) influence = truncatedInfluence / cellCount;
                         else influence = -1;
                     }
                     break;
             }
 
             if (influence === 0) continue;
-            if (influence < 0) d -= check.size;
             if (d === 0) d = 1;
             dx /= d; dy /= d;
             mouseX += dx * influence / d;
             mouseY += dy * influence / d;
         }
 
-        if (willSplit && bestPrey !== null && bestPrey.size * 2 > cell.size && !hasPredator && this.splitCooldownTicks <= 0) {
+        if (
+                willingToSplit && !splitkillObstacleNearby && this.splitCooldownTicks <= 0 &&
+                bestPrey !== null && bestPrey.size * 2 > cell.size
+            ) {
             this.target = bestPrey;
             this.mouseX = bestPrey.x;
             this.mouseY = bestPrey.y;
             this.splitAttempts++;
             this.splitCooldownTicks = 25;
         } else {
-            var d = Math.sqrt(mouseX * mouseX + mouseY * mouseY);
-            this.mouseX = cell.x + mouseX / (1 + d) * player.viewArea.w;
-            this.mouseY = cell.y + mouseY / (1 + d) * player.viewArea.h;
+            const d = Math.sqrt(mouseX * mouseX + mouseY * mouseY);
+            this.mouseX = cell.x + mouseX / d * player.viewArea.w;
+            this.mouseY = cell.y + mouseY / d * player.viewArea.h;
         }
     }
 
