@@ -57,7 +57,8 @@ class PlayerBot extends Bot {
             const truncatedInfluence = Math.log10(cell.squareSize);
             let dx = check.x - cell.x;
             let dy = check.y - cell.y;
-            let d = Math.sqrt(dx * dx + dy * dy) - cell.size - check.size;
+            let dSplit = Math.sqrt(dx * dx + dy * dy);
+            let d = dSplit - cell.size - check.size;
             let influence = 0;
             switch (check.type) {
                 case 0:
@@ -65,7 +66,7 @@ class PlayerBot extends Bot {
                     if (player.team !== null && player.team === check.owner.team) break;
                     if (this.canEat(cell.size, check.size)) {
                         influence = truncatedInfluence;
-                        if (!this.canSplitkill(cell.size, check.size, d)) break;
+                        if (!this.canSplitkill(cell.size, check.size, dSplit)) break;
                         if (bestPrey === null || check.size > bestPrey.size)
                             bestPrey = check;
                     } else {
@@ -78,7 +79,7 @@ class PlayerBot extends Bot {
                     if (atMaxCells) influence = truncatedInfluence / cellCount;
                     else if (this.canEat(cell.size, check.size)) {
                         influence = -1;
-                        if (this.canSplitkill(cell.size, check.size, d))
+                        if (this.canSplitkill(cell.size, check.size, dSplit))
                             splitkillObstacleNearby = true;
                     }
                     break;
