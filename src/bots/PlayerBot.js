@@ -58,7 +58,7 @@ class PlayerBot extends Bot {
             let dx = check.x - cell.x;
             let dy = check.y - cell.y;
             let dSplit = Math.sqrt(dx * dx + dy * dy);
-            let d = dSplit - cell.size - check.size;
+            let d = Math.max(1, dSplit - cell.size - check.size);
             let influence = 0;
             switch (check.type) {
                 case 0:
