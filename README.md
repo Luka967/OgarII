@@ -1,5 +1,7 @@
 # OgarII
 
+**If you're trying to connect through agar.io, you need to run `core.disableIntegrityChecks(true);` in the console**.
+
 **Ask all your questions over on the Agar.io Private Servers guild**:
 
 [![link](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/msMVwQC)
