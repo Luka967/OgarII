@@ -75,6 +75,8 @@ const value = Object.seal({
     playerSplitBoost: 780,
     playerNoCollideDelay: 13,
     playerNoMergeDelay: 15,
+    /** @type {"old" | "new"} */
+    playerMergeVersion: "old",
     playerMergeTime: 30,
     playerMergeTimeIncrease: 0.02,
     playerDecayMult: 0.001

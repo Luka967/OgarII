@@ -57,7 +57,7 @@ class PlayerBot extends Bot {
             const truncatedInfluence = Math.log10(cell.squareSize);
             let dx = check.x - cell.x;
             let dy = check.y - cell.y;
-            let dSplit = Math.sqrt(dx * dx + dy * dy);
+            let dSplit = Math.max(1, Math.sqrt(dx * dx + dy * dy));
             let d = Math.max(1, dSplit - cell.size - check.size);
             let influence = 0;
             switch (check.type) {
@@ -70,24 +70,24 @@ class PlayerBot extends Bot {
                         if (bestPrey === null || check.size > bestPrey.size)
                             bestPrey = check;
                     } else {
-                        influence = this.canEat(check.size, cell.size) ? -truncatedInfluence : -1;
+                        influence = this.canEat(check.size, cell.size) ? -truncatedInfluence * cellCount : -1;
                         splitkillObstacleNearby = true;
                     }
                     break;
-                case 1: influence = 1 / cellCount; break;
+                case 1: influence = 1; break;
                 case 2:
-                    if (atMaxCells) influence = truncatedInfluence / cellCount;
+                    if (atMaxCells) influence = truncatedInfluence;
                     else if (this.canEat(cell.size, check.size)) {
-                        influence = -1;
+                        influence = -1 * cellCount;
                         if (this.canSplitkill(cell.size, check.size, dSplit))
                             splitkillObstacleNearby = true;
                     }
                     break;
-                case 3: if (this.canEat(cell.size, check.size)) influence = truncatedInfluence / cellCount; break;
+                case 3: if (this.canEat(cell.size, check.size)) influence = truncatedInfluence * cellCount; break;
                 case 4:
                     if (this.canEat(check.size, cell.size)) influence = -1;
                     else if (this.canEat(cell.size, check.size)) {
-                        if (atMaxCells) influence = truncatedInfluence / cellCount;
+                        if (atMaxCells) influence = truncatedInfluence * cellCount;
                         else influence = -1;
                     }
                     break;
@@ -110,7 +110,7 @@ class PlayerBot extends Bot {
             this.splitAttempts++;
             this.splitCooldownTicks = 25;
         } else {
-            const d = Math.sqrt(mouseX * mouseX + mouseY * mouseY);
+            const d = Math.max(1, Math.sqrt(mouseX * mouseX + mouseY * mouseY));
             this.mouseX = cell.x + mouseX / d * player.viewArea.w;
             this.mouseY = cell.y + mouseY / d * player.viewArea.h;
         }

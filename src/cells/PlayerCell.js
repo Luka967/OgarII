@@ -56,9 +56,12 @@ class PlayerCell extends Cell {
     onTick() {
         super.onTick();
         const settings = this.world.settings;
-        const delay = settings.playerMergeTime === 0
-            ? settings.playerNoMergeDelay
-            : ~~(settings.playerMergeTime + this.mass * settings.playerMergeTimeIncrease) * 25;
+        let delay = settings.playerNoMergeDelay;
+        if (settings.playerMergeTime > 0) {
+            if (settings.playerMergeVersion === "new")
+                delay = Math.round(settings.playerMergeTime + this.mass * settings.playerMergeTimeIncrease) * 25;
+            else delay = Math.max(delay, Math.max(settings.playerMergeTime * 25, Math.round(this.age * settings.playerMergeTimeIncrease) * 25));
+        }
         this._canMerge = this.age >= delay;
     }
 
