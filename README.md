@@ -4,7 +4,7 @@
 
 **Ask all your questions over on the Agar.io Private Servers guild**:
 
-[![link](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/msMVwQC)
+[![link](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/66X2ESb)
 
 This is a full rewrite based off of Ogar/MultiOgar/MultiOgar-Edited that ended up being better than I originally expected. The code is clean and logical. The agar protocol is fully supported - up from version 4 all the way to 17.
 
