@@ -23,19 +23,33 @@ class Connection extends PlayingRouter {
         this.protocol = NaN;
         this.protocolKey = NaN;
 
+        this.socketDisconnected = false;
+        this.closeCode = NaN;
+        /** @type {String} */
+        this.closeReason = null;
+
         /** @type {Minion[]} */
         this.minions = [];
         this.minionsFrozen = false;
         this.controllingMinions = false;
 
-        webSocket.on("close", this.onClose.bind(this));
-        webSocket.on("message", this._onMessage.bind(this));
+        webSocket.on("close", this.onSocketClose.bind(this));
+        webSocket.on("message", this.onSocketMessage.bind(this));
         webSocket.on("ping", this.closeSocket.bind(webSocket, 1003, "Unexpected message format"));
         webSocket.on("pong", this.closeSocket.bind(webSocket, 1003, "Unexpected message format"));
     }
 
-    get isExternal() { return true; }
+    close() {
+        if (!this.socketDisconnected) return void this.closeSocket(1001, "Manual connection close call");
+        super.close();
+        this.disconnected = true;
+        this.disconnectionTick = this.listener.handle.tick;
+        this.listener.onDisconnection(this, this.closeCode, this.closeReason);
+        this.webSocket.removeAllListeners();
+    }
 
+    static get separateInTeams() { return true; }
+    get isExternal() { return true; }
     /** @private */
     get logger() { return this.listener.handle.logger; }
 
@@ -43,18 +57,18 @@ class Connection extends PlayingRouter {
      * @param {Number} code
      * @param {String} reason
      */
-    onClose(code, reason) {
-        super.close();
-        this.isDisconnected = true;
-        this.disconnectionTick = this.listener.handle.tick;
-        this.listener.onDisconnection(this, code, reason);
-        this.webSocket.removeAllListeners();
+    onSocketClose(code, reason) {
+        if (this.socketDisconnected) return;
+        this.logger.debug(`connection from ${this.remoteAddress} has disconnected`);
+        this.socketDisconnected = true;
+        this.closeCode = code;
+        this.closeReason = reason;
     }
 
     /**
      * @param {ArrayBuffer|String} data
      */
-    _onMessage(data) {
+    onSocketMessage(data) {
         if (data instanceof String) return void this.closeSocket(1003, "Unexpected message format");
         if (data.byteLength > 256 || data.byteLength === 0)
             return void this.closeSocket(1009, "Unexpected message size");
@@ -80,7 +94,7 @@ class Connection extends PlayingRouter {
                 break;
             case 2:
                 if (reader.dataLength < 1) return void this.closeSocket(1003, "Bad message format");
-                this._onGameMessage(reader.readUInt8(), reader);
+                this.onGameMessage(reader.readUInt8(), reader);
                 break;
         }
     }
@@ -88,7 +102,7 @@ class Connection extends PlayingRouter {
      * @param {Number} messageId
      * @param {Reader} reader
      */
-    _onGameMessage(messageId, reader) {
+    onGameMessage(messageId, reader) {
         switch (messageId) {
             case 0:
                 const name = reader[this.protocol < 6 ? "readZTStringUCS2" : "readZTStringUTF8"]();
@@ -169,9 +183,11 @@ class Connection extends PlayingRouter {
             this.controllingMinions = !this.controllingMinions;
         else this.listener.handle.gamemode.whenPlayerPressQ(this.player);
     }
-
+    get shouldClose() {
+        return this.socketDisconnected;
+    }
     update() {
-        if (this.isDisconnected || isNaN(this.protocolKey)) return;
+        if (isNaN(this.protocolKey)) return;
         if (this.player === null) return;
         if (this.player.world === null) {
             if (this.spawningName !== null)
@@ -208,35 +224,28 @@ class Connection extends PlayingRouter {
         if (this.listener.handle.tick % 4 === 0)
             this.listener.handle.gamemode.sendLeaderboard(this);
     }
-
-    /**
-     * @param {Buffer} data
-     */
-    send(data) {
-        if (this.isDisconnected) return;
-        this.webSocket.send(data);
-    }
-
-    close() {
-        this.closeSocket(1001, "Manual connection close call");
-    }
     onWorldSet() {
         this.send(Messages.SetWorldBounds(this.player.world, true, this.protocol));
     }
-    /**
-     * @param {PlayerCell} cell
-     */
+    /** @param {PlayerCell} cell */
     onNewOwnedCell(cell) {
         this.send(Messages.SetNewOwnedCell(cell.id));
     }
 
+    /** @param {Buffer} data */
+    send(data) {
+        if (this.socketDisconnected) return;
+        this.webSocket.send(data);
+    }
     /**
      * @param {Number=} code
      * @param {String=} reason
      */
     closeSocket(code, reason) {
-        if (this.isDisconnected) return;
-        this.isDisconnected = true;
+        if (this.socketDisconnected) return;
+        this.socketDisconnected = true;
+        this.closeCode = code;
+        this.closeReason = reason;
         this.webSocket.close(code || 1006, reason || "");
     }
 }

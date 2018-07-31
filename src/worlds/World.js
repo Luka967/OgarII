@@ -154,6 +154,7 @@ class World {
         this.worldChat.add(player.router);
         this.handle.gamemode.onPlayerJoinWorld(player, this);
         player.router.onWorldSet();
+        this.handle.logger.debug(`player ${player.id} has been added to world ${this.id}`);
         if (!player.router.isExternal) return;
         for (let i = 0; i < this.settings.minionsPerPlayer; i++)
             new Minion(player.router);
@@ -167,6 +168,7 @@ class World {
         while (player.ownedCells.length > 0)
             this.removeCell(player.ownedCells[0]);
         player.router.onWorldReset();
+        this.handle.logger.debug(`player ${player.id} has been removed from world ${this.id}`);
     }
 
     /**
@@ -451,7 +453,7 @@ class World {
     /** @param {PlayerCell} cell */
     movePlayerCell(cell) {
         const router = cell.owner.router;
-        if (router.isDisconnected) return;
+        if (router.disconnected) return;
         let dx = router.mouseX - cell.x;
         let dy = router.mouseY - cell.y;
         const d = Math.sqrt(dx * dx + dy * dy);

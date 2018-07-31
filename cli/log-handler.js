@@ -34,13 +34,13 @@ else fs.writeFileSync("./log-settings.json", JSON.stringify(settings, null, 4), 
  * @param {Date=} date
  */
 function dateTime(date) {
-    var dy = date.getFullYear();
-    var dm = ("00" + (date.getMonth() + 1)).slice(-2);
-    var dd = ("00" + (date.getDate())).slice(-2);
-    var th = ("00" + (date.getHours())).slice(-2);
-    var tm = ("00" + (date.getMinutes())).slice(-2);
-    var ts = ("00" + (date.getSeconds())).slice(-2);
-    var tz = ("000" + (date.getMilliseconds())).slice(-3);
+    const dy = date.getFullYear();
+    const dm = ("00" + (date.getMonth() + 1)).slice(-2);
+    const dd = ("00" + (date.getDate())).slice(-2);
+    const th = ("00" + (date.getHours())).slice(-2);
+    const tm = ("00" + (date.getMinutes())).slice(-2);
+    const ts = ("00" + (date.getSeconds())).slice(-2);
+    const tz = ("000" + (date.getMilliseconds())).slice(-3);
     return `${dy}-${dm}-${dd} ${th}:${tm}:${ts}.${tz}`;
 }
 
@@ -48,12 +48,12 @@ function dateTime(date) {
  * @param {Date} date
  */
 function filename(date) {
-    var dy = date.getFullYear();
-    var dm = ("00" + (date.getMonth() + 1)).slice(-2);
-    var dd = ("00" + (date.getDate())).slice(-2);
-    var th = ("00" + (date.getHours())).slice(-2);
-    var tm = ("00" + (date.getMinutes())).slice(-2);
-    var ts = ("00" + (date.getSeconds())).slice(-2);
+    const dy = date.getFullYear();
+    const dm = ("00" + (date.getMonth() + 1)).slice(-2);
+    const dd = ("00" + (date.getDate())).slice(-2);
+    const th = ("00" + (date.getHours())).slice(-2);
+    const tm = ("00" + (date.getMinutes())).slice(-2);
+    const ts = ("00" + (date.getSeconds())).slice(-2);
     return `${dy}-${dm}-${dd}T${th}-${tm}-${ts}.log`;
 }
 
@@ -61,10 +61,10 @@ function filename(date) {
  * @param {Date=} date
  */
 function time(date) {
-    var date = date || new Date();
-    var th = date.getHours();
-    var tm = date.getMinutes();
-    var ts = date.getSeconds();
+    const date = date || new Date();
+    const th = date.getHours();
+    const tm = date.getMinutes();
+    const ts = date.getSeconds();
     th = ("00" + th).slice(-2);
     tm = ("00" + tm).slice(-2);
     ts = ("00" + ts).slice(-2);
@@ -84,12 +84,11 @@ if (fs.existsSync(logLoc)) {
     } else fs.unlinkSync(logLoc);
 }
 
-var fstream = fs.createWriteStream(logLoc);
-var fqueue = [];
-var fconsuming = null;
-var fprocessing = false;
-var synchronous = false;
-var flushed = false;
+let fstream = fs.createWriteStream(logLoc);
+let fqueue = [];
+let fconsuming = null;
+let fprocessing = false;
+let synchronous = false;
 
 function formatConsole(date, level, message) {
     switch (level) {
@@ -128,7 +127,7 @@ function fprocess() {
 function fprocessSync() {
     fstream.destroy();
     fstream = null;
-    var tail = `${fconsuming || ""}${fqueue.join("")}`;
+    const tail = `${fconsuming || ""}${fqueue.join("")}`;
     fs.appendFileSync(logLoc, tail, "utf-8");
     fqueue.splice(0);
 }

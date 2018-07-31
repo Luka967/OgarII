@@ -5,12 +5,12 @@ class Stopwatch {
         this._start = this._lap = process.hrtime();
     }
     lap() {
-        var diff = process.hrtime(this._lap);
+        const diff = process.hrtime(this._lap);
         this._lap = process.hrtime();
         return diff[0] * 1e3 + diff[1] / 1e6;
     }
     elapsed() {
-        var diff = process.hrtime(this._start);
+        const diff = process.hrtime(this._start);
         return diff[0] * 1e3 + diff[1] / 1e6;
     }
     stop() {

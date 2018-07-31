@@ -43,26 +43,35 @@ class Listener {
         return true;
     }
 
+    /**
+     * @param {{req: any, origin: string}} info 
+     * @param {*} response 
+     */
     verifyClient(info, response) {
-        this.logger.onAccess(`REQUEST FROM ${info.req.socket.remoteAddress}, ${info.secure ? "" : "not "}secure, Origin: ${info.origin}`);
-        if (this.settings.listenerAcceptedOrigins.length > 0) {
-            let index = this.settings.listenerAcceptedOrigins.indexOf(info.origin);
-            this.logger.debug(`socketAcceptedOrigins index of ${info.origin}: ${index}`);
-            if (index === -1) return void response(false, 403, "Forbidden");
-        }
+        /**
+         * @type {string}
+         */
+        const address = info.req.socket.remoteAddress;
+        this.logger.onAccess(`REQUEST FROM ${address}, ${info.secure ? "" : "not "}secure, Origin: ${info.origin}`);
         if (this.connections.length > this.settings.listenerMaxConnections) {
-            this.logger.debug("listenerMaxConnections reached, dropping new connections!");
+            this.logger.debug("listenerMaxConnections reached, dropping new connections");
             return void response(false, 503, "Service Unavailable");
         }
+        if (this.settings.listenerAcceptedOrigins.indexOf(info.origin) !== -1) {
+            this.logger.debug(`listenerAcceptedOrigins doesn't contain ${info.origin}`);
+            return void response(false, 403, "Forbidden");
+        }
+        if (this.settings.listenerBannedIPs.indexOf(address) !== -1) {
+            this.logger.debug(`listenerForbiddenIPs contains ${address}, dropping connection`);
+            return void response(false, 403, "Forbidden");
+        }
         if (this.settings.listenerMaxConnectionsPerIP > 0) {
-            const address = info.req.connection.remoteAddress;
             const count = this.connectionsByIP[address];
             if (count && count >= this.settings.listenerMaxConnectionsPerIP) {
                 this.logger.debug(`listenerMaxConnectionsPerIP reached for '${address}', dropping its new connections`);
                 return void response(false, 403, "Forbidden");
             }
         }
-
         this.logger.debug("client verification passed");
         response(true);
     }
@@ -117,10 +126,10 @@ class Listener {
         let i, l;
         for (i = 0, l = this.allPlayingRouters.length; i < l; i++) {
             const router = this.allPlayingRouters[i];
-            router.update();
-            if (router.isDisconnected) i--, l--;
+            if (!router.shouldClose) continue;
+            router.close(); i--; l--;
         }
-        
+        for (i = 0; i < l; i++) this.allPlayingRouters[i].update();
         for (i = 0, l = this.connections.length; i < l; i++) {
             const connection = this.connections[i];
             if (Date.now() - connection.lastActivityTime < this.settings.listenerMaxClientDormancy) continue;

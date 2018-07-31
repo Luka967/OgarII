@@ -1,4 +1,4 @@
-const { intersects, fullyIntersects } = require("../primitives/Misc");
+const { intersects, fullyIntersects, getQuadIntersect, getQuadFullIntersect } = require("../primitives/Misc");
 
 /**
  * @typedef {{x: Number, y: Number, w: Number, h: Number}} Range
@@ -28,43 +28,40 @@ class QuadTree {
     }
 
     destroy() {
-        for (var i = 0, l = this.items.length; i < l; i++)
+        for (let i = 0, l = this.items.length; i < l; i++)
             delete this.items[i].__root;
         if (!this.hasSplit) return;
         for (i = 0; i < 4; i++) this.branches[i].destroy();
     }
-
     /** 
      * @param {QuadItem} item
      */
     insert(item) {
-        var quad = this;
+        let quad = this;
         while (true) {
             if (!quad.hasSplit) break;
-            var quadrant = quad.getQuadrant(item.range);
+            const quadrant = quad.getQuadrant(item.range);
             if (quadrant === -1) break;
             quad = quad.branches[quadrant];
         }
         item.__root = quad;
         quad.items.push(item);
-        if (!quad.hasSplit && quad.level <= quad.maxLevel && quad.items.length >= quad.maxItems)
-            quad.split();
+        quad.split();
     }
-
     /** 
      * @param {InsertedQuadItem} item
      */
     update(item) {
-        var oldQuad = item.__root;
-        var newQuad = item.__root;
+        const oldQuad = item.__root;
+        let newQuad = item.__root;
         while (true) {
             if (!newQuad.root) break;
             newQuad = newQuad.root;
-            if (fullyIntersects(newQuad.range, item)) break;
+            if (fullyIntersects(newQuad.range, item.range)) break;
         }
         while (true) {
             if (!newQuad.hasSplit) break;
-            var quadrant = newQuad.getQuadrant(item.range);
+            const quadrant = newQuad.getQuadrant(item.range);
             if (quadrant === -1) break;
             newQuad = newQuad.branches[quadrant];
         }
@@ -72,60 +69,55 @@ class QuadTree {
         oldQuad.items.splice(oldQuad.items.indexOf(item), 1);
         newQuad.items.push(item);
         item.__root = newQuad;
-        if (oldQuad.root) oldQuad.root.merge();
-        if (!newQuad.hasSplit && newQuad.level <= newQuad.maxLevel && newQuad.items.length >= newQuad.maxItems)
-            newQuad.split();
+        oldQuad.merge();
+        newQuad.split();
     }
-
     /** 
      * @param {InsertedQuadItem} item
      */
     remove(item) {
-        var quad = item.__root;
-        var i = quad.items.indexOf(item);
-        if (i === -1) throw new Error("item not found");
-        quad.items.splice(i, 1);
+        const quad = item.__root;
+        quad.items.splice(quad.items.indexOf(item), 1);
         delete item.__root;
-        if (quad.root) quad.root.merge();
+        quad.merge();
     }
 
     /** 
      * @private
      */
     split() {
+        if (this.hasSplit || this.level > this.maxLevel || this.items.length < this.maxItems) return;
         this.hasSplit = true;
-        var x = this.range.x;
-        var y = this.range.y;
-        var hw = this.range.w / 2;
-        var hh = this.range.h / 2;
+        const x = this.range.x;
+        const y = this.range.y;
+        const hw = this.range.w / 2;
+        const hh = this.range.h / 2;
         this.branches = [
             new QuadTree({ x: x - hw, y: y - hh, w: hw, h: hh }, this.maxLevel, this.maxItems, this),
             new QuadTree({ x: x + hw, y: y - hh, w: hw, h: hh }, this.maxLevel, this.maxItems, this),
             new QuadTree({ x: x - hw, y: y + hh, w: hw, h: hh }, this.maxLevel, this.maxItems, this),
             new QuadTree({ x: x + hw, y: y + hh, w: hw, h: hh }, this.maxLevel, this.maxItems, this)
         ];
-        for (var i = 0, l = this.items.length; i < l; i++) {
-            var quadrant = this.getQuadrant(this.items[i].range);
+        for (let i = 0, l = this.items.length, quadrant; i < l; i++) {
+            quadrant = this.getQuadrant(this.items[i].range);
             if (quadrant === -1) continue;
             delete this.items[i].__root;
             this.branches[quadrant].insert(this.items[i]);
             this.items.splice(i, 1); i--; l--;
         }
     }
-
     /** 
      * @private
      */
     merge() {
-        var quad = this;
-        while (quad !== null) {
-            if (!this.hasSplit) return;
-            for (var i = 0; i < 4; i++)
-                if (this.branches[i].items.length > 0 ||
-                    this.branches[i].hasSplit) return;
-            delete this.branches;
-            this.hasSplit = false;
-            quad = quad.root;
+        let quad = this;
+        while (quad != null) {
+            if (!quad.hasSplit) { quad = quad.root; continue; }
+            for (let i = 0, branch; i < 4; i++)
+                if ((branch = quad.branches[i]).hasSplit || branch.items.length > 0)
+                    return;
+            quad.hasSplit = false;
+            delete quad.branches;
         }
     }
 
@@ -134,35 +126,38 @@ class QuadTree {
      * @param {(item: InsertedQuadItem) => void} callback
      */
     search(range, callback) {
-        for (var i = 0, l = this.items.length; i < l; i++)
-            if (intersects(range, this.items[i].range))
-                callback(this.items[i]);
+        for (let i = 0, l = this.items.length, item; i < l; i++)
+            if (intersects(range, (item = this.items[i]).range)) callback(item);
         if (!this.hasSplit) return;
-        var quadrant = this.getQuadrant(range);
-        if (quadrant !== -1)
-            this.branches[quadrant].search(range, callback);
-        else for (i = 0; i < 4; i++)
-            if (intersects(this.branches[i].range, range))
-                this.branches[i].search(range, callback);
+        const quad = getQuadIntersect(range, this.range);
+        if (quad.t) {
+            if (quad.l) this.branches[0].search(range, callback);
+            if (quad.r) this.branches[1].search(range, callback);
+        }
+        if (quad.b) {
+            if (quad.l) this.branches[2].search(range, callback);
+            if (quad.r) this.branches[3].search(range, callback);
+        }
     }
-
     /**
      * @param {Range} range
-     * @param {(item: InsertedQuadItem) => Boolean} selector
-     * @returns {Boolean}
+     * @param {(item: InsertedQuadItem) => boolean} selector
+     * @returns {boolean}
      */
     containsAny(range, selector) {
-        for (var i = 0, l = this.items.length; i < l; i++)
-            if (intersects(range, this.items[i].range))
-                if (!selector || selector(this.items[i]))
-                    return true;
+        for (let i = 0, l = this.items.length, item; i < l; i++)
+            if (intersects(range, (item = this.items[i]).range) && (!selector || selector(item)))
+                return true;
         if (!this.hasSplit) return false;
-        var quadrant = this.getQuadrant(range);
-        if (quadrant !== -1)
-            return this.branches[quadrant].containsAny(range, selector);
-        else for (var i = 0; i < 4; i++)
-            if (intersects(this.branches[i].range, range))
-                if (this.branches[i].containsAny(range, selector)) return true;
+        const quad = getQuadIntersect(range, this.range);
+        if (quad.t) {
+            if (quad.l && this.branches[0].containsAny(range, selector)) return true;
+            if (quad.r && this.branches[1].containsAny(range, selector)) return true;
+        }
+        if (quad.b) {
+            if (quad.l && this.branches[2].containsAny(range, selector)) return true;
+            if (quad.r && this.branches[3].containsAny(range, selector)) return true;
+        }
         return false;
     }
 
@@ -172,15 +167,19 @@ class QuadTree {
         else return this.items.slice(0).concat(this.branches[0].getItems(),
             this.branches[1].getItems(), this.branches[2].getItems(), this.branches[3].getItems());
     }
-    /** @returns {Number} */
+    /** @returns {number} */
     getBranchCount() {
         if (this.hasSplit)
-            return 1 + this.branches[0].getBranchCount() +
-                this.branches[1].getBranchCount() + this.branches[2].getBranchCount() + this.branches[3].getBranchCount();
+            return 1 +
+                this.branches[0].getBranchCount() + this.branches[1].getBranchCount() +
+                this.branches[2].getBranchCount() + this.branches[3].getBranchCount();
         return 1;
     }
+    /**
+     * @returns {string}
+     */
     debugStr() {
-        var str = `items ${this.items.length}/${this.getItems().length} level ${this.level} x ${this.range.x} y ${this.range.y} w ${this.range.w} h ${this.range.h}\n`;
+        let str = `items ${this.items.length}/${this.getItems().length} level ${this.level} x ${this.range.x} y ${this.range.y} w ${this.range.w} h ${this.range.h}\n`;
         if (this.hasSplit) {
             str += new Array(1 + this.level * 2).join(" ") + this.branches[0].debugStr();
             str += new Array(1 + this.level * 2).join(" ") + this.branches[1].debugStr();
@@ -195,19 +194,14 @@ class QuadTree {
      * @returns {-1|0|1|2|3}
      */
     getQuadrant(a) {
-        var x = this.range.x,
-            y = this.range.y;
-        var top = a.y - a.h < y && a.y + a.h < y;
-        var bottom = a.y - a.h > y && a.y + a.h > y;
-        var left = a.x - a.w < x && a.x + a.w < x;
-        var right = a.x - a.w > x && a.x + a.w > x;
-        if (top) {
-            if (left) return 0;
-            if (right) return 1;
+        const quad = getQuadFullIntersect(a, this.range);
+        if (quad.t) {
+            if (quad.l) return 0;
+            if (quad.r) return 1;
         }
-        if (bottom) {
-            if (left) return 2;
-            if (right) return 3;
+        if (quad.b) {
+            if (quad.l) return 2;
+            if (quad.r) return 3;
         }
         return -1;
     }

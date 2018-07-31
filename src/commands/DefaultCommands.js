@@ -118,10 +118,9 @@ module.exports = (commands, chatCommands) => {
                     const connections = handle.listener.connections.length;
                     const bots = handle.listener.allPlayingRouters.length - connections;
                     logger.print(`${Object.keys(handle.players).length} players, ${connections} connections, ${bots} bots`);
-                    logger.print(`${Object.keys(handle.worlds).length} worlds:`);
                     for (let id in handle.worlds) {
                         const world = handle.worlds[id];
-                        logger.print(`world ${id}: ${world.cells.length} cells, (${world.playerCells.length}/${world.pelletCount}/${world.virusCount}/${world.ejectedCells.length}/${world.mothercellCount})`);
+                        logger.print(`world ${id}: ${world.cells.length} cells - ${world.playerCells.length}P/${world.pelletCount}p/${world.virusCount}v/${world.ejectedCells.length}e/${world.mothercellCount}m`);
                         logger.print(`    ${world.stats.external} / ${world.stats.limit} players, ${world.stats.playing} playing, ${world.stats.spectating} spectating, ${world.stats.internal} bots`);
                     }
                 }
@@ -385,7 +384,7 @@ module.exports = (commands, chatCommands) => {
                 if (!handle.worlds.hasOwnProperty(id))
                     return void chat.directMessage(null, context, "this world doesn't exist");
                 if (!handle.gamemode.canJoinWorld(handle.worlds[id]))
-                    return void chat.directMessage(null, context, "uou can't join this world");
+                    return void chat.directMessage(null, context, "you can't join this world");
                 handle.worlds[id].addPlayer(context.player);
             }
         })
@@ -395,16 +394,16 @@ module.exports = (commands, chatCommands) => {
 function prettyPrintTime(seconds) {
     seconds = ~~seconds;
 
-    var minutes = ~~(seconds / 60);
+    let minutes = ~~(seconds / 60);
     if (minutes < 1) return `${seconds} seconds`;
     if (seconds === 60) return `1 minute`;
 
-    var hours = ~~(minutes / 60);
+    let hours = ~~(minutes / 60);
     if (hours < 1) return `${minutes} minute${minutes === 1 ? "" : "s"} ${seconds % 60} second${seconds === 1 ? "" : "s"}`;
     if (minutes === 60) return `1 hour`;
 
-    var days = ~~(hours / 24);
-    if (days < 1) return `${hours} hour${hours === 1 ? "" : "s"} ${minutes} minute${minutes === 1 ? "" : "s"}`;
+    let days = ~~(hours / 24);
+    if (days < 1) return `${hours} hour${hours === 1 ? "" : "s"} ${minutes % 60} minute${minutes === 1 ? "" : "s"}`;
     if (hours === 24) return `1 day`;
     return `${days} day${days === 1 ? "" : "s"} ${hours % 24} hour${hours === 1 ? "" : "s"}`;
 }

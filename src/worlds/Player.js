@@ -127,7 +127,7 @@ class Player {
     }
 
     checkDisconnect() {
-        if (!this.router.isDisconnected) return;
+        if (!this.router.disconnected) return;
         if (this.state !== 0) return void this.handle.removePlayer(this.id);
         const disposeDelay = this.settings.playerDisposeDelay;
         if (disposeDelay > 0 && this.handle.tick - this.router.disconnectionTick >= disposeDelay)

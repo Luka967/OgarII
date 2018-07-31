@@ -5,7 +5,7 @@ class PlayingRouter {
      */
     constructor(listener) {
         this.listener = listener;
-        this.isDisconnected = false;
+        this.disconnected = false;
         this.disconnectionTick = NaN;
         
         this.mouseX = 0;
@@ -25,6 +25,10 @@ class PlayingRouter {
 
     /** @abstract @returns {Boolean} */
     get isExternal() { throw new Error("Must be overriden"); }
+    /** @abstract @returns {Boolean} */
+    static get separateInTeams() { throw new Error("Must be overriden"); }
+    /** @returns {Boolean} */
+    get separateInTeams() { return this.constructor.separateInTeams; }
 
     createPlayer() {
         this.player = this.listener.handle.createPlayer(this);
@@ -68,6 +72,10 @@ class PlayingRouter {
         this.listener.removePlayingRouter(this);
     }
 
+    /** @abstract @returns {Boolean} */
+    get shouldClose() {
+        throw new Error("Must be overriden");
+    }
     /** @abstract */
     update() {
         throw new Error("Must be overriden");

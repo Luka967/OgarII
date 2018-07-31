@@ -1,0 +1,137 @@
+1.1.0 @ 2018-7-31
+- Add this changelog file
+- Refactor CLI settings file manipulation
+- Use const & let instead of var wherever it is
+- GamemodeList is and was not a debug item
+- New setting, listenerBannedIPs array
+- Implement per-IP banning (range banning might be tricky)
+- Rename PlayerRouter.isDisconnected to disconnected
+- Add PlayerRouter.shouldClose abstract function
+- Calling Connection.close will either kill the connection or destroy the router depending on the connection status
+- Minions now don't get put in teams in Teams gamemode
+- Simplify Misc.randomColor
+- Fix fatal QuadTree flaw of branches not merging properly
+- Minor QuadTree optimization
+- Overall minor bugfixing and refactoring
+
+1.0.5 @ 2018-5-4
+- Fix two fatal player bot errors where division with 0 occur
+- Implement new merging timing
+
+1.0.4 @ 2018-4-30
+- Player bot improvements
+- Don't show the matchmaker queue messages when queuing is not necessary
+
+1.0.3 @ 2018-4-28
+- Three new chat commands - worldid, leaveworld, joinworld
+- Make Gamemode.gamemodeType a static property
+- Actually use the World.frozen property
+- New gamemode, Last Man Standing
+- Add a world-level chat channel
+- Add feedback in chat when a match gets found
+
+1.0.0 @ 2018-4-26
+- At ServerHandle, properly set settings given at constructor
+- New setting, ticksPerSecond
+- Updated behavior to reflect the addition of ticksPerSecond
+- New gamemode functions, onPlayerJoinWorld and onPlayerLeaveWorld
+- Implement Teams mode
+
+0.9.19 @ 2018-4-20
+- New setting, mothercellActiveSpawnSpeed
+- Use proper default value for setting playerSpawnSize
+- Temporary fix for crash when a playing router attempts spawning after it gets detached from world
+- Have player bots continue following split prey until split cooldown expires
+- Fix crash because of player bots somehow get 0 distance to cell
+- Make help readable with padding
+- Minor updates to stats command
+- Add new commands: pause, resume, mass, merge, kill, pop, addminion, killminion, addbot, killbot
+
+0.9.18 @ 2018-4-16
+- Logging settings are now in a standalone JSON file
+- A re-run won't be necessary for running the CLI without settings
+- Added new setting, listenerMaxConnectionsPerIP, plus implementation
+- Removed json-beautify dependency thanks to SuperOP535
+- listenerAcceptedOrigins is now an optional string array
+- Fixed the 'x in queue' message showing when matchmakerNeedsQueuing is false
+- Fixed matchmaker prioritizing new worlds when too many bots are in one
+- Worlds now self-destruct when they have zero external players
+- Fixed stats command's bots representation not working
+
+0.9.17 @ 2018-2-17
+- Implement dynamic gamemode list, made for plugins
+- Add setting for gamemode
+- Fix eval command not showing return result
+- Have a single endpoint for changing the version
+- Fix fatal typo on World.prototype.destroy
+Nightly @ 2018-2-17
+- Implement Q-based minion controls
+- Disconnect inactive connections
+- Add two new CLI-only commands, reload and save
+- Disable logging DEBUG and ACCESS levels to console by default
+- Minor refactoring
+- Implement matchmaking
+- Avoid protocol version matching when parsing mouse position message
+- Three new default commands: eval, test & stats
+
+0.9.16 @ 2018-2-16
+- Implement commands, ready for plugin support
+- Logging updates
+- A couple refactors
+Nightly @ 2018-2-15
+- Implement logging to file
+- Fix ServerHandle stopping logic
+- Set setting mothercellCount's default to 0
+- Don't have player bots split on very small cells
+- Check for bad number at Cell constructor
+- Use safe spawning positions for pellets
+
+0.9.15 @ 2018-2-15
+- Minor CLI updates
+- Remove log entries of when a new player gets added or removed
+- Add playerBotsPerWorld setting
+- Add minionsPerPlayer setting
+- Implement the abstract bot class
+- Implement minions (WIP)
+- Implement player bots (WIP)
+- Update cell eat size multiplier - from 1.14075183 to 1.140175425099138
+- Optimize FFA's leaderboard compiliation time - use native sorting
+- Fix agar.io recognizing viruses/mothercells as regular cells
+- Minor refactoring at PlayerRouter
+- Minor refactoring of where player actions get called
+- Fix the server throwing up the connection because of my Cigar's 200 char length chat textbox
+- Minor refactoring at Listener
+- Actually use the allPlayingRouters array
+- Split the Player.prototype.update function into two - updateViewArea and updateVisibleCells
+
+0.9.13 @ 2018-2-14
+- Minor refactoring in a couple places
+- Implement mothercells
+- Implement the chat
+- Implement autosplitting
+
+Nightly @ 2018-2-13
+- Call gamemode methods when necessary
+- Define messages for the leaderboard
+- Define the server stats type
+- Properly dispose of players & worlds
+- Fix viruses not setting the cell that ate it
+- Implement maximum connections count
+- Implement FFA's leaderboard
+- Fix the decay being off
+- Fix Player.prototype.updateState setting bad states
+
+0.9.11 @ 2018-2-12
+- Implement viruses and related settings
+- Fix border set message inconsistency
+- Fix cell bouncing inconsistency
+
+0.9.10 @ 2018-2-11
+- Cell splitting ejecting & merging works
+
+0.9.7 @ 2018-2-10
+- Cell eating works
+- Setup for splitting
+
+0.9.5 @ 2018-2-10
+- Spawning and moving works

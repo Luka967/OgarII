@@ -13,7 +13,7 @@ class Ticker {
      */
     add(callback) {
         if (!(callback instanceof Function))
-            throw new TypeError("Given object isn't a function");
+            throw new TypeError("given object isn't a function");
         this.callbacks.push(callback);
         return this;
     }
@@ -22,9 +22,9 @@ class Ticker {
      */
     remove(callback) {
         if (!(callback instanceof Function))
-            throw new TypeError("Given object isn't a function");
-        var i = this.callbacks.indexOf(callback);
-        if (i === -1) throw new Error("Given function wasn't added");
+            throw new TypeError("given object isn't a function");
+        const i = this.callbacks.indexOf(callback);
+        if (i === -1) throw new Error("given function wasn't added");
         this.callback.splice(i, 1);
         return this;
     }
@@ -39,10 +39,10 @@ class Ticker {
     }
     _tick() {
         if (!this.isRunning) return;
-        for (var i = 0, l = this.callbacks.length; i < l; i++)
+        for (let i = 0, l = this.callbacks.length; i < l; i++)
             this.callbacks[i]();
         this._suppTime += this.step;
-        var diff = (this._suppTime + this.step) - Date.now();
+        const diff = (this._suppTime + this.step) - Date.now();
         if (diff < 0) this._suppTime -= diff;
         this._timeoutId = setTimeout(this._bind, diff);
     }

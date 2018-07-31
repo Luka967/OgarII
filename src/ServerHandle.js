@@ -2,6 +2,7 @@ const Settings = require("./Settings");
 
 const { CommandList } = require("./commands/CommandList");
 const DefaultCommands = require("./commands/DefaultCommands");
+const GamemodeList = require("./gamemodes/GamemodeList");
 
 const Stopwatch = require("./primitives/Stopwatch");
 const Logger = require("./primitives/Logger");
@@ -12,9 +13,6 @@ const Listener = require("./sockets/Listener");
 const Matchmaker = require("./worlds/Matchmaker");
 const Player = require("./worlds/Player");
 const World = require("./worlds/World");
-
-// DEBUG
-const GamemodeList = require("./gamemodes/GamemodeList");
 
 class ServerHandle {
     /**

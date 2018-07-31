@@ -12,36 +12,36 @@ class Reader {
         return this.data[this.offset++];
     }
     readInt8() {
-        var a = this.data[this.offset++];
+        const a = this.data[this.offset++];
         return a < 0x7F ? a : -a + 0x7F;
     }
     readUInt16() {
-        var a = this.data.readUInt16LE(this.offset);
+        const a = this.data.readUInt16LE(this.offset);
         this.offset += 2;
         return a;
     }
     readInt16() {
-        var a = this.data.readInt16LE(this.offset);
+        const a = this.data.readInt16LE(this.offset);
         this.offset += 2;
         return a;
     }
     readUInt32() {
-        var a = this.data.readUInt32LE(this.offset);
+        const a = this.data.readUInt32LE(this.offset);
         this.offset += 4;
         return a;
     }
     readInt32() {
-        var a = this.data.readInt32LE(this.offset);
+        const a = this.data.readInt32LE(this.offset);
         this.offset += 4;
         return a;
     }
     readFloat32() {
-        var a = this.data.readFloatLE(this.offset);
+        const a = this.data.readFloatLE(this.offset);
         this.offset += 4;
         return a;
     }
     readFloat64() {
-        var a = this.data.readDoubleLE(this.offset);
+        const a = this.data.readDoubleLE(this.offset);
         this.offset += 8;
         return a;
     }
@@ -52,14 +52,12 @@ class Reader {
         this.offset += count;
     }
     readZTStringUCS2() {
-        var start = this.offset;
-        var index = this.offset;
+        let start = this.offset, index = this.offset;
         while (index + 2 < this.dataLength && this.readUInt16() !== 0) index += 2;
         return this.data.slice(start, index).toString("ucs2");
     }
     readZTStringUTF8() {
-        var start = this.offset;
-        var index = this.offset;
+        let start = this.offset, index = this.offset;
         while (index + 1 < this.dataLength && this.readUInt8() !== 0) index++;
         return this.data.slice(start, index).toString("utf-8");
     }

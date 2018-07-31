@@ -13,13 +13,20 @@ class PlayerBot extends Bot {
         this.target = null;
     }
 
+    static get separateInTeams() { return true; }
+
+    get shouldClose() {
+        return
+            this.player === null
+         || !this.player.exists
+         || this.player.world === null;
+    }
     update() {
-        if (this.player.world === null) return void this.close();
         if (this.splitCooldownTicks > 0) this.splitCooldownTicks--;
         else this.target = null;
 
         this.player.updateVisibleCells();
-        var player = this.player;
+        const player = this.player;
         if (player.state === -1) {
             this.spawningName = "Player bot";
             this.onSpawnRequest();
@@ -27,7 +34,7 @@ class PlayerBot extends Bot {
         }
 
         /** @type {PlayerCell} */
-        var cell = null;
+        let cell = null;
         for (let i = 0, l = player.ownedCells.length; i < l; i++)
             if (cell === null || player.ownedCells[i].size > cell.size)
                 cell = player.ownedCells[i];

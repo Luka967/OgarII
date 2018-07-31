@@ -14,7 +14,7 @@ const serverSource = {
 
 /** @param {Connection} connection */
 function getSourceFromConnection(connection) {
-    if (connection.player === null) return null;
+    if (connection.player == null) return null;
     const player = connection.player;
     const hasCells = player.state === 0;
     return {
@@ -25,6 +25,9 @@ function getSourceFromConnection(connection) {
 }
 
 class ChatChannel {
+    /**
+     * @param {Listener} listener
+     */
     constructor(listener) {
         this.listener = listener;
         /** @type {Connection[]} */

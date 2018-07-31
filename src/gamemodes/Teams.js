@@ -47,6 +47,7 @@ class Teams extends Gamemode {
      * @param {World} world
      */
     onPlayerJoinWorld(player, world) {
+        if (!player.router.separateInTeams) return;
         let s = 0;
         for (let i = 0; i < teamCount; i++)
             s = world.teams[i].length < world.teams[s].length ? i : s;
@@ -58,6 +59,7 @@ class Teams extends Gamemode {
      * @param {World} world
      */
     onPlayerLeaveWorld(player, world) {
+        if (!player.router.separateInTeams) return;
         world.teams[player.team].splice(world.teams[player.team].indexOf(player), 1);
         player.team = null;
     }
@@ -69,7 +71,10 @@ class Teams extends Gamemode {
     onPlayerSpawnRequest(player, name) {
         if (player.state === 0) return;
         const size = this.handle.settings.playerSpawnSize;
-        player.world.spawnPlayer(player, getTeamColor(player.team), player.world.getSafeSpawnPos(size), size, name, null);
+        const pos = player.world.getSafeSpawnPos(size);
+        if (player.router.separateInTeams)
+            player.world.spawnPlayer(player, getTeamColor(player.team), pos, size, name, null);
+        else player.world.spawnPlayer(player, Misc.randomColor(), pos, size, name, null);
     }
 
     /**
@@ -80,6 +85,7 @@ class Teams extends Gamemode {
         let sum = 0;
         for (let i = 0; i < world.playerCells.length; i++) {
             const cell = world.playerCells[i];
+            if (cell.owner.team === null) continue;
             teams[cell.owner.team] += cell.size;
             sum += cell.size;
         }

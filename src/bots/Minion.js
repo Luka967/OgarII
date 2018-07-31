@@ -10,18 +10,24 @@ class Minion extends Bot {
         this.following = following;
         following.minions.push(this);
     }
+    
+    static get separateInTeams() { return false; }
 
     close() {
         super.close();
         this.following.minions.splice(this.following.minions.indexOf(this), 1);
     }
 
+    get shouldClose() {
+        return
+            this.player.world === null
+         || this.following.socketDisconnected
+         || this.following.disconnected
+         || this.following.player === null
+         || !this.following.player.exists
+         || this.following.player.world !== this.player.world;
+    }
     update() {
-        if (this.player.world === null) return void this.close();
-        if (this.following.isDisconnected) return void this.close();
-        if (this.following.player === null) return void this.close();
-        if (!this.following.player.exists) return void this.close();
-        if (this.following.player.world !== this.player.world) return void this.close();
         const player = this.player;
         if (player.state === -1) {
             this.spawningName = this.listener.settings.minionName;

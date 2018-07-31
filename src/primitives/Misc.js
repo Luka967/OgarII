@@ -10,14 +10,13 @@ module.exports = {
      * @returns {{r: Number, g: Number, b: Number}}
      */
     randomColor() {
-        var colors = [~~(Math.random() * 0x100), 0x10, 0xFF];
         switch (~~(Math.random() * 6)) {
-            case 0: return { r: colors[0], g: colors[1], b: colors[2] };
-            case 1: return { r: colors[0], g: colors[2], b: colors[1] };
-            case 2: return { r: colors[1], g: colors[2], b: colors[0] };
-            case 3: return { r: colors[1], g: colors[0], b: colors[2] };
-            case 4: return { r: colors[2], g: colors[0], b: colors[1] };
-            case 5: return { r: colors[2], g: colors[1], b: colors[0] };
+            case 0: return { r: ~~(Math.random() * 0x100), g: 0x10, b: 0xFF };
+            case 1: return { r: ~~(Math.random() * 0x100), g: 0xFF, b: 0x10 };
+            case 2: return { r: 0x10, g: 0xFF, b: ~~(Math.random() * 0x100) };
+            case 3: return { r: 0x10, g: ~~(Math.random() * 0x100), b: 0xFF };
+            case 4: return { r: 0xFF, g: ~~(Math.random() * 0x100), b: 0x10 };
+            case 5: return { r: 0xFF, g: 0x10, b: ~~(Math.random() * 0x100) };
         }
     },
     /**
@@ -26,7 +25,7 @@ module.exports = {
      */
     grayscaleColor(color) {
         /** @type {Number} */
-        var weight;
+        let weight;
         if (color) weight = ~~(0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
         else weight = 0x7F + ~~(Math.random() * 0x80);
         return { r: weight, g: weight, b: weight };
@@ -57,6 +56,30 @@ module.exports = {
                a.y - a.h >= b.y + b.h &&
                a.y + a.h <= b.y - b.h;
     },
+    /**
+     * @param {Range} a
+     * @param {Range} b
+     */
+    getQuadIntersect(a, b) {
+        return {
+            t: a.y - a.h < b.y || a.y + a.h < b.y,
+            b: a.y - a.h > b.y || a.y + a.h > b.y,
+            l: a.x - a.w < b.x || a.x + a.w < b.x,
+            r: a.x - a.w > b.x || a.x + a.w > b.x
+        };
+    },
+    /**
+     * @param {Range} a
+     * @param {Range} b
+     */
+    getQuadFullIntersect(a, b) {
+        return {
+            t: a.y - a.h < b.y && a.y + a.h < b.y,
+            b: a.y - a.h > b.y && a.y + a.h > b.y,
+            l: a.x - a.w < b.x && a.x + a.w < b.x,
+            r: a.x - a.w > b.x && a.x + a.w > b.x
+        };
+    },
 
-    version: "1.0.5"
+    version: "1.1.0"
 };

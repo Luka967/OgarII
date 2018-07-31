@@ -1,5 +1,7 @@
 const value = Object.seal({
     /** @type {String[]} */
+    listenerForbiddenIPs: [],
+    /** @type {String[]} */
     listenerAcceptedOrigins: [],
     listenerMaxConnections: 100,
     listenerMaxClientDormancy: 1000 * 60,

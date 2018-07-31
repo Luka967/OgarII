@@ -1,6 +1,6 @@
-var poolSize = 1048576;
-var sharedBuf = Buffer.allocUnsafe(poolSize);
-var offset = 0;
+const poolSize = 1048576;
+const sharedBuf = Buffer.allocUnsafe(poolSize);
+let offset = 0;
 
 class Writer {
     constructor() {
@@ -65,7 +65,7 @@ class Writer {
      */
     writeZTStringUCS2(a) {
         if (a) {
-            var tbuf = Buffer.from(a, "ucs2");
+            const tbuf = Buffer.from(a, "ucs2");
             offset += tbuf.copy(sharedBuf, offset);
         }
         sharedBuf[offset++] = 0;
@@ -76,7 +76,7 @@ class Writer {
      */
     writeZTStringUTF8(a) {
         if (a) {
-            var tbuf = Buffer.from(a, "utf-8");
+            const tbuf = Buffer.from(a, "utf-8");
             offset += tbuf.copy(sharedBuf, offset);
         }
         sharedBuf[offset++] = 0;
@@ -95,7 +95,7 @@ class Writer {
         offset += a.copy(sharedBuf, offset, 0, a.length);
     }
     finalize() {
-        var a = Buffer.allocUnsafe(offset);
+        const a = Buffer.allocUnsafe(offset);
         sharedBuf.copy(a, 0, 0, offset);
         return a;
     }

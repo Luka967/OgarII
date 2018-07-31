@@ -33,7 +33,7 @@ module.exports = (requesting, add, upd, eat, del) => {
     const writer = new Writer();
     const protocol = requesting.protocol;
     writer.writeUInt8(16);
-    var i, l, cell;
+    let i, l, cell;
 
     l = eat.length;
     writer.writeUInt16(l);
@@ -78,7 +78,7 @@ function writeCellData4(writer, protocol, cell, includeType, includeSize, includ
     writer.writeUInt8(cell.color.g);
     writer.writeUInt8(cell.color.b);
 
-    var flags = 0;
+    let flags = 0;
     if (cell.isSpiked) flags |= 0x01;
     if (includeSkin) flags |= 0x04;
     if (cell.isAgitated) flags |= 0x10;
@@ -106,7 +106,7 @@ function writeCellData6(writer, protocol, cell, includeType, includeSize, includ
     writer.writeUInt32(cell.y);
     writer.writeUInt16(cell.size);
 
-    var flags = 0;
+    let flags = 0;
     if (cell.isSpiked) flags |= 0x01;
     if (includeColor) flags |= 0x02;
     if (includeSkin) flags |= 0x04;
@@ -140,7 +140,7 @@ function writeCellData11(writer, protocol, cell, includeType, includeSize, inclu
     writer.writeUInt32(cell.y);
     writer.writeUInt16(cell.size);
 
-    var flags = 0;
+    let flags = 0;
     if (cell.isSpiked) flags |= 0x01;
     if (includeColor) flags |= 0x02;
     if (includeSkin) flags |= 0x04;
