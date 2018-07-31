@@ -68,7 +68,6 @@ package-lock.json
 # Settings
 cli/settings.json
 cli/log-settings.json
-cli/server-bans.json
 
 # Visual Studio Code settings
 .vscode/*
