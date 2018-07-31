@@ -57,11 +57,12 @@ class Listener {
             this.logger.debug("listenerMaxConnections reached, dropping new connections");
             return void response(false, 503, "Service Unavailable");
         }
-        if (this.settings.listenerAcceptedOrigins.indexOf(info.origin) !== -1) {
+        const acceptedOrigins = this.settings.listenerAcceptedOrigins;
+        if (acceptedOrigins.length > 0 && acceptedOrigins.indexOf(info.origin) === -1) {
             this.logger.debug(`listenerAcceptedOrigins doesn't contain ${info.origin}`);
             return void response(false, 403, "Forbidden");
         }
-        if (this.settings.listenerBannedIPs.indexOf(address) !== -1) {
+        if (this.settings.listenerForbiddenIPs.indexOf(address) !== -1) {
             this.logger.debug(`listenerForbiddenIPs contains ${address}, dropping connection`);
             return void response(false, 403, "Forbidden");
         }
