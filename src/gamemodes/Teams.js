@@ -1,13 +1,14 @@
 const Gamemode = require("./Gamemode");
 const Misc = require("../primitives/Misc");
-const Messages = {
-    UpdatePieBoard: require("../messages/UpdatePieBoard")
-};
 
+const highlightBase = 204,
+       lowlightBase = 51,
+      highlightDiff = 52,
+       lowlightDiff = 52;
 const teamColors = [
-    { r: 204, g: 51, b: 51 },
-    { r: 51, g: 204, b: 51 },
-    { r: 51, g: 51, b: 204 }
+    { r: highlightBase, g: lowlightBase, b: lowlightBase },
+    { r: lowlightBase, g: highlightBase, b: lowlightBase },
+    { r: lowlightBase, g: lowlightBase, b: highlightBase }
 ];
 const teamCount = teamColors.length;
 
@@ -15,13 +16,13 @@ const teamCount = teamColors.length;
  * @param {number} index
  */
 function getTeamColor(index) {
-    const random = ~~(Math.random() * 52);
-    const highlight = 204 + random;
-    const lowlight = 51 - random;
+    const random = Math.random();
+    const highlight = highlightBase + ~~(random * highlightDiff);
+    const lowlight  =  lowlightBase - ~~(random * lowlightDiff);
     return {
-        r: teamColors[index].r === 204 ? highlight : lowlight,
-        g: teamColors[index].g === 204 ? highlight : lowlight,
-        b: teamColors[index].b === 204 ? highlight : lowlight
+        r: teamColors[index].r === highlightBase ? highlight : lowlight,
+        g: teamColors[index].g === highlightBase ? highlight : lowlight,
+        b: teamColors[index].b === highlightBase ? highlight : lowlight
     };
 }
 
@@ -94,7 +95,7 @@ class Teams extends Gamemode {
 
     /** @param {Connection} connection */
     sendLeaderboard(connection) {
-        connection.send(Messages.UpdatePieBoard(connection.player.world.leaderboard));
+        connection.protocol.onLeaderboardUpdate("pie", connection.player.world.leaderboard);
     }
 }
 

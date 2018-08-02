@@ -9,6 +9,8 @@ class Protocol {
         this.connection = connection;
     }
 
+    get listener() { return this.connection.listener; }
+    get handle() { return this.connection.listener.handle; }
     get logger() { return this.connection.listener.handle.logger; }
     get settings() { return this.connection.listener.handle.settings; }
 
@@ -17,7 +19,7 @@ class Protocol {
      * @param {Reader} reader
      * @returns {boolean}
      */
-    distinguish(reader) { throw new Error("Must be implemented"); }
+    distinguishes(reader) { throw new Error("Must be implemented"); }
 
     /**
      * @abstract
@@ -35,7 +37,7 @@ class Protocol {
      * @abstract
      * @param {PlayerCell} cell
      */
-    onNewCell(cell) { throw new Error("Must be implemented"); }
+    onNewOwnedCell(cell) { throw new Error("Must be implemented"); }
     /**
      * @param {World} world
      * @param {boolean} includeServerInfo
@@ -45,8 +47,9 @@ class Protocol {
      * @abstract
      * @param {LeaderboardType} type
      * @param {LeaderboardDataType[type][]} data
+     * @param {LeaderboardDataType[type]=} selfData
      */
-    onLeaderboardUpdate(type, data) { throw new Error("Must be implemented"); }
+    onLeaderboardUpdate(type, data, selfData) { throw new Error("Must be implemented"); }
     /**
      * @abstract
      * @param {ViewArea} viewArea
@@ -54,19 +57,17 @@ class Protocol {
     onSpectatePosition(viewArea) { throw new Error("Must be implemented"); }
     /**
      * @abstract
-     * @param {Connection} requesting
      * @param {Cell[]} add
      * @param {Cell[]} upd
      * @param {Cell[]} eat
      * @param {Cell[]} del
      */
-    onVisibleCellUpdate(requesting, add, upd, eat, del) { throw new Error("Must be implemented"); }
+    onVisibleCellUpdate(add, upd, eat, del) { throw new Error("Must be implemented"); }
 
-    /** @param {Buffer} data */
-    send(data) {
-        this.connection.send(data);
-    }
-
+    /**
+     * @param {Buffer} data
+     */
+    send(data) { this.connection.send(data); }
     /**
      * @param {number=} code
      * @param {string=} reason

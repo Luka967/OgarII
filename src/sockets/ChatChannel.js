@@ -1,7 +1,3 @@
-const Messages = {
-    DisplayChatMessage: require("../messages/DisplayChatMessage")
-};
-
 const serverSource = {
     name: "Server",
     isServer: true,
@@ -54,7 +50,7 @@ class ChatChannel {
     broadcast(source, message) {
         const sourceInfo = source === null ? serverSource : getSourceFromConnection(source);
         for (let i = 0, l = this.connections.length; i < l; i++)
-            this.connections[i].send(Messages.DisplayChatMessage(sourceInfo, message, this.connections[i].protocol));
+            this.connections[i].protocol.onChatMessage(sourceInfo, message);
     }
 
     /**
@@ -64,7 +60,7 @@ class ChatChannel {
      */
     directMessage(source, recipient, message) {
         const sourceInfo = source === null ? serverSource : getSourceFromConnection(source);
-        recipient.send(Messages.DisplayChatMessage(sourceInfo, message, recipient.protocol));
+        this.connections[i].protocol.onChatMessage(sourceInfo, message);
     }
 }
 

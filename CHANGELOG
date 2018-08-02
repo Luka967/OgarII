@@ -11,9 +11,9 @@ develop/1.1.1 @ 2018-8-2
 - Replace String, Number and Boolean with string, number and boolean in docs
 - Sort out typedefs by having a single global definition typescript
 - Implement multiple protocol handling - Connection is now essentially a WebSocket wrapper now
+- Implement legacy protocol handle
 TODO:
-- Implement legacy protocol handle (in progress)
-- Simplify player/connection references (upcoming)
+- Simplify player/connection references (in progress)
   - Refactor world joining/leaving
   - Add Connection.createPlayer and Connection.destroyPlayer
 

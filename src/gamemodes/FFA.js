@@ -1,8 +1,5 @@
 const Gamemode = require("./Gamemode");
 const Misc = require("../primitives/Misc");
-const Messages = {
-    UpdateLeaderboard: require("../messages/UpdateLeaderboard")
-};
 
 class FFA extends Gamemode {
     /** @param {ServerHandle} handle */
@@ -36,7 +33,7 @@ class FFA extends Gamemode {
         const leaderboard = player.world.leaderboard;
         const data = leaderboard.map((v, i) => getLeaderboardData(v, player, i));
         const selfData = isNaN(player.score) ? null : data[leaderboard.indexOf(player)];
-        connection.send(Messages.UpdateLeaderboard(data.slice(0, 10), selfData, connection.protocol));
+        connection.protocol.onLeaderboardUpdate("ffa", data.slice(0, 10), selfData);
     }
 }
 

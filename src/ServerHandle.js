@@ -3,6 +3,8 @@ const Settings = require("./Settings");
 const { CommandList } = require("./commands/CommandList");
 const DefaultCommands = require("./commands/DefaultCommands");
 const GamemodeList = require("./gamemodes/GamemodeList");
+const ProtocolHandle = require("./protocols/ProtocolHandle");
+const LegacyProtocol = require("./protocols/LegacyProtocol");
 
 const Stopwatch = require("./primitives/Stopwatch");
 const Logger = require("./primitives/Logger");
@@ -22,6 +24,7 @@ class ServerHandle {
         /** @type {Settings} */
         this.settings = Settings;
 
+        this.protocols = new ProtocolHandle();
         this.gamemodes = new GamemodeList(this);
         /** @type {Gamemode} */
         this.gamemode = null;
@@ -49,8 +52,11 @@ class ServerHandle {
         this.players = { };
 
         this.setSettings(settings);
+        this.protocols.register(LegacyProtocol);
         DefaultCommands(this.commands, this.chatCommands);
     }
+
+    get version() { return version; }
 
     /**
      * @param {Settings} settings
@@ -76,7 +82,7 @@ class ServerHandle {
         this.gamemode.onHandleStart();
 
         this.logger.inform("ticker begin");
-        this.logger.inform(`\u001B[1m\u001B[32mOgarII\u001B[0m\u001B[32m ${version}\u001B[0m`);
+        this.logger.inform(`\u001B[1m\u001B[32mOgarII\u001B[0m\u001B[32m ${this.version}\u001B[0m`);
         return true;
     }
 
