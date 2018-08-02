@@ -43,9 +43,9 @@ class ServerHandle {
         
         this.listener = new Listener(this);
         this.matchmaker = new Matchmaker(this);
-        /** @type {{[id: string]: World}} */
+        /** @type {Identified<World>} */
         this.worlds = { };
-        /** @type {{[id: string]: Player}} */
+        /** @type {Identified<Player>} */
         this.players = { };
 
         this.setSettings(settings);
@@ -114,8 +114,8 @@ class ServerHandle {
     }
 
     /**
-     * @param {Number} id
-     * @returns {Boolean}
+     * @param {number} id
+     * @returns {boolean}
      */
     removeWorld(id) {
         if (!this.worlds.hasOwnProperty(id)) return false;
@@ -141,8 +141,8 @@ class ServerHandle {
     }
 
     /**
-     * @param {Number} id
-     * @returns {Boolean}
+     * @param {number} id
+     * @returns {boolean}
      */
     removePlayer(id) {
         if (!this.players.hasOwnProperty(id)) return false;

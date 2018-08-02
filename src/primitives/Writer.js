@@ -7,61 +7,61 @@ class Writer {
         offset = 0;
     }
     /**
-     * @param {Number} a
+     * @param {number} a
      */
     writeUInt8(a) {
         sharedBuf[offset++] = a;
     }
     /**
-     * @param {Number} a
+     * @param {number} a
      */
     writeInt8(a) {
         sharedBuf[offset++] = a;
     }
     /**
-     * @param {Number} a
+     * @param {number} a
      */
     writeUInt16(a) {
         sharedBuf.writeUInt16LE(a, offset, true);
         offset += 2;
     }
     /**
-     * @param {Number} a
+     * @param {number} a
      */
     writeInt16(a) {
         sharedBuf.writeUInt16LE(a, offset, true);
         offset += 2;
     }
     /**
-     * @param {Number} a
+     * @param {number} a
      */
     writeUInt32(a) {
         sharedBuf.writeUInt32LE(a, offset, true);
         offset += 4;
     }
     /**
-     * @param {Number} a
+     * @param {number} a
      */
     writeInt32(a) {
         sharedBuf.writeInt32LE(a, offset, true);
         offset += 4;
     }
     /**
-     * @param {Number} a
+     * @param {number} a
      */
     writeFloat32(a) {
         sharedBuf.writeFloatLE(a, offset, true);
         offset += 4;
     }
     /**
-     * @param {Number} a
+     * @param {number} a
      */
     writeFloat64(a) {
         sharedBuf.writeDoubleLE(a, offset, true);
         offset += 8;
     }
     /**
-     * @param {String} a
+     * @param {string} a
      */
     writeZTStringUCS2(a) {
         if (a) {
@@ -72,7 +72,7 @@ class Writer {
         sharedBuf[offset++] = 0;
     }
     /**
-     * @param {String} a
+     * @param {string} a
      */
     writeZTStringUTF8(a) {
         if (a) {
@@ -82,8 +82,8 @@ class Writer {
         sharedBuf[offset++] = 0;
     }
     /**
-     * @param {String} a
-     * @param {Number} protocol
+     * @param {string} a
+     * @param {number} protocol
      */
     writeZTString(a, protocol) {
         this[protocol < 6 ? "writeZTStringUCS2" : "writeZTStringUTF8"](a);

@@ -1,10 +1,5 @@
 const util = require("util");
 
-/**
- * @typedef {(date: Date, level: "DEBUG"|"ACCESS"|"INFO"|"WARN"|"ERROR"|"FATAL", message: String) => void} LogEvent
- * @typedef {any[]} LogMessageData
- */
-
 class Logger {
     constructor() {
         /** @type {LogEvent} */

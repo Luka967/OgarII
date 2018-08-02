@@ -8,7 +8,7 @@ class GamemodeList {
      */
     constructor(handle) {
         this.handle = handle;
-        /** @type {{[gamemodeName: string]: typeof Gamemode}} */
+        /** @type {Indexed<typeof Gamemode>} */
         this.list = { };
         this.register(FFA, Teams, LastManStanding);
     }
@@ -26,7 +26,7 @@ class GamemodeList {
     }
 
     /**
-     * @param {String} name
+     * @param {string} name
      */
     setGamemode(name) {
         if (!this.list.hasOwnProperty(name))

@@ -1,6 +1,9 @@
 const Cell = require("./Cell");
 const Pellet = require("./Pellet");
 
+/**
+ * @implements {Spawner}
+ */
 class Mothercell extends Cell {
     /**
      * @param {World} world

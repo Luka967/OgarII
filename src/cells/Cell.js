@@ -4,10 +4,10 @@ const { throwIfBadNumber } = require("../primitives/Misc");
 class Cell {
     /**
      * @param {World} world
-     * @param {Number} x
-     * @param {Number} y
-     * @param {Number} size
-     * @param {{r: Number, g: Number, b: Number}} color
+     * @param {number} x
+     * @param {number} y
+     * @param {number} size
+     * @param {Color} color
      */
     constructor(world, x, y, size, color) {
         this.world = world;
@@ -23,20 +23,20 @@ class Cell {
         this._y = y;
         this._size = size;
         this._color = color;
-        /** @type {{x: Number, y: Number, w: Number, h: Number}} */
+        /** @type {Range} */
         this.range = null;
 
         this.isBoosting = false;
-        /** @type {{dx: Number, dy: Number, d: Number}} */
+        /** @type {Boost} */
         this.boost = {
             dx: 0,
             dy: 0,
             d: 0
         };
 
-        /** @type {String} */
+        /** @type {string} */
         this._name = this._skin = null;
-        /** @type {Cell|null} */
+        /** @type {Cell} */
         this.eatenBy = null;
 
         this.posChanged =
@@ -49,22 +49,22 @@ class Cell {
 
     /**
      * @abstract
-     * @returns {Number}
+     * @returns {number}
      */
     get type() { throw new Error("Must be overriden"); }
     /**
      * @abstract
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     get isSpiked() { throw new Error("Must be overriden"); }
     /**
      * @abstract
-     * @returns {Boolean}
+     * @returns {boolean}
      */
     get isAgitated() { throw new Error("Must be overriden"); }
     /** 
      * @abstract
-     * @returns {Boolean}
+     * @returns {boolean}
     */
     get avoidWhenSpawning() { throw new Error("Must be overriden"); }
     /** @virtual */
@@ -76,38 +76,38 @@ class Cell {
     get age() { return (this.world.handle.tick - this.birthTick) * this.world.handle.stepMult; }
     get x() { return this._x; }
     get y() { return this._y; }
-    /** @param {Number} value */
+    /** @param {number} value */
     set x(value) { throwIfBadNumber(value); this._x = value; this.posChanged = true; }
-    /** @param {Number} value */
+    /** @param {number} value */
     set y(value) { throwIfBadNumber(value); this._y = value; this.posChanged = true; }
 
     get size() { return this._size; }
-    /** @param {Number} value */
+    /** @param {number} value */
     set size(value) { throwIfBadNumber(value); this._size = value; this.sizeChanged = true; }
 
     get squareSize() { return this.size * this.size; }
-    /** @param {Number} value */
+    /** @param {number} value */
     set squareSize(value) { this.size = Math.sqrt(value); }
 
     get mass() { return this.size * this.size / 100; }
-    /** @param {Number} value */
+    /** @param {number} value */
     set mass(value) { this.size = Math.sqrt(100 * value); }
 
     get color() { return this._color; }
-    /** @param {{r: Number, g: Number, b: Number}} value */
+    /** @param {Color} value */
     set color(value) { this._color = value; this.colorChanged = true; }
 
     get name() { return this._name; }
-    /** @param {String} value */
+    /** @param {string} value */
     set name(value) { this._name = value; this.nameChanged = true; }
 
     get skin() { return this._skin; }
-    /** @param {String} value */
+    /** @param {string} value */
     set skin(value) { this._skin = value; this.skinChanged = true; }
 
     /**
      * @param {Cell} other
-     * @returns {(0|1|2|3)} 0 for none, 1 for rigid, 2 for eat, 3 for inverted eat
+     * @returns {CellEatResult}
      */
     getEatResult(other) {
         throw new Error("Must be overriden");

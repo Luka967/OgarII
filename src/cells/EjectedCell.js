@@ -3,9 +3,9 @@ const Cell = require("./Cell");
 class EjectedCell extends Cell {
     /**
      * @param {World} world
-     * @param {Number} x
-     * @param {Number} y
-     * @param {{r: Number, g: Number, b: Number}} color
+     * @param {number} x
+     * @param {number} y
+     * @param {Color} color
      */
     constructor(world, x, y, color) {
         const size = world.settings.ejectedSize;
@@ -19,7 +19,7 @@ class EjectedCell extends Cell {
 
     /**
      * @param {Cell} other
-     * @returns {(0|1|2|3)} 0 for none, 1 for rigid, 2 for eat, 3 for inverted eat
+     * @returns {CellEatResult}
      */
     getEatResult(other) {
         if (other.type === 2 || other.type === 4) return 3;

@@ -13,7 +13,7 @@ class FFA extends Gamemode {
     static get gamemodeType() { return 0; }
     static get gamemodeName() { return "FFA"; }
 
-    /** @param {Player} player @param {String} name */
+    /** @param {Player} player @param {string} name */
     onPlayerSpawnRequest(player, name) {
         if (player.state === 0) return;
         const size = this.handle.settings.playerSpawnSize;
@@ -45,7 +45,7 @@ module.exports = FFA;
 /**
  * @param {Player} player
  * @param {Player} requesting
- * @param {Number} index
+ * @param {number} index
  */
 function getLeaderboardData(player, requesting, index) {
     return {

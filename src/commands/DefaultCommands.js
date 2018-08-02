@@ -1,9 +1,9 @@
 const { Command, genCommand } = require("./CommandList");
 
 /**
- * @param {String} str
- * @param {String} pad
- * @param {Number} len
+ * @param {string} str
+ * @param {string} pad
+ * @param {number} len
  */
 function padRight(str, pad, len) {
     return str + new Array(Math.max(len - str.length, 0)).fill(pad).join("");

@@ -18,7 +18,7 @@ class Listener {
         this.allPlayingRouters = [];
         /** @type {Connection[]} */
         this.connections = [];
-        /** @type {{[ip: string]: Number}} */
+        /** @type {Counter<IPAddress>} */
         this.connectionsByIP = { };
     }
 
@@ -112,8 +112,8 @@ class Listener {
 
     /**
      * @param {Connection} connection
-     * @param {Number} code
-     * @param {String} reason
+     * @param {number} code
+     * @param {string} reason
      */
     onDisconnection(connection, code, reason) {
         this.logger.onAccess(`DISCONNECTION FROM ${connection.remoteAddress} (${code} '${reason}')`);

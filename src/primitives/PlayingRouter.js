@@ -11,7 +11,7 @@ class PlayingRouter {
         this.mouseX = 0;
         this.mouseY = 0;
 
-        /** @type {String=} */
+        /** @type {string=} */
         this.spawningName = null;
         this.requestingSpectate = false;
         this.isPressingQ = false;
@@ -23,11 +23,11 @@ class PlayingRouter {
         this.listener.addPlayingRouter(this);
     }
 
-    /** @abstract @returns {Boolean} */
+    /** @abstract @returns {boolean} */
     get isExternal() { throw new Error("Must be overriden"); }
-    /** @abstract @returns {Boolean} */
+    /** @abstract @returns {boolean} */
     static get separateInTeams() { throw new Error("Must be overriden"); }
-    /** @returns {Boolean} */
+    /** @returns {boolean} */
     get separateInTeams() { return this.constructor.separateInTeams; }
 
     createPlayer() {
@@ -72,7 +72,7 @@ class PlayingRouter {
         this.listener.removePlayingRouter(this);
     }
 
-    /** @abstract @returns {Boolean} */
+    /** @abstract @returns {boolean} */
     get shouldClose() {
         throw new Error("Must be overriden");
     }

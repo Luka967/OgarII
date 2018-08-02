@@ -49,7 +49,7 @@ class ChatChannel {
 
     /**
      * @param {Connection=} source
-     * @param {String} message
+     * @param {string} message
      */
     broadcast(source, message) {
         const sourceInfo = source === null ? serverSource : getSourceFromConnection(source);
@@ -60,7 +60,7 @@ class ChatChannel {
     /**
      * @param {Connection=} source
      * @param {Connection} recipient
-     * @param {String} message
+     * @param {string} message
      */
     directMessage(source, recipient, message) {
         const sourceInfo = source === null ? serverSource : getSourceFromConnection(source);

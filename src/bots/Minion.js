@@ -19,13 +19,12 @@ class Minion extends Bot {
     }
 
     get shouldClose() {
-        return
-            this.player.world === null
-         || this.following.socketDisconnected
-         || this.following.disconnected
-         || this.following.player === null
-         || !this.following.player.exists
-         || this.following.player.world !== this.player.world;
+        return this.player.world === null ||
+            this.following.socketDisconnected ||
+            this.following.disconnected ||
+            this.following.player === null ||
+           !this.following.player.exists ||
+            this.following.player.world !== this.player.world;
     }
     update() {
         const player = this.player;

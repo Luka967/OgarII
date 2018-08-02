@@ -1,21 +1,21 @@
 const { intersects, fullyIntersects, getQuadIntersect, getQuadFullIntersect } = require("../primitives/Misc");
 
 /**
- * @typedef {{x: Number, y: Number, w: Number, h: Number}} Range
- * @typedef {{__root: undefined, range: Range}} QuadItem
- * @typedef {{__root: QuadTree, range: Range}} InsertedQuadItem
+ * @typedef {{ __root: undefined, range: Range }} QuadItem
+ * @typedef {{ __root: QuadTree, range: Range }} InsertedQuadItem
+ * @typedef {-1 | 0 | 1 | 2 | 3} DefiniteQuad
 */
 
 class QuadTree {
     /**
      * @param {Range} range
-     * @param {Number} maxLevel
-     * @param {Number} maxItems
+     * @param {number} maxLevel
+     * @param {number} maxItems
      * @param {QuadTree=} root 
      */
     constructor(range, maxLevel, maxItems, root) {
         this.root = root;
-        /** @type {Number} */
+        /** @type {number} */
         this.level = root ? root.level + 1 : 1;
 
         this.maxLevel = maxLevel;
@@ -191,7 +191,7 @@ class QuadTree {
 
     /**
      * @param {Range} a
-     * @returns {-1|0|1|2|3}
+     * @returns {DefiniteQuad}
      */
     getQuadrant(a) {
         const quad = getQuadFullIntersect(a, this.range);

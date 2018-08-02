@@ -3,8 +3,8 @@ const Cell = require("./Cell");
 class Virus extends Cell {
     /**
      * @param {World} world
-     * @param {Number} x
-     * @param {Number} y
+     * @param {number} x
+     * @param {number} y
      */
     constructor(world, x, y) {
         const size = world.settings.virusSize;
@@ -20,7 +20,7 @@ class Virus extends Cell {
 
     /**
      * @param {Cell} other
-     * @returns {(0|1|2|3)} 0 for none, 1 for rigid, 2 for eat, 3 for inverted eat
+     * @returns {CellEatResult}
      */
     getEatResult(other) {
         if (other.type === 3 && this.world.virusCount < this.world.settings.virusMaxCount)

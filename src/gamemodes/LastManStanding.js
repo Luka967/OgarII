@@ -27,7 +27,7 @@ class LastManStanding extends FFA {
     }
     /**
      * @param {Player} player
-     * @param {String} name
+     * @param {string} name
      */
     onPlayerSpawnRequest(player, name) {
         if (player.router.isExternal && player.life++ > 0)

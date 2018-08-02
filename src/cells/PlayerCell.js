@@ -3,12 +3,12 @@ const Cell = require("./Cell");
 class PlayerCell extends Cell {
     /**
      * @param {Player} owner
-     * @param {Number} x
-     * @param {Number} y
-     * @param {Number} size
-     * @param {({r: Number, g: Number, b: Number})} color
-     * @param {String} name
-     * @param {String} skin
+     * @param {number} x
+     * @param {number} y
+     * @param {number} size
+     * @param {Color} color
+     * @param {string} name
+     * @param {string} skin
      */
     constructor(owner, x, y, size, color, name, skin) {
         super(owner.world, x, y, size, color);
@@ -30,7 +30,7 @@ class PlayerCell extends Cell {
 
     /**
      * @param {PlayerCell|Cell} other
-     * @returns {(0|1|2|3)} 0 for none, 1 for rigid, 2 for eat, 3 for inverted eat
+     * @returns {CellEatResult}
      */
     getEatResult(other) {
         if (other.type === 0) {
@@ -80,5 +80,4 @@ class PlayerCell extends Cell {
 
 module.exports = PlayerCell;
 
-const World = require("../worlds/World");
 const Player = require("../worlds/Player");

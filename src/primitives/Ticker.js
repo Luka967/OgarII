@@ -1,6 +1,6 @@
 class Ticker {
     /**
-     * @param {Number=} step
+     * @param {number=} step
      */
     constructor(step) {
         this.step = step || 16.67;

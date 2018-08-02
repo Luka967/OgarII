@@ -1,12 +1,12 @@
 class Reader {
     /**
      * @param {Buffer} data
-     * @param {Number=} offset
+     * @param {number=} offset
      */
     constructor(data, offset) {
         this.data = data;
         this.offset = offset || 0;
-        this.dataLength = data.length;
+        this.length = data.length;
     }
     readUInt8() {
         return this.data[this.offset++];
@@ -46,26 +46,20 @@ class Reader {
         return a;
     }
     /**
-     * @param {Number} count
+     * @param {number} count
      */
     skip(count) {
         this.offset += count;
     }
     readZTStringUCS2() {
         let start = this.offset, index = this.offset;
-        while (index + 2 < this.dataLength && this.readUInt16() !== 0) index += 2;
+        while (index + 2 < this.length && this.readUInt16() !== 0) index += 2;
         return this.data.slice(start, index).toString("ucs2");
     }
     readZTStringUTF8() {
         let start = this.offset, index = this.offset;
-        while (index + 1 < this.dataLength && this.readUInt8() !== 0) index++;
+        while (index + 1 < this.length && this.readUInt8() !== 0) index++;
         return this.data.slice(start, index).toString("utf-8");
-    }
-    /**
-     * @param {Number} protocol
-     */
-    readZTString(protocol) {
-        return this[protocol < 6 ? "readZTStringUCS2" : "readZTStringUTF8"]();
     }
 }
 

@@ -25,7 +25,7 @@ class Connection extends PlayingRouter {
 
         this.socketDisconnected = false;
         this.closeCode = NaN;
-        /** @type {String} */
+        /** @type {string} */
         this.closeReason = null;
 
         /** @type {Minion[]} */
@@ -54,8 +54,8 @@ class Connection extends PlayingRouter {
     get logger() { return this.listener.handle.logger; }
 
     /**
-     * @param {Number} code
-     * @param {String} reason
+     * @param {number} code
+     * @param {string} reason
      */
     onSocketClose(code, reason) {
         if (this.socketDisconnected) return;
@@ -66,7 +66,7 @@ class Connection extends PlayingRouter {
     }
 
     /**
-     * @param {ArrayBuffer|String} data
+     * @param {ArrayBuffer|string} data
      */
     onSocketMessage(data) {
         if (data instanceof String) return void this.closeSocket(1003, "Unexpected message format");
@@ -76,7 +76,7 @@ class Connection extends PlayingRouter {
         const reader = new Reader(Buffer.from(data), 0);
         switch (this.upgradeLevel) {
             case 0:
-                if (reader.dataLength !== 5 || reader.readUInt8() !== 0xFE)
+                if (reader.length !== 5 || reader.readUInt8() !== 0xFE)
                     return void this.closeSocket(1003, "Bad message format");
                 this.protocol = reader.readUInt32();
                 if (this.protocol < 4) {
@@ -87,19 +87,19 @@ class Connection extends PlayingRouter {
                 this.upgradeLevel++;
                 break;
             case 1:
-                if (reader.dataLength !== 5 || reader.readUInt8() !== 0xFF)
+                if (reader.length !== 5 || reader.readUInt8() !== 0xFF)
                     return void this.closeSocket(1003, "Bad message format");
                 this.protocolKey = reader.readUInt32();
                 this.upgradeLevel++;
                 break;
             case 2:
-                if (reader.dataLength < 1) return void this.closeSocket(1003, "Bad message format");
+                if (reader.length < 1) return void this.closeSocket(1003, "Bad message format");
                 this.onGameMessage(reader.readUInt8(), reader);
                 break;
         }
     }
     /**
-     * @param {Number} messageId
+     * @param {number} messageId
      * @param {Reader} reader
      */
     onGameMessage(messageId, reader) {
@@ -110,7 +110,7 @@ class Connection extends PlayingRouter {
                 break;
             case 1: this.requestingSpectate = true; break;
             case 16:
-                switch (reader.dataLength) {
+                switch (reader.length) {
                     case 13:
                         this.mouseX = reader.readInt32();
                         this.mouseY = reader.readInt32();
@@ -154,11 +154,11 @@ class Connection extends PlayingRouter {
                 break;
             case 99:
                 if (this.player === null) break;
-                if (reader.dataLength < 2)
+                if (reader.length < 2)
                     return void this.closeSocket(1003, "Bad message format");
                 const flags = reader.readUInt8();
                 const skipLen = 2 * ((flags & 2) + (flags & 4) + (flags & 8))
-                if (reader.dataLength < 2 + skipLen)
+                if (reader.length < 2 + skipLen)
                     return void this.closeSocket(1003, "Bad message format");
                 reader.skip(skipLen);
                 const message = reader.readZTString(this.protocol).trim();
@@ -238,8 +238,8 @@ class Connection extends PlayingRouter {
         this.webSocket.send(data);
     }
     /**
-     * @param {Number=} code
-     * @param {String=} reason
+     * @param {number=} code
+     * @param {string=} reason
      */
     closeSocket(code, reason) {
         if (this.socketDisconnected) return;

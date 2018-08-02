@@ -4,9 +4,9 @@ const Cell = require("./Cell");
 class Pellet extends Cell {
     /**
      * @param {World} world
-     * @param {{pelletCount: Number}} spawner
-     * @param {Number} x
-     * @param {Number} y
+     * @param {Spawner} spawner
+     * @param {number} x
+     * @param {number} y
      */
     constructor(world, spawner, x, y) {
         const size = world.settings.pelletMinSize;

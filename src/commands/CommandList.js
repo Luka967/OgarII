@@ -1,12 +1,12 @@
 /**
- * @typedef {(handle: ServerHandle, context: any, args: String[]) => void} CommandExecutor
+ * @typedef {(handle: ServerHandle, context: any, args: string[]) => void} CommandExecutor
  */
 
 class Command {
     /**
-     * @param {String} name
-     * @param {String} description
-     * @param {String} args
+     * @param {string} name
+     * @param {string} description
+     * @param {string} args
      * @param {CommandExecutor} executor 
      */
     constructor(name, description, args, executor) {
@@ -41,7 +41,7 @@ class CommandList {
 
     /**
      * @param {any} context
-     * @param {String} input
+     * @param {string} input
      */
     execute(context, input) {
         const split = input.split(" ");
@@ -56,7 +56,7 @@ module.exports = {
     Command: Command,
     CommandList: CommandList,
     /**
-     * @param {{name: String, args: String, desc: String, exec: CommandExecutor}} info 
+     * @param {CommandGeneratorInfo} info 
      */
     genCommand(info) {
         return new Command(info.name, info.desc, info.args, info.exec);

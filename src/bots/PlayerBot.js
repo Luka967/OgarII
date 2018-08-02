@@ -124,16 +124,16 @@ class PlayerBot extends Bot {
     }
 
     /**
-     * @param {Number} aSize
-     * @param {Number} bSize
+     * @param {number} aSize
+     * @param {number} bSize
      */
     canEat(aSize, bSize) {
         return aSize > bSize * 1.140175425099138;
     }
     /**
-     * @param {Number} a
-     * @param {Number} b
-     * @param {Number} d
+     * @param {number} a
+     * @param {number} b
+     * @param {number} d
      */
     canSplitkill(aSize, bSize, d) {
         const splitD = Math.max(2 * aSize, this.listener.settings.playerSplitBoost);

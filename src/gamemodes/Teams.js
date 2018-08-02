@@ -12,7 +12,7 @@ const teamColors = [
 const teamCount = teamColors.length;
 
 /**
- * @param {Number} index
+ * @param {number} index
  */
 function getTeamColor(index) {
     const random = ~~(Math.random() * 52);
@@ -66,7 +66,7 @@ class Teams extends Gamemode {
 
     /**
      * @param {Player} player
-     * @param {String} name
+     * @param {string} name
      */
     onPlayerSpawnRequest(player, name) {
         if (player.state === 0) return;

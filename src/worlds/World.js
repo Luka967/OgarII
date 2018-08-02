@@ -13,15 +13,12 @@ const ChatChannel = require("../sockets/ChatChannel");
 const { fullyIntersects } = require("../primitives/Misc");
 
 /**
- * @typedef {{x: Number, y: Number}} Position
- * @typedef {{r: Number, g: Number, b: Number}} Color
- * @typedef {{x: Number, y: Number, w: Number, h: Number}} Range
+ * @implements {Spawner}
  */
-
 class World {
     /**
      * @param {ServerHandle} handle
-     * @param {Number} id
+     * @param {number} id
      */
     constructor(handle, id) {
         this.handle = handle;
@@ -30,23 +27,31 @@ class World {
         this.frozen = false;
 
         this._nextCellId = 1;
-        /** @type {Cell[]} */ this.cells = [];
-        /** @type {Cell[]} */ this.boostingCells = [];
+        /** @type {Cell[]} */
+        this.cells = [];
+        /** @type {Cell[]} */
+        this.boostingCells = [];
         this.pelletCount = 0;
         this.mothercellCount = 0;
         this.virusCount = 0;
-        /** @type {EjectedCell[]} */ this.ejectedCells = [];
-        /** @type {PlayerCell[]} */ this.playerCells = [];
+        /** @type {EjectedCell[]} */
+        this.ejectedCells = [];
+        /** @type {PlayerCell[]} */
+        this.playerCells = [];
 
-        /** @type {Player[]} */ this.players = [];
-        /** @type {Player=} */ this.largestPlayer = null;
+        /** @type {Player[]} */
+        this.players = [];
+        /** @type {Player=} */
+        this.largestPlayer = null;
         this.worldChat = new ChatChannel(this.handle);
 
-        /** @type {Range} */ this.border = { x: NaN, y: NaN, w: NaN, h: NaN };
-        /** @type {QuadTree} */ this.finder = null;
+        /** @type {Range} */
+        this.border = { x: NaN, y: NaN, w: NaN, h: NaN };
+        /** @type {QuadTree} */
+        this.finder = null;
 
         /**
-         * @type {{limit: Number, internal: Number, external: Number, playing: Number, spectating: Number, name: String, gamemode: String, loadTime: Number, uptime: Number}}
+         * @type {WorldStats}
          */
         this.stats = {
             limit: NaN,
@@ -79,7 +84,7 @@ class World {
             this.removeCell(this.cells[0]);
     }
 
-    /** @param {{x: Number, y: Number, w: Number, h: Number}} range */
+    /** @param {Range} range */
     setBorder(range) {
         this.border.x = range.x;
         this.border.y = range.y;
@@ -172,7 +177,7 @@ class World {
     }
 
     /**
-     * @param {Number} cellSize
+     * @param {number} cellSize
      * @returns {Position}
      */
     getRandomPos(cellSize) {
@@ -188,7 +193,7 @@ class World {
         return !this.finder.containsAny(range, /** @param {Cell} other */ (item) => item.avoidWhenSpawning);
     }
     /**
-     * @param {Number} cellSize
+     * @param {number} cellSize
      * @returns {Position}
      */
     getSafeSpawnPos(cellSize) {
@@ -201,7 +206,7 @@ class World {
         return this.getRandomPos(cellSize);
     }
     /**
-     * @param {Number} cellSize
+     * @param {number} cellSize
      * @returns {{color: Color, pos: Position}}
      */
     getPlayerSpawn(cellSize) {
@@ -222,9 +227,9 @@ class World {
      * @param {Player} player
      * @param {Color} color
      * @param {Position} pos
-     * @param {Number} size
-     * @param {String} name
-     * @param {String} skin
+     * @param {number} size
+     * @param {string} name
+     * @param {string} skin
      */
     spawnPlayer(player, color, pos, size, name, skin) {
         const playerCell = new PlayerCell(player, pos.x, pos.y, size, color, name, skin);
@@ -417,7 +422,7 @@ class World {
 
     /**
      * @param {Cell} cell
-     * @param {Boolean=} bounce
+     * @param {boolean=} bounce
     */
     bounceCell(cell, bounce) {
         const r = cell.size / 2;
@@ -469,8 +474,8 @@ class World {
     }
     /**
      * @param {PlayerCell} cell
-     * @param {Number} size
-     * @param {{dx: Number, dy: Number, d: Number}} boost
+     * @param {number} size
+     * @param {Boost} boost
      */
     launchPlayerCell(cell, size, boost) {
         cell.squareSize -= size * size;
@@ -568,7 +573,7 @@ class World {
 
     /**
      * @param {PlayerCell} cell
-     * @returns {Number[]}
+     * @returns {number[]}
      */
     distributeCellMass(cell) {
         const player = cell.owner;
@@ -605,11 +610,11 @@ class World {
 
     /**
      * @param {Cell} cell
-     * @param {Number[]} splits
+     * @param {number[]} splits
      */
     distributePopAngles(cell, splits) {
         splits.sort((a, b) => Math.round(Math.random() * 3 - 1.5));
-        /** @type {Number[]} */
+        /** @type {number[]} */
         const angles = [];
         const l = splits.length;
         let cellSize = cell.squareSize;

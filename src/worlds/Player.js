@@ -7,7 +7,7 @@ const PlayerCell = require("../cells/PlayerCell");
 class Player {
     /**
      * @param {ServerHandle} handle
-     * @param {Number} id
+     * @param {number} id
      * @param {PlayingRouter} router
      */
     constructor(handle, id, router) {
@@ -17,11 +17,7 @@ class Player {
         this.exists = true;
 
         /**
-         * -1 - Idle
-         * 0  - Playing
-         * 1  - Spectating
-         * 2  - Roaming
-         * @type {-1|0|1|2}
+         * @type {PlayerState}
          */
         this.state = -1;
         /** @type {World} */
@@ -36,7 +32,7 @@ class Player {
         this.visibleCells = { };
         /** @type {{[cellId: string]: Cell}} */
         this.lastVisibleCells = { };
-        /** @type {{x: Number, y: Number, w: Number, h: Number, s: Number}} */
+        /** @type {ViewArea} */
         this.viewArea = {
             x: 0,
             y: 0,
@@ -55,7 +51,7 @@ class Player {
     }
 
     /**
-     * @param {-1|0|1|2} targetState
+     * @param {PlayerState} targetState
      */
     updateState(targetState) {
         if (this.world === null) this.state = -1;

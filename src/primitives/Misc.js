@@ -1,13 +1,9 @@
 const fs = require("fs");
 const http = require("http");
 
-/**
- * @typedef {{x: Number, y: Number, w: Number, h: Number}} Range
- */
-
 module.exports = {
     /**
-     * @returns {{r: Number, g: Number, b: Number}}
+     * @returns {Color}
      */
     randomColor() {
         switch (~~(Math.random() * 6)) {
@@ -20,17 +16,17 @@ module.exports = {
         }
     },
     /**
-     * @param {{r: Number, g: Number, b: Number}=} color
-     * @returns {{r: Number, g: Number, b: Number}}
+     * @param {Color=} color
+     * @returns {Color}
      */
     grayscaleColor(color) {
-        /** @type {Number} */
+        /** @type {number} */
         let weight;
         if (color) weight = ~~(0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
         else weight = 0x7F + ~~(Math.random() * 0x80);
         return { r: weight, g: weight, b: weight };
     },
-    /** @param {Number[]} n */
+    /** @param {number[]} n */
     throwIfBadNumber(...n) {
         for (let i = 0; i < n.length; i++)
             if (isNaN(n[i]) || !isFinite(n[i]) || n[i] == null) throw new Error(`bad number (${n[i]}, index ${i})`);
@@ -59,6 +55,7 @@ module.exports = {
     /**
      * @param {Range} a
      * @param {Range} b
+     * @returns {Quadrant}
      */
     getQuadIntersect(a, b) {
         return {
@@ -71,6 +68,7 @@ module.exports = {
     /**
      * @param {Range} a
      * @param {Range} b
+     * @returns {Quadrant}
      */
     getQuadFullIntersect(a, b) {
         return {
