@@ -17,7 +17,7 @@ class PlayerBot extends Bot {
 
     get shouldClose() {
         return
-            this.player === null
+            !this.hasPlayer
          || !this.player.exists
          || this.player.world === null;
     }

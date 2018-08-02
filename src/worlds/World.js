@@ -238,23 +238,26 @@ class World {
     }
 
     update() {
-        this.handle.gamemode.onWorldTick(this);
+        this.frozen ? this.frozenUpdate() : this.liveUpdate();
+    }
 
-        if (this.frozen) {
-            for (let i = 0, l = this.players.length; i < l; i++) {
-                const router = this.players[i].router;
-                router.splitAttempts = 0;
-                router.ejectAttempts = 0;
-                if (router.isPressingQ) {
-                    if (!router.hasProcessedQ)
-                        router.onQPress();
-                    router.hasProcessedQ = true;
-                } else router.hasProcessedQ = false;
-                router.requestingSpectate = false;
-                router.spawningName = null;
-            }
-            return;
+    frozenUpdate() {
+        for (let i = 0, l = this.players.length; i < l; i++) {
+            const router = this.players[i].router;
+            router.splitAttempts = 0;
+            router.ejectAttempts = 0;
+            if (router.isPressingQ) {
+                if (!router.hasProcessedQ)
+                    router.onQPress();
+                router.hasProcessedQ = true;
+            } else router.hasProcessedQ = false;
+            router.requestingSpectate = false;
+            router.spawningName = null;
         }
+    }
+
+    liveUpdate() {
+        this.handle.gamemode.onWorldTick(this);
 
         const self = this;
         const eat = [], rigid = [];

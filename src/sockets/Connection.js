@@ -43,9 +43,6 @@ class Connection extends PlayingRouter {
 
     static get separateInTeams() { return true; }
     get isExternal() { return true; }
-    get handle() { return this.listener.handle; }
-    /** @private */
-    get logger() { return this.listener.handle.logger; }
 
     /**
      * @param {number} code
@@ -71,12 +68,20 @@ class Connection extends PlayingRouter {
         if (this.protocol !== null) this.protocol.onSocketMessage(reader);
         else {
             this.protocol = this.handle.protocols.decide(this, reader);
-            if (this.protocol === null) return void this.closeSocket(1003, "Ambigous protocol");
+            if (this.protocol === null) return void this.closeSocket(1003, "Ambiguous protocol");
         }
     }
 
+    createPlayer() {
+        super.createPlayer();
+        if (this.settings.matchmakerNeedsQueuing) {
+            this.globalChat.directMessage(null, this, "This server requires players to be queued.");
+            this.globalChat.directMessage(null, this, "Try spawning to enqueue.");
+        } else this.handle.matchmaker.toggleQueued(this);
+    }
+
     onQPress() {
-        if (this.player === null) return;
+        if (!this.hasPlayer) return;
         if (this.listener.settings.minionEnableQBasedControl && this.minions.length > 0)
             this.controllingMinions = !this.controllingMinions;
         else this.handle.gamemode.whenPlayerPressQ(this.player);
@@ -85,8 +90,7 @@ class Connection extends PlayingRouter {
         return this.socketDisconnected;
     }
     update() {
-        if (isNaN(this.protocolKey)) return;
-        if (this.player === null) return;
+        if (!this.hasPlayer) return;
         if (this.player.world === null) {
             if (this.spawningName !== null)
                 this.handle.matchmaker.toggleQueued(this);
@@ -123,11 +127,11 @@ class Connection extends PlayingRouter {
             this.handle.gamemode.sendLeaderboard(this);
     }
     onWorldSet() {
-        this.protocol.onNewWorldBounds(this.player.world, true, this.protocol);
+        this.protocol.onNewWorldBounds(this.player.world.border, true, this.protocol);
     }
     /** @param {PlayerCell} cell */
     onNewOwnedCell(cell) {
-        this.protocol.onNewOwnedCell(cell.id);
+        this.protocol.onNewOwnedCell(cell);
     }
 
     /** @param {Buffer} data */

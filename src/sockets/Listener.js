@@ -101,13 +101,8 @@ class Listener {
         this.logger.onAccess(`CONNECTION FROM ${newConnection.remoteAddress}`);
         this.connectionsByIP[newConnection.remoteAddress] =
             this.connectionsByIP[newConnection.remoteAddress] + 1 || 1;
-        newConnection.createPlayer();
         this.connections.push(newConnection);
         this.globalChat.add(newConnection);
-        if (this.settings.matchmakerNeedsQueuing) {
-            this.globalChat.directMessage(null, newConnection, "This server requires players to be queued.");
-            this.globalChat.directMessage(null, newConnection, "Try spawning to enqueue.");
-        } else this.handle.matchmaker.toggleQueued(newConnection);
     }
 
     /**

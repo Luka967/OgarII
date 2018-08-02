@@ -10,7 +10,7 @@ const serverSource = {
 
 /** @param {Connection} connection */
 function getSourceFromConnection(connection) {
-    if (connection.player == null) return null;
+    if (!connection.hasPlayer) return null;
     const player = connection.player;
     const hasCells = player.state === 0;
     return {
@@ -48,7 +48,7 @@ class ChatChannel {
      * @param {string} message
      */
     broadcast(source, message) {
-        const sourceInfo = source === null ? serverSource : getSourceFromConnection(source);
+        const sourceInfo = source == null ? serverSource : getSourceFromConnection(source);
         for (let i = 0, l = this.connections.length; i < l; i++)
             this.connections[i].protocol.onChatMessage(sourceInfo, message);
     }
@@ -59,8 +59,8 @@ class ChatChannel {
      * @param {string} message
      */
     directMessage(source, recipient, message) {
-        const sourceInfo = source === null ? serverSource : getSourceFromConnection(source);
-        this.connections[i].protocol.onChatMessage(sourceInfo, message);
+        const sourceInfo = source == null ? serverSource : getSourceFromConnection(source);
+        recipient.protocol.onChatMessage(sourceInfo, message);
     }
 }
 

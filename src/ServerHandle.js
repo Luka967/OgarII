@@ -155,7 +155,6 @@ class ServerHandle {
         this.gamemode.onPlayerDestroy(this.players[id]);
         this.players[id].destroy();
         this.players[id].exists = false;
-        this.players[id].router.player = null;
         delete this.players[id];
         return true;
     }

@@ -336,7 +336,7 @@ module.exports = (commands, chatCommands) => {
                 handle.listener.globalChat.directMessage(
                     null,
                     context,
-                    context.player !== null ? `your ID is ${context.player.id}` : "you don't have a player instance associated with yourself"
+                    context.hasPlayer ? `your ID is ${context.player.id}` : "you don't have a player instance associated with yourself"
                 );
             }
         }),
@@ -345,7 +345,7 @@ module.exports = (commands, chatCommands) => {
             args: "",
             desc: "get your world's id",
             exec: (handle, context, args) => {
-                const worldId = context.player !== null ? context.player.world !== null ? context.player.world.id : null : null;
+                const worldId = context.hasPlayer ? context.player.world !== null ? context.player.world.id : null : null;
                 handle.listener.globalChat.directMessage(
                     null,
                     context,
@@ -359,7 +359,7 @@ module.exports = (commands, chatCommands) => {
             desc: "leave your world",
             exec: (handle, context, args) => {
                 const chat = handle.listener.globalChat;
-                if (context.player === null)
+                if (!context.hasPlayer)
                     return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
                 if (context.player.world === null)
                     return void chat.directMessage(null, context, "you're not in a world");
@@ -377,7 +377,7 @@ module.exports = (commands, chatCommands) => {
                 const id = parseInt(args[0]);
                 if (isNaN(id))
                     return void chat.directMessage(null, context, "invalid world id number format");
-                if (context.player === null)
+                if (!context.hasPlayer)
                     return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
                 if (context.player.world !== null)
                     return void chat.directMessage(null, context, "you're already in a world");

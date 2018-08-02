@@ -19,6 +19,7 @@ class PlayingRouter {
         this.splitAttempts = 0;
         this.ejectAttempts = 0;
 
+        this.hasPlayer = false;
         this.player = null;
         this.listener.addPlayingRouter(this);
     }
@@ -30,8 +31,20 @@ class PlayingRouter {
     /** @returns {boolean} */
     get separateInTeams() { return this.constructor.separateInTeams; }
 
+    get handle() { return this.listener.handle; }
+    get logger() { return this.listener.handle.logger; }
+    get settings() { return this.listener.handle.settings; }
+
     createPlayer() {
+        if (this.hasPlayer) return;
+        this.hasPlayer = true;
         this.player = this.listener.handle.createPlayer(this);
+    }
+    destroyPlayer() {
+        if (!this.hasPlayer) return;
+        this.hasPlayer = false;
+        this.listener.handle.removePlayer(this.player.id);
+        this.player = null;
     }
 
     /** @virtual */
@@ -43,27 +56,27 @@ class PlayingRouter {
     
     /** @virtual */
     onSpawnRequest() {
-        if (this.player === null) return;
+        if (!this.hasPlayer) return;
         this.listener.handle.gamemode.onPlayerSpawnRequest(this.player, this.spawningName);
     }
     /** @virtual */
     onSpectateRequest() {
-        if (this.player === null) return;
+        if (!this.hasPlayer) return;
         this.player.updateState(1);
     }
     /** @virtual */
     onQPress() {
-        if (this.player === null) return;
+        if (!this.hasPlayer) return;
         this.listener.handle.gamemode.whenPlayerPressQ(this.player);
     }
     /** @virtual */
     attemptSplit() {
-        if (this.player === null) return;
+        if (!this.hasPlayer) return;
         this.listener.handle.gamemode.whenPlayerSplit(this.player);
     }
     /** @virtual */
     attemptEject() {
-        if (this.player === null) return;
+        if (!this.hasPlayer) return;
         this.listener.handle.gamemode.whenPlayerEject(this.player);
     }
 

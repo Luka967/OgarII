@@ -22,7 +22,7 @@ class Minion extends Bot {
         return this.player.world === null ||
             this.following.socketDisconnected ||
             this.following.disconnected ||
-            this.following.player === null ||
+           !this.following.hasPlayer ||
            !this.following.player.exists ||
             this.following.player.world !== this.player.world;
     }

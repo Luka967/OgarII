@@ -35,7 +35,7 @@ class LegacyProtocol extends Protocol {
         switch (messageId) {
             case 0:
                 const name = readZTString(reader, this.protocol);
-                this.spawningName = name.slice(0, this.listener.settings.playerMaxNameLength - 1);
+                this.connection.spawningName = name.slice(0, this.listener.settings.playerMaxNameLength - 1);
                 break;
             case 1: this.connection.requestingSpectate = true; break;
             case 16:
@@ -84,7 +84,6 @@ class LegacyProtocol extends Protocol {
                 this.connection.minionsFrozen = !this.connection.minionsFrozen;
                 break;
             case 99:
-                if (this.connection.player === null) break;
                 if (reader.length < 2)
                     return void this.fail(1003, "Bad message format");
                 const flags = reader.readUInt8();
@@ -101,17 +100,17 @@ class LegacyProtocol extends Protocol {
                 else message && globalChat.broadcast(this, message);
                 break;
             case 254:
-                if (this.player !== null && this.player.world !== null)
+                if (this.hasPlayer && this.gotKey && this.player.world !== null)
                     this.onStatsRequest();
                 break;
             case 255:
                 if (this.gotKey) return void this.fail("Unexpected message");
                 if (reader.length < 5) return void this.fail("Unexpected message format");
+                this.gotKey = true;
                 this.key = reader.readUInt32();
-                break;
-            default:
-                console.log(messageId);
-                return void this.fail(1003, "Unknown message type");
+                this.connection.createPlayer();
+            break;
+            default: return void this.fail(1003, "Unknown message type");
         }
     }
 
@@ -132,7 +131,6 @@ class LegacyProtocol extends Protocol {
     }
 
     onStatsRequest() {
-        if (this.connection.player == null) return;
         const writer = new Writer();
         writer.writeUInt8(254);
         const stats = this.connection.player.world.stats;
@@ -185,7 +183,7 @@ class LegacyProtocol extends Protocol {
         const writer = new Writer();
         switch (type) {
             case "ffa":
-                if (protocol < 11) ffaLeaderboard4(writer, data, this.protocol);
+                if (this.protocol < 11) ffaLeaderboard4(writer, data, this.protocol);
                 else ffaLeaderboard11(writer, data, selfData);
                 break;
             case "pie":
@@ -195,7 +193,7 @@ class LegacyProtocol extends Protocol {
                     writer.writeFloat32(data[i]);
                 break;
             case "text":
-                if (protocol < 14) textBoard4(writer, data, this.protocol);
+                if (this.protocol < 14) textBoard4(writer, data, this.protocol);
                 else textBoard14(writer, data, this.protocol);
                 break;
         }
@@ -255,6 +253,7 @@ class LegacyProtocol extends Protocol {
         l = del.length;
         writer[this.protocol < 6 ? "writeUInt32" : "writeUInt16"](l);
         for (i = 0; i < l; i++) writer.writeUInt32(del[i].id);
+        this.send(writer.finalize());
     }
 }
 
