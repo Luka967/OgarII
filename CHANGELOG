@@ -2,10 +2,12 @@ TODO 1.1.4
 - Implement dual controlling using the modern protocol
 
 TODO 1.1.3
-- Implement a new (in further: modern) protocol
-
-TODO 1.1.2
 - Implement plugin system
+
+1.1.2 @ 2018-8-5
+- Implement a new "Modern" protocol, which bases around using the minimal amount of different message types, and conserving size by further using flags
+- Fixed the "virus curling bug" mentioned in https://github.com/Luka967/OgarII/issues/16
+- Simplify player's world referencing
 
 1.1.1 @ 2018-8-2
 - Replace String, Number and Boolean with string, number and boolean in docs
@@ -20,7 +22,7 @@ TODO 1.1.2
 - Use const & let instead of var wherever it is
 - GamemodeList is and was not a debug item
 - New setting, listenerBannedIPs array
-- Implement per-IP banning (range banning might be tricky)
+- Implement per-IP banning (range banning might be tricky to implement later on)
 - Rename PlayerRouter.isDisconnected to disconnected
 - Add PlayerRouter.shouldClose abstract function
 - Calling Connection.close will either kill the connection or destroy the router depending on the connection status

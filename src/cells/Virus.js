@@ -11,6 +11,7 @@ class Virus extends Cell {
         super(world, x, y, size, { r: 51, g: 255, b: 51 });
 
         this.fedTimes = 0;
+        this.splitAngle = NaN;
     }
 
     get type() { return 2; }
@@ -45,8 +46,7 @@ class Virus extends Cell {
             this.boost.d = newD;
             this.world.setCellAsBoosting(this);
         } else {
-            this.boost.dx = cell.boost.dx;
-            this.boost.dy = cell.boost.dy;
+            this.splitAngle = Math.atan2(cell.boost.dx, cell.boost.dy);
             if (++this.fedTimes >= settings.virusFeedTimes) {
                 this.fedTimes = 0;
                 this.size = settings.virusSize;

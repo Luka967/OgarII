@@ -1,4 +1,6 @@
 const Protocol = require("./Protocol");
+const Reader = require("../primitives/Reader");
+const Writer = require("../primitives/Writer");
 
 class LegacyProtocol extends Protocol {
     /**
@@ -92,15 +94,10 @@ class LegacyProtocol extends Protocol {
                     return void this.fail(1003, "Unexpected message format");
                 reader.skip(skipLen);
                 const message = readZTString(reader, this.protocol).trim();
-                const globalChat = this.connection.listener.globalChat;
-                if (message.length >= 2 && message[0] === "/") {
-                    if (!this.connection.listener.handle.chatCommands.execute(this, message.slice(1)))
-                        globalChat.directMessage(null, this, "unknown command, execute /help for the list of commands");
-                }
-                else message && globalChat.broadcast(this, message);
+                this
                 break;
             case 254:
-                if (this.hasPlayer && this.gotKey && this.player.world !== null)
+                if (this.hasPlayer && this.gotKey && this.connection.player.hasWorld)
                     this.onStatsRequest();
                 break;
             case 255:
@@ -444,5 +441,3 @@ function writeZTString(writer, value, protocol) {
 const Cell = require("../cells/Cell");
 const PlayerCell = require("../cells/PlayerCell");
 const Connection = require("../sockets/Connection");
-const Reader = require("../primitives/Reader");
-const Writer = require("../primitives/Writer");

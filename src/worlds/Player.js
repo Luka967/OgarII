@@ -20,6 +20,7 @@ class Player {
          * @type {PlayerState}
          */
         this.state = -1;
+        this.hasWorld = false;
         /** @type {World} */
         this.world = null;
         /** @type {any} */
@@ -45,8 +46,7 @@ class Player {
     get settings() { return this.handle.settings; }
 
     destroy() {
-        if (this.world !== null)
-            this.world.removePlayer(this);
+        if (this.hasWorld) this.world.removePlayer(this);
         this.exists = false;
     }
 

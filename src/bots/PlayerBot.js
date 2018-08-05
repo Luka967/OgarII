@@ -19,7 +19,7 @@ class PlayerBot extends Bot {
         return
             !this.hasPlayer
          || !this.player.exists
-         || this.player.world === null;
+         || !this.player.hasWorld;
     }
     update() {
         if (this.splitCooldownTicks > 0) this.splitCooldownTicks--;

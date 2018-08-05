@@ -51,12 +51,12 @@ class Gamemode {
     }
     /** @param {Player} player @virtual */
     whenPlayerEject(player) {
-        if (player.world === null) return;
+        if (!player.hasWorld) return;
         player.world.ejectFromPlayer(player);
     }
     /** @param {Player} player @virtual */
     whenPlayerSplit(player) {
-        if (player.world === null) return;
+        if (!player.hasWorld) return;
         player.world.splitPlayer(player);
     }
     /** @param {Player} player @param {string} name @abstract */

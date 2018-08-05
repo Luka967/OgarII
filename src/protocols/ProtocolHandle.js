@@ -29,8 +29,11 @@ class ProtocolHandle {
     decide(connection, reader) {
         for (let i = 0; i < this.protocols.length; i++) {
             const generated = new this.protocols[i](connection);
-            if (!generated.distinguishes(reader)) continue;
-            return generated;
+            if (!generated.distinguishes(reader)) {
+                reader.offset = 0;
+                continue;
+            }
+            return connection.socketDisconnected ? null : generated;
         }
         return null;
     }
