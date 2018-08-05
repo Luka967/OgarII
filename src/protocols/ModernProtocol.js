@@ -61,7 +61,7 @@ class ModernProtocol extends Protocol {
                 this.connection.splitAttempts += reader.readUInt8();
                 count = reader.readUInt8();
                 for (i = 0, l = this.connection.minions.length; count > 0 && i < l; i++)
-                    this.connection.splitAttempts += count;
+                    this.connection.minions[i].splitAttempts += count;
 
                 const globalFlags = reader.readUInt8();
                 if (globalFlags & 1)
@@ -72,7 +72,7 @@ class ModernProtocol extends Protocol {
                 if (globalFlags & 16) this.connection.ejectAttempts++;
                 if (globalFlags & 32)
                     for (i = 0, l = this.connection.minions.length; i < l; i++)
-                        this.connection.ejectAttempts++;
+                        this.connection.minions[i].ejectAttempts++;
                 if (globalFlags & 64) this.connection.minionsFrozen = !this.connection.minionsFrozen;
                 if (globalFlags & 128) {
                     count = reader.readUInt8();

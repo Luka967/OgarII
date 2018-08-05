@@ -122,8 +122,8 @@ class LegacyProtocol extends Protocol {
         writer.writeUInt8(source.color.r);
         writer.writeUInt8(source.color.g);
         writer.writeUInt8(source.color.b);
-        writeZTString(writer, source.name, protocol);
-        writeZTString(writer, message, protocol);
+        writeZTString(writer, source.name, this.protocol);
+        writeZTString(writer, message, this.protocol);
         this.send(writer.finalize());
     }
 
@@ -139,7 +139,7 @@ class LegacyProtocol extends Protocol {
             playersSpect: stats.spectating,
             playersLimit: stats.limit
         };
-        writeZTString(writer, JSON.stringify(Object.assign({ }, legacy, stats)), protocol);
+        writeZTString(writer, JSON.stringify(Object.assign({}, legacy, stats)), this.protocol);
         this.send(writer.finalize());
     }
 
