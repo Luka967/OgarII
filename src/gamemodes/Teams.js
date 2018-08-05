@@ -87,8 +87,8 @@ class Teams extends Gamemode {
         for (let i = 0; i < world.playerCells.length; i++) {
             const cell = world.playerCells[i];
             if (cell.owner.team === null) continue;
-            teams[cell.owner.team] += cell.size;
-            sum += cell.size;
+            teams[cell.owner.team] += cell.squareSize;
+            sum += cell.squareSize;
         }
         for (let i = 0; i < teamCount; i++) teams[i] /= sum;
     }

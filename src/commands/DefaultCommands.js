@@ -238,7 +238,7 @@ module.exports = (commands, chatCommands) => {
                 if (isNaN(count)) return void handle.logger.print("invalid number for count");
                 const player = handle.players[id];
                 if (!(player.router instanceof Connection)) return void handle.logger.print("player is a bot");
-                if (player.world === null) return void handle.logger.print("player is not in a world");
+                if (!player.hasWorld) return void handle.logger.print("player is not in a world");
                 for (let i = 0; i < count; i++) new Minion(player.router);
                 handle.logger.print(`added ${count} minions to player`);
             }
@@ -260,7 +260,7 @@ module.exports = (commands, chatCommands) => {
                 if (isNaN(count)) return void handle.logger.print("invalid number for count");
                 const player = handle.players[id];
                 if (!(player.router instanceof Connection)) return void handle.logger.print("player is a bot");
-                if (player.world === null) return void handle.logger.print("player is not in a world");
+                if (!player.hasWorld) return void handle.logger.print("player is not in a world");
                 let realCount = 0;
                 for (let i = 0; i < count && player.router.minions.length > 0; i++) {
                     player.router.minions[0].close();
@@ -345,7 +345,7 @@ module.exports = (commands, chatCommands) => {
             args: "",
             desc: "get your world's id",
             exec: (handle, context, args) => {
-                const worldId = context.hasPlayer ? context.player.world !== null ? context.player.world.id : null : null;
+                const worldId = context.hasPlayer ? !context.player.hasWorld ? context.player.world.id : null : null;
                 handle.listener.globalChat.directMessage(
                     null,
                     context,
@@ -361,7 +361,7 @@ module.exports = (commands, chatCommands) => {
                 const chat = handle.listener.globalChat;
                 if (!context.hasPlayer)
                     return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
-                if (context.player.world === null)
+                if (!context.player.hasWorld)
                     return void chat.directMessage(null, context, "you're not in a world");
                 context.player.world.removePlayer(context.player);
             }
@@ -379,7 +379,7 @@ module.exports = (commands, chatCommands) => {
                     return void chat.directMessage(null, context, "invalid world id number format");
                 if (!context.hasPlayer)
                     return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
-                if (context.player.world !== null)
+                if (!context.player.hasWorld)
                     return void chat.directMessage(null, context, "you're already in a world");
                 if (!handle.worlds.hasOwnProperty(id))
                     return void chat.directMessage(null, context, "this world doesn't exist");

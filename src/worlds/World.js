@@ -156,6 +156,7 @@ class World {
     addPlayer(player) {
         this.players.push(player);
         player.world = this;
+        player.hasWorld = true;
         this.worldChat.add(player.router);
         this.handle.gamemode.onPlayerJoinWorld(player, this);
         player.router.onWorldSet();
@@ -169,7 +170,8 @@ class World {
         this.players.splice(this.players.indexOf(player), 1);
         this.handle.gamemode.onPlayerLeaveWorld(player, this);
         player.world = null;
-        this.worldChat.remove(player.router);        
+        player.hasWorld = false;
+        this.worldChat.remove(player.router);
         while (player.ownedCells.length > 0)
             this.removeCell(player.ownedCells[0]);
         player.router.onWorldReset();
@@ -332,8 +334,15 @@ class World {
         for (i = 0, l = eat.length; i < l;)
             this.resolveEatCheck(eat[i++], eat[i++]);
 
-        // update players
+        // find largest player
         this.largestPlayer = null;
+        for (i = 0, l = this.players.length; i < l; i++) {
+            const player = this.players[i];
+            if (!isNaN(player.score) && (this.largestPlayer === null || player.score > this.largestPlayer.score))
+                this.largestPlayer = player;
+        }
+        
+        // update players
         for (i = 0, l = this.players.length; i < l; i++) {
             const player = this.players[i];
             player.checkDisconnect();
@@ -361,8 +370,6 @@ class World {
                 router.spawningName = null;
             }
             player.updateViewArea();
-            if (!isNaN(player.score) && (this.largestPlayer === null || player.score > this.largestPlayer.score))
-                this.largestPlayer = player;
         }
         this.compileStatistics();
         this.handle.gamemode.compileLeaderboard(this);
@@ -451,8 +458,8 @@ class World {
     /** @param {Virus} virus */
     splitVirus(virus) {
         const newVirus = new Virus(this, virus.x, virus.y);
-        newVirus.boost.dx = virus.boost.dx;
-        newVirus.boost.dy = virus.boost.dy;
+        newVirus.boost.dx = Math.sin(virus.splitAngle);
+        newVirus.boost.dy = Math.cos(virus.splitAngle);
         newVirus.boost.d = this.settings.virusSplitBoost;
         this.addCell(newVirus);
         this.setCellAsBoosting(newVirus);

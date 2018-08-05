@@ -5,6 +5,7 @@ const DefaultCommands = require("./commands/DefaultCommands");
 const GamemodeList = require("./gamemodes/GamemodeList");
 const ProtocolHandle = require("./protocols/ProtocolHandle");
 const LegacyProtocol = require("./protocols/LegacyProtocol");
+const ModernProtocol = require("./protocols/ModernProtocol");
 
 const Stopwatch = require("./primitives/Stopwatch");
 const Logger = require("./primitives/Logger");
@@ -52,6 +53,7 @@ class ServerHandle {
         this.players = { };
 
         this.setSettings(settings);
+        this.protocols.register(ModernProtocol);
         this.protocols.register(LegacyProtocol);
         DefaultCommands(this.commands, this.chatCommands);
     }

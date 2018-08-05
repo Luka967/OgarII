@@ -52,6 +52,7 @@ interface WorldStats {
     uptime: number;
 }
 
+declare type CommandExecutor = (handle: ServerHandle, context: any, args: string[]) => void;
 interface CommandGeneratorInfo {
     name: string;
     args: string;

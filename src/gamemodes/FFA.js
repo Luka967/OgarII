@@ -25,9 +25,9 @@ class FFA extends Gamemode {
 
     /** @param {Connection} connection */
     sendLeaderboard(connection) {
+        if (!connection.hasPlayer) return;
         const player = connection.player;
-        if (player === null) return;
-        if (player.world === null) return;
+        if (!player.hasWorld) return;
         if (player.world.frozen) return;
         /** @type {Player[]} */
         const leaderboard = player.world.leaderboard;

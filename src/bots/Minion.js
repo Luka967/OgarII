@@ -19,7 +19,7 @@ class Minion extends Bot {
     }
 
     get shouldClose() {
-        return this.player.world === null ||
+        return !this.player.hasWorld ||
             this.following.socketDisconnected ||
             this.following.disconnected ||
            !this.following.hasPlayer ||

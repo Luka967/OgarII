@@ -1,7 +1,3 @@
-/**
- * @typedef {(handle: ServerHandle, context: any, args: string[]) => void} CommandExecutor
- */
-
 class Command {
     /**
      * @param {string} name
