@@ -32,7 +32,7 @@ const value = Object.seal({
     matchmakerBulkSize: 1,
 
     minionName: "Minion",
-    minionStartSize: 32,
+    minionSpawnSize: 32,
     minionEnableERTPControls: false,
     minionEnableQBasedControl: true,
 

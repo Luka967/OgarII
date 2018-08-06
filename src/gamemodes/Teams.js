@@ -71,7 +71,9 @@ class Teams extends Gamemode {
      */
     onPlayerSpawnRequest(player, name) {
         if (player.state === 0) return;
-        const size = this.handle.settings.playerSpawnSize;
+        const size = player.router.type === "minion" ?
+            this.handle.settings.minionSpawnSize :
+            this.handle.settings.playerSpawnSize;
         const pos = player.world.getSafeSpawnPos(size);
         if (player.router.separateInTeams)
             player.world.spawnPlayer(player, getTeamColor(player.team), pos, size, name, null);

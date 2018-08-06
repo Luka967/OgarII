@@ -4,8 +4,12 @@ TODO 1.2.1
 TODO 1.2.0
 - Implement plugin system
 
-1.1.4 @ 2018-8-6
+1.1.5 @ 2018-8-6
 ** BACK UP YOUR SETTINGS.JSON - a lot of the settings have been renamed so they will get overriden with defaults
+- Renamed setting minionStartSize to minionSpawnSize
+- Teams gamemode now uses minionSpawnSize for spawning minions
+
+1.1.4 @ 2018-8-6
 - Fixed new player cell merging time
 - Refactored and fixed up the legacy protocol
 - Changed setting finderMaxLevel's default from 32 to 16
@@ -125,6 +129,7 @@ Nightly @ 2018-2-17
 - Implement commands, ready for plugin support
 - Logging updates
 - A couple refactors
+
 Nightly @ 2018-2-15
 - Implement logging to file
 - Fix ServerHandle stopping logic
@@ -156,6 +161,7 @@ Nightly @ 2018-2-15
 - Implement mothercells
 - Implement the chat
 - Implement autosplitting
+
 Nightly @ 2018-2-13
 - Call gamemode methods when necessary
 - Define messages for the leaderboard
