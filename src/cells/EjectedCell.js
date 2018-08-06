@@ -3,13 +3,15 @@ const Cell = require("./Cell");
 class EjectedCell extends Cell {
     /**
      * @param {World} world
+     * @param {Player} owner
      * @param {number} x
      * @param {number} y
      * @param {Color} color
      */
-    constructor(world, x, y, color) {
+    constructor(world, owner, x, y, color) {
         const size = world.settings.ejectedSize;
         super(world, x, y, size, color);
+        this.owner = owner;
     }
 
     get type() { return 3; }
@@ -41,3 +43,4 @@ class EjectedCell extends Cell {
 module.exports = EjectedCell;
 
 const World = require("../worlds/World");
+const Player = require("../worlds/Player");

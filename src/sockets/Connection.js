@@ -41,8 +41,9 @@ class Connection extends PlayingRouter {
         this.webSocket.removeAllListeners();
     }
 
+    static get type() { return "connection"; }
+    static get isExternal() { return true; }
     static get separateInTeams() { return true; }
-    get isExternal() { return true; }
 
     /**
      * @param {number} code

@@ -61,7 +61,7 @@ class ModernProtocol extends Protocol {
                 this.connection.splitAttempts += reader.readUInt8();
                 count = reader.readUInt8();
                 for (i = 0, l = this.connection.minions.length; count > 0 && i < l; i++)
-                    this.connection.splitAttempts += count;
+                    this.connection.minions[i].splitAttempts += count;
 
                 const globalFlags = reader.readUInt8();
                 if (globalFlags & 1)
@@ -72,7 +72,7 @@ class ModernProtocol extends Protocol {
                 if (globalFlags & 16) this.connection.ejectAttempts++;
                 if (globalFlags & 32)
                     for (i = 0, l = this.connection.minions.length; i < l; i++)
-                        this.connection.ejectAttempts++;
+                        this.connection.minions[i].ejectAttempts++;
                 if (globalFlags & 64) this.connection.minionsFrozen = !this.connection.minionsFrozen;
                 if (globalFlags & 128) {
                     count = reader.readUInt8();
@@ -218,14 +218,13 @@ class ModernProtocol extends Protocol {
                         writer.writeUInt8(flags);
                         writer.writeZTStringUTF8(item.name);
                     }
-                    writer.writeUInt16(0);
-                    if (!hitSelfData) {
+                    if (!hitSelfData && (item = this.leaderboardSelfData) != null) {
                         writer.writeUInt16(item.position);
-                        flags = 0;
-                        if (item.highlighted) flags |= 1;
+                        flags = item.highlighted ? 1 : 0;
                         writer.writeUInt8(flags);
                         writer.writeZTStringUTF8(item.name);
                     }
+                    writer.writeUInt16(0);
                     break;
                 case "pie":
                     writer.writeUInt8(2);
@@ -259,7 +258,7 @@ class ModernProtocol extends Protocol {
                 writer.writeUInt8(item.color.g);
                 writer.writeUInt8(item.color.b);
                 flags = 0;
-                if (item instanceof PlayerCell && item.owner === this.connection.player)
+                if (item.type === 0 && item.owner === this.connection.player)
                     flags |= 1;
                 if (!!item.name) flags |= 2;
                 if (!!item.skin) flags |= 4;

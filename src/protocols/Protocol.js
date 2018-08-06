@@ -9,6 +9,12 @@ class Protocol {
         this.connection = connection;
     }
 
+    /**
+     * @returns {string}
+     */
+    static get protocolName() { throw new Error("Must be implemented"); }
+    get protocolName() { return this.constructor.protocolName; }
+
     get listener() { return this.connection.listener; }
     get handle() { return this.connection.listener.handle; }
     get logger() { return this.connection.listener.handle.logger; }
