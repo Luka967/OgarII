@@ -4,6 +4,10 @@ TODO 1.2.1
 TODO 1.2.0
 - Implement plugin system
 
+1.1.6 @ 2018-8-7
+- Fixed player cell merging time yet again
+- Fixed the view area being twice larger than it should be, agar.io was trolling me
+
 1.1.5 @ 2018-8-6
 ** BACK UP YOUR SETTINGS.JSON - a lot of the settings have been renamed so they will get overriden with defaults
 - Renamed setting minionStartSize to minionSpawnSize
@@ -30,7 +34,6 @@ TODO 1.2.0
 - Renamed setting playerBotsPerWorld to worldPlayerBotsPerWorld
 - Renamed setting minionsPerPlayer to worldMinionsPerPlayer
 - Renamed setting maxWorldCount to worldMaxCount
-- Setting playerMergeTime is now measured in ticks instead of seconds
 
 1.1.3 @ 2018-8-5
 - Fix fatal crash in legacy protocol when sending chat message
