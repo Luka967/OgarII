@@ -13,7 +13,7 @@ class Bot extends PlayingRouter {
         world.addPlayer(this.player);
     }
 
-    get isExternal() { return false; }
+    static get isExternal() { return false; }
 
     close() {
         super.close();

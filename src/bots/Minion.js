@@ -11,6 +11,7 @@ class Minion extends Bot {
         following.minions.push(this);
     }
     
+    static get type() { return "minion"; }
     static get separateInTeams() { return false; }
 
     close() {

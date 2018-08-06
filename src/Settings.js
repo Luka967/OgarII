@@ -6,30 +6,33 @@ const value = Object.seal({
     listenerMaxConnections: 100,
     listenerMaxClientDormancy: 1000 * 60,
     listenerMaxConnectionsPerIP: -1,
+    listenerMinLegacyProtocol: 1,
+    listenerMaxLegacyProtocol: 18,
     listeningPort: 443,
 
+    serverUpdateFrequency: 25,
     serverName: "An unnamed server",
     gamemode: "FFA",
 
-    mapX: 0,
-    mapY: 0,
-    mapW: 7071,
-    mapH: 7071,
-    finderMaxLevel: 32,
-    finderMaxItems: 32,
-    safeSpawnTries: 16,
-    safeSpawnFromEjected: 0.8,
-    playerDisposeDelay: 25 * 60,
-    ticksPerSecond: 25,
-    
-    playerBotsPerWorld: 0,
-    minionsPerPlayer: 0,
+    worldMapX: 0,
+    worldMapY: 0,
+    worldMapW: 7071,
+    worldMapH: 7071,
+    worldFinderMaxLevel: 16,
+    worldFinderMaxItems: 16,
+    worldSafeSpawnTries: 16,
+    worldSafeSpawnFromEjectedChance: 0.8,
+    worldPlayerDisposeDelay: 25 * 60,
+
+    worldPlayerBotsPerWorld: 0,
+    worldMinionsPerPlayer: 0,
     worldMaxPlayers: 50,
-    maxWorldCount: 2,
+    worldMaxCount: 2,
     matchmakerNeedsQueuing: false,
     matchmakerBulkSize: 1,
 
     minionName: "Minion",
+    minionStartSize: 32,
     minionEnableERTPControls: false,
     minionEnableQBasedControl: true,
 
@@ -79,7 +82,7 @@ const value = Object.seal({
     playerNoMergeDelay: 15,
     /** @type {"old" | "new"} */
     playerMergeVersion: "old",
-    playerMergeTime: 30,
+    playerMergeTime: 25 * 30,
     playerMergeTimeIncrease: 0.02,
     playerDecayMult: 0.001
 });

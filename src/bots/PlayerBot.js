@@ -1,5 +1,4 @@
 const Bot = require("./Bot");
-const { throwIfBadNumber } = require("../primitives/Misc");
 
 class PlayerBot extends Bot {
     /**
@@ -13,6 +12,7 @@ class PlayerBot extends Bot {
         this.target = null;
     }
 
+    static get type() { return "playerbot"; }
     static get separateInTeams() { return true; }
 
     get shouldClose() {

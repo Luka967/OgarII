@@ -38,6 +38,8 @@ class Cell {
         this._name = this._skin = null;
         /** @type {Cell} */
         this.eatenBy = null;
+        /** @type {Player} */
+        this.owner = null;
 
         this.posChanged =
             this.sizeChanged =
@@ -139,3 +141,4 @@ class Cell {
 module.exports = Cell;
 
 const World = require("../worlds/World");
+const Player = require("../worlds/Player");

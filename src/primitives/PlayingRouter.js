@@ -24,8 +24,16 @@ class PlayingRouter {
         this.listener.addPlayingRouter(this);
     }
 
+    /** @abstract @returns {string} */
+    static get type() { throw new Error("Must be overriden"); }
+    /** @returns {string} */
+    get type() { return this.constructor.type; }
+
     /** @abstract @returns {boolean} */
-    get isExternal() { throw new Error("Must be overriden"); }
+    static get isExternal() { throw new Error("Must be overriden"); }
+    /** @returns {boolean} */
+    get isExternal() { return this.constructor.isExternal; }
+
     /** @abstract @returns {boolean} */
     static get separateInTeams() { throw new Error("Must be overriden"); }
     /** @returns {boolean} */

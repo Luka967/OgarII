@@ -72,7 +72,7 @@ class Matchmaker {
                 bestWorld = world;
         }
         if (bestWorld !== null) return bestWorld;
-        else if (Object.keys(this.handle.worlds).length < this.handle.settings.maxWorldCount)
+        else if (Object.keys(this.handle.worlds).length < this.handle.settings.worldMaxCount)
             return this.handle.createWorld();
         else return null;
     }

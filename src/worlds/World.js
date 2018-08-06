@@ -65,7 +65,7 @@ class World {
             uptime: NaN
         };
 
-        this.setBorder({ x: this.settings.mapX, y: this.settings.mapY, w: this.settings.mapW, h: this.settings.mapH });
+        this.setBorder({ x: this.settings.worldMapX, y: this.settings.worldMapY, w: this.settings.worldMapW, h: this.settings.worldMapH });
     }
 
     get settings() { return this.handle.settings; }
@@ -74,7 +74,7 @@ class World {
     }
 
     afterCreation() {
-        for (let i = 0; i < this.settings.playerBotsPerWorld; i++)
+        for (let i = 0; i < this.settings.worldPlayerBotsPerWorld; i++)
             new PlayerBot(this);
     }
     destroy() {
@@ -93,8 +93,8 @@ class World {
         if (this.finder !== null) this.finder.destroy();
         this.finder = new QuadTree(
             this.border,
-            this.settings.finderMaxLevel,
-            this.settings.finderMaxItems
+            this.settings.worldFinderMaxLevel,
+            this.settings.worldFinderMaxItems
         );
         for (let i = 0, l = this.cells.length; i < l; i++) {
             const cell = this.cells[i];
@@ -162,7 +162,7 @@ class World {
         player.router.onWorldSet();
         this.handle.logger.debug(`player ${player.id} has been added to world ${this.id}`);
         if (!player.router.isExternal) return;
-        for (let i = 0; i < this.settings.minionsPerPlayer; i++)
+        for (let i = 0; i < this.settings.worldMinionsPerPlayer; i++)
             new Minion(player.router);
     }
     /** @param {Player} player */
@@ -199,7 +199,7 @@ class World {
      * @returns {Position}
      */
     getSafeSpawnPos(cellSize) {
-        let tries = this.settings.safeSpawnTries;
+        let tries = this.settings.worldSafeSpawnTries;
         while (--tries >= 0) {
             const pos = this.getRandomPos(cellSize);
             if (this.isSafeSpawnPos({ x: pos.x, y: pos.y, w: cellSize, h: cellSize }))
@@ -212,8 +212,8 @@ class World {
      * @returns {{color: Color, pos: Position}}
      */
     getPlayerSpawn(cellSize) {
-        if (this.settings.safeSpawnFromEjected > Math.random() && this.ejectedCells.length > 0) {
-            let tries = this.settings.safeSpawnTries;
+        if (this.settings.worldSafeSpawnFromEjectedChance > Math.random() && this.ejectedCells.length > 0) {
+            let tries = this.settings.worldSafeSpawnTries;
             while (--tries >= 0) {
                 const cell = this.ejectedCells[~~(Math.random() * this.ejectedCells.length)];
                 if (this.isSafeSpawnPos({ x: cell.x, y: cell.y, w: cellSize, h: cellSize })) {
@@ -554,7 +554,7 @@ class World {
             else dx /= d, dy /= d;
             const sx = cell.x + dx * cell.size;
             const sy = cell.y + dy * cell.size;
-            const newCell = new EjectedCell(this, sx, sy, cell.color);
+            const newCell = new EjectedCell(this, player, sx, sy, cell.color);
             const a = Math.atan2(dx, dy) - dispersion + Math.random() * 2 * dispersion;
             newCell.boost.dx = Math.sin(a);
             newCell.boost.dy = Math.cos(a);

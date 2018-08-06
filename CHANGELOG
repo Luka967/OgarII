@@ -4,6 +4,30 @@ TODO 1.2.1
 TODO 1.2.0
 - Implement plugin system
 
+1.1.4 @ 2018-8-6
+** BACK UP YOUR SETTINGS.JSON - a lot of the settings have been renamed so they will get overriden with defaults
+- Fixed new player cell merging time
+- Refactored and fixed up the legacy protocol
+- Changed setting finderMaxLevel's default from 32 to 16
+- Changed setting finderMaxItems's default from 32 to 16
+- New setting, listenerMinLegacyProtocol
+- New setting, listenerMaxLegacyProtocol
+- New setting, minionStartSize
+- Renamed setting mapX to worldMapX
+- Renamed setting mapY to worldMapY
+- Renamed setting mapW to worldMapW
+- Renamed setting mapH to worldMapH
+- Renamed setting finderMaxLevel to worldFinderMaxLevel
+- Renamed setting finderMaxItems to worldFinderMaxItems
+- Renamed setting safeSpawnTries to worldSafeSpawnTries
+- Renamed setting safeSpawnFromEjected to worldSafeSpawnFromEjectedChance
+- Renamed setting playerDisposeDelay to worldPlayerDisposeDelay
+- Renamed setting ticksPerSecond to serverUpdateFrequency
+- Renamed setting playerBotsPerWorld to worldPlayerBotsPerWorld
+- Renamed setting minionsPerPlayer to worldMinionsPerPlayer
+- Renamed setting maxWorldCount to worldMaxCount
+- Setting playerMergeTime is now measured in ticks instead of seconds
+
 1.1.3 @ 2018-8-5
 - Fix fatal crash in legacy protocol when sending chat message
 - Fix fatal crash in legacy protocol when sending stats
@@ -11,7 +35,7 @@ TODO 1.2.0
 
 1.1.2 @ 2018-8-5
 - Implement a new "Modern" protocol, which bases around using the minimal amount of different message types, and conserving size by further using flags
-- Fixed the "virus curling bug" mentioned in https://github.com/Luka967/OgarII/issues/16
+- Fixed the "virus curling bug" mentioned in issue #16
 - Simplify player's world referencing
 
 1.1.1 @ 2018-8-2
@@ -132,7 +156,6 @@ Nightly @ 2018-2-15
 - Implement mothercells
 - Implement the chat
 - Implement autosplitting
-
 Nightly @ 2018-2-13
 - Call gamemode methods when necessary
 - Define messages for the leaderboard
