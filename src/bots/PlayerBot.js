@@ -16,10 +16,9 @@ class PlayerBot extends Bot {
     static get separateInTeams() { return true; }
 
     get shouldClose() {
-        return
-            !this.hasPlayer
-         || !this.player.exists
-         || !this.player.hasWorld;
+        return !this.hasPlayer
+            || !this.player.exists
+            || !this.player.hasWorld;
     }
     update() {
         if (this.splitCooldownTicks > 0) this.splitCooldownTicks--;

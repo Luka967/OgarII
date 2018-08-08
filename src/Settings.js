@@ -82,7 +82,7 @@ const value = Object.seal({
     playerNoMergeDelay: 15,
     /** @type {"old" | "new"} */
     playerMergeVersion: "old",
-    playerMergeTime: 25 * 30,
+    playerMergeTime: 30,
     playerMergeTimeIncrease: 0.02,
     playerDecayMult: 0.001
 });

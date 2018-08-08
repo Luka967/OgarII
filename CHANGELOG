@@ -4,6 +4,11 @@ TODO 1.2.1
 TODO 1.2.0
 - Implement plugin system
 
+1.1.7 @ 2018-8-8
+- Changed setting playerMergeTime's default
+- Format shouldClose function on bots
+- Remove debug console.log
+
 1.1.6 @ 2018-8-7
 - Fixed player cell merging time yet again
 - Fixed the view area being twice larger than it should be, agar.io was trolling me
