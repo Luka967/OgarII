@@ -102,7 +102,8 @@ class Listener {
         this.connectionsByIP[newConnection.remoteAddress] =
             this.connectionsByIP[newConnection.remoteAddress] + 1 || 1;
         this.connections.push(newConnection);
-        this.globalChat.add(newConnection);
+        if (this.settings.serverChatEnabled)
+            this.globalChat.add(newConnection);
     }
 
     /**

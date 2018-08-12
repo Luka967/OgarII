@@ -4,6 +4,11 @@ TODO 1.2.1
 TODO 1.2.0
 - Implement plugin system
 
+1.1.8 @ 2018-8-12
+- Rename setting gamemode to serverGamemode
+- New setting, serverChatEnabled
+- Replace \uNNNN unicode codes with shorter \xNN variant
+
 1.1.7 @ 2018-8-8
 - Changed setting playerMergeTime's default
 - Format shouldClose function on bots

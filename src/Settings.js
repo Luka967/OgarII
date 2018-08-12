@@ -12,7 +12,8 @@ const value = Object.seal({
 
     serverUpdateFrequency: 25,
     serverName: "An unnamed server",
-    gamemode: "FFA",
+    serverGamemode: "FFA",
+    serverChatEnabled: true,
 
     worldMapX: 0,
     worldMapY: 0,

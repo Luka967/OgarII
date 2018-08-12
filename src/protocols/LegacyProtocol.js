@@ -37,12 +37,22 @@ class LegacyProtocol extends Protocol {
      */
     onSocketMessage(reader) {
         const messageId = reader.readUInt8();
+        if (!this.gotKey) {
+            if (messageId !== 255) return;
+            if (reader.length < 5) return void this.fail("Unexpected message format");
+            this.gotKey = true;
+            this.key = reader.readUInt32();
+            this.connection.createPlayer();
+            return;
+        }
         switch (messageId) {
             case 0:
                 const name = readZTString(reader, this.protocol);
                 this.connection.spawningName = name.slice(0, this.listener.settings.playerMaxNameLength - 1);
                 break;
-            case 1: this.connection.requestingSpectate = true; break;
+            case 1:
+                this.connection.requestingSpectate = true;
+                break;
             case 16:
                 switch (reader.length) {
                     case 13:
@@ -75,17 +85,17 @@ class LegacyProtocol extends Protocol {
                 else this.connection.ejectAttempts++;
                 break;
             case 22:
-                if (!this.settings.minionEnableERTPControls) break;
+                if (!this.gotKey || !this.settings.minionEnableERTPControls) break;
                 for (let i = 0, l = this.connection.minions.length; i < l; i++)
                     this.connection.minions[i].splitAttempts++;
                 break;
             case 23:
-                if (!this.settings.minionEnableERTPControls) break;
+                if (!this.gotKey || !this.settings.minionEnableERTPControls) break;
                 for (let i = 0, l = this.connection.minions.length; i < l; i++)
                     this.connection.minions[i].ejectAttempts++;
                 break;
             case 24:
-                if (!this.settings.minionEnableERTPControls) break;
+                if (!this.gotKey || !this.settings.minionEnableERTPControls) break;
                 this.connection.minionsFrozen = !this.connection.minionsFrozen;
                 break;
             case 99:
@@ -97,19 +107,13 @@ class LegacyProtocol extends Protocol {
                     return void this.fail(1003, "Unexpected message format");
                 reader.skip(skipLen);
                 const message = readZTString(reader, this.protocol).trim();
-                this
+                this.connection.onChatMessage(message);
                 break;
             case 254:
-                if (this.hasPlayer && this.gotKey && this.connection.player.hasWorld)
+                if (this.connection.hasPlayer && this.connection.player.hasWorld)
                     this.onStatsRequest();
                 break;
-            case 255:
-                if (this.gotKey) return void this.fail("Unexpected message");
-                if (reader.length < 5) return void this.fail("Unexpected message format");
-                this.gotKey = true;
-                this.key = reader.readUInt32();
-                this.connection.createPlayer();
-            break;
+            case 255: return void this.fail(1003, "Unexpected message");
             default: return void this.fail(1003, "Unknown message type");
         }
     }

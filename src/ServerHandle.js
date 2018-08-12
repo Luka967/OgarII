@@ -74,7 +74,7 @@ class ServerHandle {
         if (this.running) return false;
         this.logger.inform("starting");
         
-        this.gamemodes.setGamemode(this.settings.gamemode);
+        this.gamemodes.setGamemode(this.settings.serverGamemode);
         this.startTime = new Date();
         this.averageTickTime = this.tick = 0;
         this.running = true;
@@ -84,7 +84,7 @@ class ServerHandle {
         this.gamemode.onHandleStart();
 
         this.logger.inform("ticker begin");
-        this.logger.inform(`\u001B[1m\u001B[32mOgarII\u001B[0m\u001B[32m ${this.version}\u001B[0m`);
+        this.logger.inform(`\x1B[1m\x1B[32mOgarII\x1B[0m\x1B[32m ${this.version}\x1B[0m`);
         return true;
     }
 
