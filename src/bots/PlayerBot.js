@@ -37,7 +37,7 @@ class PlayerBot extends Bot {
         for (let i = 0, l = player.ownedCells.length; i < l; i++)
             if (cell === null || player.ownedCells[i].size > cell.size)
                 cell = player.ownedCells[i];
-        if (cell === null) return; // ???
+        if (cell === null) return;
         
         if (this.target != null) {
             if (!this.target.exists || !this.canEat(cell.size, this.target.size))

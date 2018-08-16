@@ -265,11 +265,9 @@ class World {
         const eat = [], rigid = [];
         let i, l;
 
-        // fire cell onTick
         for (i = 0, l = this.cells.length; i < l; i++)
             this.cells[i].onTick();
-        
-        // spawn passives
+
         while (this.pelletCount < this.settings.pelletCount) {
             const pos = this.getSafeSpawnPos(this.settings.pelletMinSize);
             this.addCell(new Pellet(this, this, pos.x, pos.y));
@@ -282,14 +280,12 @@ class World {
             const pos = this.getSafeSpawnPos(this.settings.mothercellSize);
             this.addCell(new Mothercell(this, pos.x, pos.y));
         }
-        
-        // boosting cell updates
+
         for (i = 0, l = this.boostingCells.length; i < l;) {
             if (!this.boostCell(this.boostingCells[i])) l--;
             else i++;
         }
 
-        // boosting cell checks
         for (i = 0; i < this.boostingCells.length; i++) {
             const cell = this.boostingCells[i];
             if (cell.type !== 2 && cell.type !== 3) continue;
@@ -302,8 +298,7 @@ class World {
                 }
             });
         }
-
-        // player cell updates        
+       
         for (i = 0, l = this.playerCells.length; i < l; i++) {
             const cell = this.playerCells[i];
             this.autosplitPlayerCell(cell);
@@ -313,7 +308,6 @@ class World {
             this.updateCell(cell);
         }
 
-        // player cell checks
         for (i = 0; i < l; i++) {
             const cell = this.playerCells[i];
             this.finder.search(cell.range, /** @param {Cell} other */ (other) => {
@@ -326,23 +320,18 @@ class World {
             });
         }
 
-        // resolve rigids
         for (i = 0, l = rigid.length; i < l;)
             this.resolveRigidCheck(rigid[i++], rigid[i++]);
-
-        // resolve eats
         for (i = 0, l = eat.length; i < l;)
             this.resolveEatCheck(eat[i++], eat[i++]);
 
-        // find largest player
         this.largestPlayer = null;
         for (i = 0, l = this.players.length; i < l; i++) {
             const player = this.players[i];
             if (!isNaN(player.score) && (this.largestPlayer === null || player.score > this.largestPlayer.score))
                 this.largestPlayer = player;
         }
-        
-        // update players
+
         for (i = 0, l = this.players.length; i < l; i++) {
             const player = this.players[i];
             player.checkDisconnect();

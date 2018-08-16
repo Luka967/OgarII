@@ -38,11 +38,11 @@ const commandStream = readline.createInterface({
 function ask() {
     if (commandStreamClosing) return;
     commandStream.question("@ ", (input) => {
+        setTimeout(ask, 1000);
         if (!(input = input.trim())) return;
         logger.printFile(`@ ${input}`);
         if (!currentHandle.commands.execute(null, input))
             logger.warn(`unknown command ${input}`);
-        process.nextTick(ask);
     });
 }
 logger.inform("command stream open");

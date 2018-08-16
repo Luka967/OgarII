@@ -55,7 +55,6 @@ class ModernProtocol extends Protocol {
                 break;
             case 3:
                 let i, l, count;
-                // TODO: message size assertion.
                 this.connection.mouseX = reader.readInt32();
                 this.connection.mouseY = reader.readInt32();
                 this.connection.splitAttempts += reader.readUInt8();

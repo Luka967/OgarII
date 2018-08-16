@@ -1,8 +1,19 @@
-TODO 1.2.1
+TODO 1.2.2
 - Implement dual controlling using the modern protocol
 
-TODO 1.2.0
+TODO 1.2.1
 - Implement plugin system
+
+TODO 1.2.0
+- Implement cell type assigning system
+- Implement playerlist command
+- Implement message size assertion for the modern protocol
+- Implement adding a new player to specified world if its id has been given in HTTP request path
+
+1.1.9 @ 2018-8-16
+- Fix executing an empty string as command killing the command stream
+- Update README
+- Remove all comments
 
 1.1.8 @ 2018-8-12
 - Rename setting gamemode to serverGamemode
@@ -19,7 +30,6 @@ TODO 1.2.0
 - Fixed the view area being twice larger than it should be, agar.io was trolling me
 
 1.1.5 @ 2018-8-6
-** BACK UP YOUR SETTINGS.JSON - a lot of the settings have been renamed so they will get overriden with defaults
 - Renamed setting minionStartSize to minionSpawnSize
 - Teams gamemode now uses minionSpawnSize for spawning minions
 
