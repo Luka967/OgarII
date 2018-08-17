@@ -16,7 +16,7 @@ Your friendly agar.io private server recreation.
 
 - Before connecting from agar.io you will need to do `core.disableIntegrityChecks(true)` in the console.
 
-- OgarII supports a custom protocol made by Luka. To use it, clone the [modern](https://github.com/Luka967/Cigar/tree/modern) of [Luka967/Cigar](https://github.com/Luka967/Cigar).
+- OgarII supports a custom protocol made by Luka. To use it, clone the [modern branch](https://github.com/Luka967/Cigar/tree/modern) of [Luka967/Cigar](https://github.com/Luka967/Cigar).
 
 - Ask all your questions over on the [Agar.io Private Servers](https://discord.gg/66X2ESb) guild.
 
