@@ -10,6 +10,21 @@ TODO 1.2.0
 - Implement message size assertion for the modern protocol
 - Implement adding a new player to specified world if its id has been given in HTTP request path
 
+1.1.10 @ 2018-8-18
+- Removed delay between commands, no idea why was it there in the first place
+- Default gamemodes are now registered at ServerHandle instead of GamemodeList
+- Renamed PlayerRouter to Router
+- Abstracted the table generating function of help
+- New server command, routers - the equivalent of Ogar's playerlist for OgarII
+- Rename Gamemode.gamemodeType to type
+- Rename Gamemode.gamemodeName to name
+- Actually implement Protocol.type
+- Added Protocol.subtype
+- Renamed ProtocolHandle to ProtocolStore
+- Renamed Listener.allPlayingRouters to routers
+- Renamed Listener.addPlayingRouter to addRouter
+- Renamed Listener.removePlayingRouter to removeRouter
+
 1.1.9 @ 2018-8-16
 - Fix executing an empty string as command killing the command stream
 - Update README

@@ -10,10 +10,16 @@ class Protocol {
     }
 
     /**
+     * @abstract
      * @returns {string}
      */
-    static get protocolName() { throw new Error("Must be implemented"); }
-    get protocolName() { return this.constructor.protocolName; }
+    static get type() { throw new Error("Must be implemented"); }
+    get type() { return this.constructor.type; }
+    /**
+     * @abstract
+     * @returns {string}
+     */
+    get subtype() { throw new Error("Must be implemented"); }
 
     get listener() { return this.connection.listener; }
     get handle() { return this.connection.listener.handle; }

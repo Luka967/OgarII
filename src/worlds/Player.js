@@ -1,4 +1,4 @@
-const PlayingRouter = require("../primitives/PlayingRouter");
+const Router = require("../primitives/Router");
 const ServerHandle = require("../ServerHandle");
 const World = require("./World");
 const Cell = require("../cells/Cell");
@@ -8,7 +8,7 @@ class Player {
     /**
      * @param {ServerHandle} handle
      * @param {number} id
-     * @param {PlayingRouter} router
+     * @param {Router} router
      */
     constructor(handle, id, router) {
         this.handle = handle;

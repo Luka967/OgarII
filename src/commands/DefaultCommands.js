@@ -1,4 +1,5 @@
 const { Command, genCommand } = require("./CommandList");
+const { EOL } = require("os");
 
 /**
  * @param {string} str
@@ -7,6 +8,40 @@ const { Command, genCommand } = require("./CommandList");
  */
 function padRight(str, pad, len) {
     return str + new Array(Math.max(len - str.length, 0)).fill(pad).join("");
+}
+
+/**
+ * @param {GenCommandTable} contents
+ * @param {string} eol
+ */
+function table(contents, eol) {
+    const columnSizes = [];
+    let all = "", i, j, rowText, row, col, size;
+    for (i = 0; i < contents.columns.length; i++) {
+        col = contents.columns[i];
+        size = col.text.length;
+        for (j = 0; j < contents.rows.length; j++)
+            size = Math.max(size, contents.rows[j][i] ? contents.rows[j][i].length : 0);
+        columnSizes.push(size);
+    }
+    for (i = 0, rowText = ""; i < contents.columns.length; i++) {
+        col = contents.columns[i];
+        rowText += (i == 0 ? "" : col.separated ? " | " : " ") + padRight(col.text, col.headPad, columnSizes[i]);
+    }
+    all += rowText + eol;
+    for (i = 0, rowText = ""; i < contents.rows.length; i++, rowText = "") {
+        for (j = 0; j < contents.rows[i].length; j++) {
+            row = contents.rows[i][j] || "";
+            col = contents.columns[j];
+            rowText += (j == 0 ? "" : col.separated ? " | " : " ") + padRight(row, row ? col.rowPad : col.emptyPad, columnSizes[j]);
+        }
+        for (; j < contents.columns.length; j++) {
+            col = contents.columns[j];
+            rowText += (j == 0 ? "" : col.separated ? " | " : " ") + padRight("", col.emptyPad, columnSizes[j]);
+        }
+        all += rowText + eol;
+    }
+    return all;
 }
 
 /**
@@ -22,21 +57,75 @@ module.exports = (commands, chatCommands) => {
             exec: (handle, context, args) => {
                 const list = handle.commands.list;
                 const keys = Object.keys(list).sort();
-                let nameLen = 4, argsLen = 10;
-                for (let name in list) {
-                    nameLen = Math.max(nameLen, list[name].name.length + 1);
-                    argsLen = Math.max(argsLen, list[name].args.length);
-                }
-                handle.logger.print(
-                    padRight("NAME", " ", nameLen - 1)
-                  + padRight(" ARGUMENTS", " ", argsLen)
-                  + "  | DESCRIPTION");
-                for (let i = 0, l = keys.length; i < l; i++)
-                    handle.logger.print(
-                        padRight(list[keys[i]].name + " ", " ", nameLen)
-                      + padRight(list[keys[i]].args, " ", argsLen)
-                      + " | "
-                      + list[keys[i]].description);
+                handle.logger.print(table({
+                    columns: [
+                        { text: "NAME",        headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
+                        { text: "ARGUMENTS",   headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
+                        { text: "DESCRIPTION", headPad: " ", emptyPad: " ", rowPad: " ", separated: true  }
+                    ],
+                    rows: keys.map(v => {
+                        return [
+                            list[v].name,
+                            list[v].args,
+                            list[v].description
+                        ]
+                    })
+                }, EOL));
+            }
+        }),
+        genCommand({
+            name: "routers",
+            args: "[router type]",
+            desc: "display information about routers and their players",
+            exec: (handle, context, args) => {
+                const matchingType = args.length >= 1 ? args[0] : null;
+                const routers = handle.listener.routers.filter(v => matchingType === null || v.type == matchingType);
+                handle.logger.print(table({
+                    columns: [
+                        { text: "N",     headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
+                        { text: "TYPE",  headPad: " ", emptyPad: " ", rowPad: " ", separated: true  },
+                        { text: "PRT",   headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
+                        { text: "P",     headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
+                        { text: "PID",   headPad: " ", emptyPad: "/", rowPad: " ", separated: true  },
+                        { text: "FID",   headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "STATE", headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "WID",   headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "SCORE", headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "NAME",  headPad: " ", emptyPad: "/", rowPad: " ", separated: false }
+                    ],
+                    rows: routers.map((v, i) => {
+                        let ret = [
+                            i.toString(),
+                            v.type,
+                            v.protocol ? v.protocol.subtype : "///",
+                            v.hasPlayer ? "Y" : "N"
+                        ];
+                        if (v.hasPlayer) {
+                            ret.push(v.player.id.toString());
+                            switch (v.player.state) {
+                                case -1: ret.push("idle"); break;
+                                case 0:
+                                    ret.push(v.type === "minion" ? v.following.player.id.toString() : null);
+                                    ret.push("alive");
+                                    ret.push(v.player.world.id.toString());
+                                    ret.push(Math.round(v.player.score).toString());
+                                    ret.push(v.player.ownedCells[0].name || "");
+                                    break;
+                                case 1:
+                                    ret.push(v.player.world.largestPlayer !== null ?
+                                        v.player.world.largestPlayer.id.toString() : null);
+                                    ret.push("spec");
+                                    ret.push(v.player.world.id.toString());
+                                    break;
+                                case 2:
+                                    ret.push("roam");
+                                    ret.push(v.player.world.id.toString());
+                                    break;
+                            }
+                        }
+                        return ret;
+                    })
+                }, EOL));
             }
         }),
         genCommand({
@@ -116,7 +205,7 @@ module.exports = (commands, chatCommands) => {
                     logger.print(`${heapUsed.toFixed(1)} MiB used heap / ${heapTotal.toFixed(1)} MiB total heap / ${rss.toFixed(1)} MiB allocated`);
                     logger.print(`running for ${prettyPrintTime(Math.floor((Date.now() - handle.startTime.getTime()) / 1000))}`);
                     const connections = handle.listener.connections.length;
-                    const bots = handle.listener.allPlayingRouters.length - connections;
+                    const bots = handle.listener.routers.length - connections;
                     logger.print(`${Object.keys(handle.players).length} players, ${connections} connections, ${bots} bots`);
                     for (let id in handle.worlds) {
                         const world = handle.worlds[id];

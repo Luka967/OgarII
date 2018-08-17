@@ -8,8 +8,8 @@ class FFA extends Gamemode {
         super(handle);
     }
 
-    static get gamemodeType() { return 0; }
-    static get gamemodeName() { return "FFA"; }
+    static get type() { return 0; }
+    static get name() { return "FFA"; }
 
     /** @param {Player} player @param {string} name */
     onPlayerSpawnRequest(player, name) {

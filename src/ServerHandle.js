@@ -1,9 +1,13 @@
 const Settings = require("./Settings");
 
 const { CommandList } = require("./commands/CommandList");
-const DefaultCommands = require("./commands/DefaultCommands");
 const GamemodeList = require("./gamemodes/GamemodeList");
-const ProtocolHandle = require("./protocols/ProtocolHandle");
+const ProtocolStore = require("./protocols/ProtocolStore");
+
+const DefaultCommands = require("./commands/DefaultCommands");
+const FFAGamemode = require("./gamemodes/FFA");
+const TeamsGamemode = require("./gamemodes/Teams");
+const LMSGamemode = require("./gamemodes/LastManStanding");
 const LegacyProtocol = require("./protocols/LegacyProtocol");
 const ModernProtocol = require("./protocols/ModernProtocol");
 
@@ -25,7 +29,7 @@ class ServerHandle {
         /** @type {Settings} */
         this.settings = Settings;
 
-        this.protocols = new ProtocolHandle();
+        this.protocols = new ProtocolStore();
         this.gamemodes = new GamemodeList(this);
         /** @type {Gamemode} */
         this.gamemode = null;
@@ -52,10 +56,10 @@ class ServerHandle {
         /** @type {Identified<Player>} */
         this.players = { };
 
-        this.setSettings(settings);
-        this.protocols.register(ModernProtocol);
-        this.protocols.register(LegacyProtocol);
         DefaultCommands(this.commands, this.chatCommands);
+        this.protocols.register(ModernProtocol, LegacyProtocol);
+        this.gamemodes.register(FFAGamemode, TeamsGamemode, LMSGamemode);
+        this.setSettings(settings);
     }
 
     get version() { return version; }
@@ -135,7 +139,7 @@ class ServerHandle {
     }
 
     /**
-     * @param {PlayingRouter} router
+     * @param {Router} router
      * @returns {Player}
      */
     createPlayer(router) {
@@ -178,5 +182,5 @@ class ServerHandle {
 
 module.exports = ServerHandle;
 
-const PlayingRouter = require("./primitives/PlayingRouter");
+const Router = require("./primitives/Router");
 const Gamemode = require("./gamemodes/Gamemode");

@@ -650,7 +650,7 @@ class World {
         this.stats.playing = playing;
         this.stats.spectating = spectating;
         this.stats.name = this.settings.serverName;
-        this.stats.gamemode = this.handle.gamemode.gamemodeName;
+        this.stats.gamemode = this.handle.gamemode.name;
         this.stats.loadTime = this.handle.averageTickTime / this.handle.stepMult;
         this.stats.uptime = Math.floor((Date.now() - this.handle.startTime.getTime()) / 1000);
     }

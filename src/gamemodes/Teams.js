@@ -32,8 +32,8 @@ class Teams extends Gamemode {
         super(handle);
     }
 
-    static get gamemodeName() { return "Teams"; }
-    static get gamemodeType() { return 1; }
+    static get name() { return "Teams"; }
+    static get type() { return 1; }
 
     /**
      * @param {World} world

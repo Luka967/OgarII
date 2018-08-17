@@ -1,25 +1,15 @@
 
-class ProtocolHandle {
+class ProtocolStore {
     constructor() {
         /** @type {typeof Protocol[]} */
-        this.protocols = [];
+        this.store = [];
     }
 
     /**
-     * @param {typeof Protocol} protocol
+     * @param {typeof Protocol[]} protocols
      */
-    register(protocol) {
-        this.protocols.push(protocol);
-    }
-
-    /**
-     * @param {typeof Protocol} protocol
-     */
-    unregister(protocol) {
-        const index = this.protocols.indexOf(protocol);
-        if (index === -1) return false;
-        this.protocols.splice(index, 1);
-        return true;
+    register(...protocols) {
+        this.store.splice(this.store.length, 0, ...protocols);
     }
 
     /**
@@ -27,8 +17,8 @@ class ProtocolHandle {
      * @param {Reader} reader
      */
     decide(connection, reader) {
-        for (let i = 0; i < this.protocols.length; i++) {
-            const generated = new this.protocols[i](connection);
+        for (let i = 0; i < this.store.length; i++) {
+            const generated = new this.store[i](connection);
             if (!generated.distinguishes(reader)) {
                 reader.offset = 0;
                 continue;
@@ -39,7 +29,7 @@ class ProtocolHandle {
     }
 }
 
-module.exports = ProtocolHandle;
+module.exports = ProtocolStore;
 
 const Protocol = require("./Protocol");
 const Connection = require("../sockets/Connection");

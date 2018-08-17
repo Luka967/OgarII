@@ -14,6 +14,9 @@ class LegacyProtocol extends Protocol {
         this.key = NaN;
     }
 
+    static get type() { return "legacy"; }
+    get subtype() { return `l${!isNaN(this.protocol) ? ("00" + this.protocol).slice(-2) : "//"}`; }
+
     /**
      * @param {Reader} reader
      */
@@ -172,7 +175,7 @@ class LegacyProtocol extends Protocol {
         writer.writeFloat64(range.x + range.w);
         writer.writeFloat64(range.y + range.h);
         if (includeServerInfo) {
-            writer.writeUInt32(this.handle.gamemode.gamemodeType);
+            writer.writeUInt32(this.handle.gamemode.type);
             writeZTString(writer, `OgarII ${this.handle.version}`, this.protocol);
         }
         this.send(writer.finalize());

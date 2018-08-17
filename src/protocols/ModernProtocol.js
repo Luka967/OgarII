@@ -30,6 +30,9 @@ class ModernProtocol extends Protocol {
         this.worldStatsPending = false;
     }
 
+    static get type() { return "modern"; }
+    get subtype() { return `m${!isNaN(this.protocol) ? ("00" + this.protocol).slice(-2) : "//"}`; }
+
     /**
      * @param {Reader} reader
      */
@@ -170,7 +173,7 @@ class ModernProtocol extends Protocol {
             this.worldBorderPending = null;
         }
         if (this.serverInfoPending) {
-            writer.writeUInt8(this.handle.gamemode.gamemodeType);
+            writer.writeUInt8(this.handle.gamemode.type);
             item = this.handle.version.split(".");
             writer.writeUInt8(parseInt(item[0]));
             writer.writeUInt8(parseInt(item[1]));

@@ -3,7 +3,7 @@ class Command {
      * @param {string} name
      * @param {string} description
      * @param {string} args
-     * @param {CommandExecutor} executor 
+     * @param {(handle: ServerHandle, context: any, args: string[]) => void} executor 
      */
     constructor(name, description, args, executor) {
         this.name = name.toLowerCase();

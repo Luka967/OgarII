@@ -1,7 +1,7 @@
-const PlayingRouter = require("../primitives/PlayingRouter");
+const Router = require("../primitives/Router");
 const Reader = require("../primitives/Reader");
 
-class Connection extends PlayingRouter {
+class Connection extends Router {
     /**
      * @param {Listener} listener
      * @param {WebSocket} webSocket

@@ -1,5 +1,5 @@
 /** @interface */
-class PlayingRouter {
+class Router {
     /**
      * @param {Listener} listener
      */
@@ -20,8 +20,10 @@ class PlayingRouter {
         this.ejectAttempts = 0;
 
         this.hasPlayer = false;
+        /** @type {Player} */
         this.player = null;
-        this.listener.addPlayingRouter(this);
+        
+        this.listener.addRouter(this);
     }
 
     /** @abstract @returns {string} */
@@ -90,7 +92,7 @@ class PlayingRouter {
 
     /** @virtual */
     close() {
-        this.listener.removePlayingRouter(this);
+        this.listener.removeRouter(this);
     }
 
     /** @abstract @returns {boolean} */
@@ -103,7 +105,7 @@ class PlayingRouter {
     }
 }
 
-module.exports = PlayingRouter;
+module.exports = Router;
 
 const Listener = require("../sockets/Listener");
 const Player = require("../worlds/Player");

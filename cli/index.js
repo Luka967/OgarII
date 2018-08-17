@@ -38,7 +38,7 @@ const commandStream = readline.createInterface({
 function ask() {
     if (commandStreamClosing) return;
     commandStream.question("@ ", (input) => {
-        setTimeout(ask, 1000);
+        setTimeout(ask, 0);
         if (!(input = input.trim())) return;
         logger.printFile(`@ ${input}`);
         if (!currentHandle.commands.execute(null, input))

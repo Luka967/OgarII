@@ -1,9 +1,9 @@
-const PlayingRouter = require("../primitives/PlayingRouter");
+const Router = require("../primitives/Router");
 
 /**
  * @abstract
 */
-class Bot extends PlayingRouter {
+class Bot extends Router {
     /**
      * @param {World} world
      */

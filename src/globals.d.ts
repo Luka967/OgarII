@@ -59,6 +59,16 @@ interface CommandGeneratorInfo {
     desc: string;
     exec: CommandExecutor;
 }
+interface GenCommandTable {
+    columns: {
+        text: string;
+        headPad: string;
+        emptyPad: string;
+        rowPad: string;
+        separated: boolean;
+    }[];
+    rows: string[][];
+}
 
 declare type LogEvent = (date: Date, level: "DEBUG" | "ACCESS" | "INFO" | "WARN" | "ERROR" | "FATAL", message: string) => void;
 declare type LogMessageData = any[];

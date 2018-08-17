@@ -79,6 +79,7 @@ pop        <id>                 | instantly pop a player's first cell
 reload                          | reload the settings from local settings.json
 restart                         | restart the server
 resume                          | unpause the server
+routers    [router type]        | display information about routers and their players
 save                            | save the current settings to settings.json
 setting    <name> [value]       | change/print the value of a setting
 start                           | start the server
@@ -86,3 +87,16 @@ stats                           | display critical information about the server
 stop                            | close the server
 test                            | test command
 ```
+
+### `routers` column explanation
+
+`N` - router's index
+`TYPE` - router type (connection, playerbot, minion)
+`PRT` - router's protocol, if a connection
+`P` - does the router have a player
+`PID` - player id
+`FID` - following player id, if minion or spectating
+`STATE` - player's state
+`WID` - player's world id
+`SCORE` - player's mass sum
+`NAME` - player's first owned cell name
