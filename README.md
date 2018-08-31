@@ -4,7 +4,7 @@ Your friendly agar.io private server recreation.
 
 - It supports all current agar.io protocol versions (4 - 18).
 
-- It supports handling multiple worlds, all within one instance. Be wary that you can still use up the one CPU core node.js is running.
+- It supports handling multiple worlds, all within one instance. Be wary that you can still use up the one CPU core node.js is running on.
 
 - It has a minimal memory footprint, and strictly uses uWebSockets for networking.
 

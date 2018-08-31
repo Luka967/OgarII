@@ -24,7 +24,8 @@ class EjectedCell extends Cell {
      * @returns {CellEatResult}
      */
     getEatResult(other) {
-        if (other.type === 2 || other.type === 4) return 3;
+        if (other.type === 2) return other.getEjectedEatResult(false);
+        if (other.type === 4) return 3;
         if (other.type === 3) {
             if (!other.isBoosting) other.world.setCellAsBoosting(other);
             return 1;

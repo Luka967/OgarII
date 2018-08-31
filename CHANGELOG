@@ -10,6 +10,14 @@ TODO 1.2.0
 - Implement message size assertion for the modern protocol
 - Implement adding a new player to specified world if its id has been given in HTTP request path
 
+1.1.11 @ 2018-8-31
+- Fix wrong usage of unsigned integers for cell position in legacy protocol
+- Fix crash when matchmakerNeedsQueuing is on
+- Fix virus count being able to exceed virusMaxCount
+- Upgraded uws dependency version
+- Refactored stats command
+- Formatting
+
 1.1.10 @ 2018-8-18
 - Removed delay between commands, no idea why was it there in the first place
 - Default gamemodes are now registered at ServerHandle instead of GamemodeList

@@ -9,6 +9,14 @@ const { EOL } = require("os");
 function padRight(str, pad, len) {
     return str + new Array(Math.max(len - str.length, 0)).fill(pad).join("");
 }
+/**
+ * @param {string} str
+ * @param {string} pad
+ * @param {number} len
+ */
+function padLeft(str, pad, len) {
+    return new Array(Math.max(len - str.length, 0)).fill(pad).join("") + str;
+}
 
 /**
  * @param {GenCommandTable} contents
@@ -42,6 +50,32 @@ function table(contents, eol) {
         all += rowText + eol;
     }
     return all;
+}
+
+/** @param {number} value */
+function prettyMemory(value) {
+    const units = ["B", "kiB", "MiB", "GiB"]; let i = 0;
+    for (; i < units.length && value / 1024 > 1; i++)
+        value /= 1024;
+    return `${value.toFixed(1)} ${units[i]}`;
+}
+
+/** @param {number} seconds */
+function prettyTime(seconds) {
+    seconds = ~~seconds;
+
+    let minutes = ~~(seconds / 60);
+    if (minutes < 1) return `${seconds} seconds`;
+    if (seconds === 60) return `1 minute`;
+
+    let hours = ~~(minutes / 60);
+    if (hours < 1) return `${minutes} minute${minutes === 1 ? "" : "s"} ${seconds % 60} second${seconds === 1 ? "" : "s"}`;
+    if (minutes === 60) return `1 hour`;
+
+    let days = ~~(hours / 24);
+    if (days < 1) return `${hours} hour${hours === 1 ? "" : "s"} ${minutes % 60} minute${minutes === 1 ? "" : "s"}`;
+    if (hours === 24) return `1 day`;
+    return `${days} day${days === 1 ? "" : "s"} ${hours % 24} hour${hours === 1 ? "" : "s"}`;
 }
 
 /**
@@ -197,20 +231,18 @@ module.exports = (commands, chatCommands) => {
                     logger.print("not running");
                 else {
                     const memory = process.memoryUsage();
-                    memory.heapUsed /= 1048576;
-                    memory.heapTotal /= 1048576;
-                    memory.rss /= 1048576;
-                    const { heapUsed, heapTotal, rss } = memory;
-                    logger.print(`average tick time: ${handle.averageTickTime.toFixed(2)} ms / ${handle.tickDelay} ms`);
-                    logger.print(`${heapUsed.toFixed(1)} MiB used heap / ${heapTotal.toFixed(1)} MiB total heap / ${rss.toFixed(1)} MiB allocated`);
-                    logger.print(`running for ${prettyPrintTime(Math.floor((Date.now() - handle.startTime.getTime()) / 1000))}`);
-                    const connections = handle.listener.connections.length;
-                    const bots = handle.listener.routers.length - connections;
-                    logger.print(`${Object.keys(handle.players).length} players, ${connections} connections, ${bots} bots`);
+                    logger.print(`load:    ${handle.averageTickTime.toFixed(4)} ms / ${handle.tickDelay} ms`);
+                    logger.print(`heap:    ${prettyMemory(memory.heapUsed)} / ${prettyMemory(memory.heapTotal)} / ${prettyMemory(memory.rss)} / ${prettyMemory(memory.external)}`);
+                    logger.print(`time:    ${prettyTime(Math.floor((Date.now() - handle.startTime.getTime()) / 1000))}`);
+                    const external = handle.listener.connections.length;
+                    const internal = handle.listener.routers.length - external;
+                    logger.print(`routers: ${Object.keys(handle.players).length} players, ${external} external, ${internal} internal`);
                     for (let id in handle.worlds) {
-                        const world = handle.worlds[id];
-                        logger.print(`world ${id}: ${world.cells.length} cells - ${world.playerCells.length}P/${world.pelletCount}p/${world.virusCount}v/${world.ejectedCells.length}e/${world.mothercellCount}m`);
-                        logger.print(`    ${world.stats.external} / ${world.stats.limit} players, ${world.stats.playing} playing, ${world.stats.spectating} spectating, ${world.stats.internal} bots`);
+                        const world = handle.worlds[id], stats = world.stats,
+                            cells = [ world.cells.length, world.playerCells.length, world.pelletCount, world.virusCount, world.ejectedCells.length, world.mothercellCount],
+                            statsF = [ stats.external, stats.internal, stats.limit, stats.playing, stats.spectating ];
+                        logger.print(`world ${id}: ${cells[0]} cells - ${cells[1]}P/${cells[2]}p/${cells[3]}v/${cells[4]}e/${cells[5]}m`);
+                        logger.print(`         ${statsF[0]} / ${statsF[1]} / ${statsF[2]} players - ${statsF[3]}p/${statsF[4]}s`);
                     }
                 }
             }
@@ -479,23 +511,6 @@ module.exports = (commands, chatCommands) => {
         })
     );
 };
-
-function prettyPrintTime(seconds) {
-    seconds = ~~seconds;
-
-    let minutes = ~~(seconds / 60);
-    if (minutes < 1) return `${seconds} seconds`;
-    if (seconds === 60) return `1 minute`;
-
-    let hours = ~~(minutes / 60);
-    if (hours < 1) return `${minutes} minute${minutes === 1 ? "" : "s"} ${seconds % 60} second${seconds === 1 ? "" : "s"}`;
-    if (minutes === 60) return `1 hour`;
-
-    let days = ~~(hours / 24);
-    if (days < 1) return `${hours} hour${hours === 1 ? "" : "s"} ${minutes % 60} minute${minutes === 1 ? "" : "s"}`;
-    if (hours === 24) return `1 day`;
-    return `${days} day${days === 1 ? "" : "s"} ${hours % 24} hour${hours === 1 ? "" : "s"}`;
-}
 
 const { CommandList } = require("./CommandList");
 const ServerHandle = require("../ServerHandle");

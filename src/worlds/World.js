@@ -209,7 +209,7 @@ class World {
     }
     /**
      * @param {number} cellSize
-     * @returns {{color: Color, pos: Position}}
+     * @returns {{ color: Color, pos: Position }}
      */
     getPlayerSpawn(cellSize) {
         if (this.settings.worldSafeSpawnFromEjectedChance > Math.random() && this.ejectedCells.length > 0) {

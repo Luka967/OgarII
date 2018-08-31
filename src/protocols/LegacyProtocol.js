@@ -393,8 +393,8 @@ const writeCellData = {
  */
 function writeCellData4(writer, source, protocol, cell, includeType, includeSize, includePos, includeColor, includeName, includeSkin) {
     writer.writeUInt32(cell.id);
-    writer[protocol === 4 ? "writeUInt16" : "writeUInt32"](cell.x);
-    writer[protocol === 4 ? "writeUInt16" : "writeUInt32"](cell.y);
+    writer[protocol === 4 ? "writeInt16" : "writeInt32"](cell.x);
+    writer[protocol === 4 ? "writeInt16" : "writeInt32"](cell.y);
     writer.writeUInt16(cell.size);
     writer.writeUInt8(cell.color.r);
     writer.writeUInt8(cell.color.g);
@@ -425,8 +425,8 @@ function writeCellData4(writer, source, protocol, cell, includeType, includeSize
  */
 function writeCellData6(writer, source, protocol, cell, includeType, includeSize, includePos, includeColor, includeName, includeSkin) {
     writer.writeUInt32(cell.id);
-    writer.writeUInt32(cell.x);
-    writer.writeUInt32(cell.y);
+    writer.writeInt32(cell.x);
+    writer.writeInt32(cell.y);
     writer.writeUInt16(cell.size);
 
     let flags = 0;
@@ -460,8 +460,8 @@ function writeCellData6(writer, source, protocol, cell, includeType, includeSize
  */
 function writeCellData11(writer, source, protocol, cell, includeType, includeSize, includePos, includeColor, includeName, includeSkin) {
     writer.writeUInt32(cell.id);
-    writer.writeUInt32(cell.x);
-    writer.writeUInt32(cell.y);
+    writer.writeInt32(cell.x);
+    writer.writeInt32(cell.y);
     writer.writeUInt16(cell.size);
 
     let flags = 0;

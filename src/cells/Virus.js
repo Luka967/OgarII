@@ -24,10 +24,16 @@ class Virus extends Cell {
      * @returns {CellEatResult}
      */
     getEatResult(other) {
-        if (other.type === 3 && this.world.virusCount < this.world.settings.virusMaxCount)
-            return 2;
+        if (other.type === 3) return this.getEjectedEatResult(true);
         if (other.type === 4) return 3;
         return 0;
+    }
+    /**
+     * @param {boolean} isSelf
+     * @returns {CellEatResult}
+     */
+    getEjectedEatResult(isSelf) {
+        return this.world.virusCount >= this.world.settings.virusMaxCount ? 0 : isSelf ? 2 : 3;
     }
 
     onSpawned() {
