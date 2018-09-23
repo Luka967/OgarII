@@ -19,7 +19,7 @@ class PlayerCell extends Cell {
     }
 
     get moveSpeed() {
-        return 88 * Math.pow(this.size, -0.4396754) * this.owner.settings.playerMoveMult;
+        return 88 * Math.pow(this.size, -0.4396754) * (this.owner.customSpeed > 0 ? this.owner.customSpeed : this.owner.settings.playerMoveMult);
     }
     get canMerge() { return this._canMerge; }
 

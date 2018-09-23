@@ -41,6 +41,8 @@ class Player {
             h: 1080 / 2 * handle.settings.playerViewScaleMult,
             s: 1
         };
+
+        this.customSpeed = -1;
     }
 
     get settings() { return this.handle.settings; }

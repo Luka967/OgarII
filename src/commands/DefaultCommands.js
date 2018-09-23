@@ -286,6 +286,24 @@ module.exports = (commands, chatCommands) => {
                 for (let i = 0; i < l; i++) player.ownedCells[i].mass = mass;
                 handle.logger.print(`player now has ${mass * l} mass`);
             }
+        }),genCommand({
+            name: "speed",
+            args: "<id> <speed>",
+            desc: "change cell speed",
+            exec: (handle, context, args) => {
+                if (args.length === 0) return void handle.logger.print("missing player id");
+                if (args.length === 1) return void handle.logger.print("missing speed input");
+                const id = parseInt(args[0]);
+                if (isNaN(id)) return void handle.logger.print("invalid number for player id");
+                if (!handle.players.hasOwnProperty(id))
+                    return void handle.logger.print("no player has this id");
+                const speed = parseFloat(args[1]);
+                if (isNaN(speed)) return void handle.logger.print("invalid number for speed input");
+                const player = handle.players[id];
+                if (player.state !== 0) return void handle.logger.print("player is not alive");
+                player.customSpeed = speed;
+                handle.logger.print(`player now has speed ${speed}`);
+            }
         }),
         genCommand({
             name: "merge",
