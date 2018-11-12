@@ -11,7 +11,7 @@ class Connection extends Router {
         this.remoteAddress = webSocket._socket.remoteAddress;
         this.webSocket = webSocket;
         this.lastActivityTime = Date.now();
-        
+
         this.upgradeLevel = 0;
         /** @type {Protocol} */
         this.protocol = null;
@@ -130,7 +130,7 @@ class Connection extends Router {
             if (cell.eatenBy !== null) eat.push(cell);
             del.push(cell);
         }
-        
+
         if (player.state === 1 || player.state === 2)
             this.protocol.onSpectatePosition(player.viewArea);
         if (this.handle.tick % 4 === 0)
@@ -143,6 +143,9 @@ class Connection extends Router {
     /** @param {PlayerCell} cell */
     onNewOwnedCell(cell) {
         this.protocol.onNewOwnedCell(cell);
+    }
+    onWorldReset() {
+        this.protocol.onWorldReset();
     }
 
     /** @param {Buffer} data */

@@ -43,12 +43,12 @@ class ServerHandle {
         this.tick = NaN;
         this.tickDelay = NaN;
         this.stepMult = NaN;
-        
+
         this.ticker = new Ticker(40);
         this.ticker.add(this._onTick.bind(this));
         this.stopwatch = new Stopwatch();
         this.logger = new Logger();
-        
+
         this.listener = new Listener(this);
         this.matchmaker = new Matchmaker(this);
         /** @type {Identified<World>} */
@@ -77,7 +77,7 @@ class ServerHandle {
     start() {
         if (this.running) return false;
         this.logger.inform("starting");
-        
+
         this.gamemodes.setGamemode(this.settings.serverGamemode);
         this.startTime = new Date();
         this.averageTickTime = this.tick = 0;
@@ -172,8 +172,8 @@ class ServerHandle {
         for (let id in this.worlds)
             this.worlds[id].update();
         this.listener.update();
-        this.gamemode.onHandleTick();
         this.matchmaker.update();
+        this.gamemode.onHandleTick();
 
         this.averageTickTime = this.stopwatch.elapsed();
         this.stopwatch.stop();

@@ -57,6 +57,10 @@ class Protocol {
     onNewWorldBounds(world, includeServerInfo) { throw new Error("Must be implemented"); }
     /**
      * @abstract
+     */
+    onWorldReset() { throw new Error("Must be implemented"); }
+    /**
+     * @abstract
      * @param {LeaderboardType} type
      * @param {LeaderboardDataType[type][]} data
      * @param {LeaderboardDataType[type]=} selfData

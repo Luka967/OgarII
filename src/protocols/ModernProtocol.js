@@ -28,6 +28,7 @@ class ModernProtocol extends Protocol {
         this.spectateAreaPending = null;
         this.serverInfoPending = false;
         this.worldStatsPending = false;
+        this.clearCellsPending = false;
     }
 
     static get type() { return "modern"; }
@@ -111,6 +112,11 @@ class ModernProtocol extends Protocol {
         this.serverInfoPending = includeServerInfo;
     }
 
+    onWorldReset() {
+        this.clearCellsPending = true;
+        this.onVisibleCellUpdate([], [], [], []);
+    }
+
     /**
      * @param {LeaderboardType} type
      * @param {LeaderboardDataType[type][]} data
@@ -143,15 +149,17 @@ class ModernProtocol extends Protocol {
         if (this.spectateAreaPending != null) globalFlags |= 1;
         if (this.worldBorderPending != null)  globalFlags |= 2;
         if (this.serverInfoPending)           globalFlags |= 4;
-        if (this.connection.hasPlayer && this.connection.player.hasWorld && this.worldStatsPending)          
+        if (this.connection.hasPlayer && this.connection.player.hasWorld && this.worldStatsPending)
                                               globalFlags |= 8;
         if (this.chatPending.length > 0)      globalFlags |= 16;
         if (this.leaderboardPending)          globalFlags |= 32;
-        if (add.length > 0)                   globalFlags |= 64;
-        if (upd.length > 0)                   globalFlags |= 128;
-        if (eat.length > 0)                   globalFlags |= 256;
-        if (del.length > 0)                   globalFlags |= 512;
-        
+        if (this.clearCellsPending)           globalFlags |= 64,
+            this.clearCellsPending = false;
+        if (add.length > 0)                   globalFlags |= 128;
+        if (upd.length > 0)                   globalFlags |= 256;
+        if (eat.length > 0)                   globalFlags |= 512;
+        if (del.length > 0)                   globalFlags |= 1024;
+
         if (globalFlags === 0) return;
 
         const writer = new Writer();

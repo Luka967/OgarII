@@ -12,6 +12,8 @@ class LegacyProtocol extends Protocol {
         this.protocol = NaN;
         this.gotKey = false;
         this.key = NaN;
+
+        this.lastLeaderboardType = null;
     }
 
     static get type() { return "legacy"; }
@@ -122,8 +124,8 @@ class LegacyProtocol extends Protocol {
     }
 
     /**
-     * @param {ChatSource} source 
-     * @param {string} message 
+     * @param {ChatSource} source
+     * @param {string} message
      */
     onChatMessage(source, message) {
         const writer = new Writer();
@@ -181,12 +183,23 @@ class LegacyProtocol extends Protocol {
         this.send(writer.finalize());
     }
 
+    onWorldReset() {
+        const writer = new Writer();
+        writer.writeUInt8(18);
+        this.send(writer.finalize());
+        if (this.lastLeaderboardType !== null) {
+            this.onLeaderboardUpdate(this.lastLeaderboardType, [], null);
+            this.lastLeaderboardType = null;
+        }
+    }
+
     /**
      * @param {LeaderboardType} type
      * @param {LeaderboardDataType[type][]} data
      * @param {LeaderboardDataType[type]=} selfData
      */
     onLeaderboardUpdate(type, data, selfData) {
+        this.lastLeaderboardType = type;
         const writer = new Writer();
         switch (type) {
             case "ffa":

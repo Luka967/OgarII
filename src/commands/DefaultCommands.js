@@ -466,12 +466,12 @@ module.exports = (commands, chatCommands) => {
             args: "",
             desc: "get your world's id",
             exec: (handle, context, args) => {
-                const worldId = context.hasPlayer ? !context.player.hasWorld ? context.player.world.id : null : null;
-                handle.listener.globalChat.directMessage(
-                    null,
-                    context,
-                    worldId !== null ? `your world ID is ${worldId}` : "you're not in a world"
-                );
+                const chat = handle.listener.globalChat;
+                if (!context.hasPlayer)
+                    return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
+                if (!context.player.hasWorld)
+                    return void chat.directMessage(null, context, "you're not in a world");
+                chat.directMessage(`your world ID is ${context.player.world.id}`);
             }
         }),
         genCommand({
