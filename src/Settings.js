@@ -26,6 +26,7 @@ const value = Object.seal({
     worldPlayerDisposeDelay: 25 * 60,
 
     worldPlayerBotsPerWorld: 0,
+    worldPlayerBotNames: ['Best gamer', 'OgarII is cool', 'cell', 'pro', 'King', 'Queen', 'boss', 'List of noobs:', 'Team?', 'An unnamed cell', 'bored', 'lol'],
     worldMinionsPerPlayer: 0,
     worldMaxPlayers: 50,
     worldMaxCount: 2,
