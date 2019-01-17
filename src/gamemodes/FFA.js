@@ -1,5 +1,6 @@
 const Gamemode = require("./Gamemode");
 const Misc = require("../primitives/Misc");
+const Minion = require("../bots/Minion");
 
 class FFA extends Gamemode {
     /** @param {ServerHandle} handle */
@@ -7,13 +8,15 @@ class FFA extends Gamemode {
         super(handle);
     }
 
-    static get gamemodeType() { return 0; }
-    static get gamemodeName() { return "FFA"; }
+    static get type() { return 0; }
+    static get name() { return "FFA"; }
 
     /** @param {Player} player @param {string} name */
     onPlayerSpawnRequest(player, name) {
-        if (player.state === 0) return;
-        const size = this.handle.settings.playerSpawnSize;
+        if (player.state === 0 || !player.hasWorld) return;
+        const size = player.router.type === "minion" ?
+             this.handle.settings.minionSpawnSize :
+             this.handle.settings.playerSpawnSize;
         const spawnInfo = player.world.getPlayerSpawn(size);
         player.world.spawnPlayer(player, spawnInfo.color || Misc.randomColor(), spawnInfo.pos, size, name, null);
     }
@@ -25,9 +28,9 @@ class FFA extends Gamemode {
 
     /** @param {Connection} connection */
     sendLeaderboard(connection) {
+        if (!connection.hasPlayer) return;
         const player = connection.player;
-        if (player === null) return;
-        if (player.world === null) return;
+        if (!player.hasWorld) return;
         if (player.world.frozen) return;
         /** @type {Player[]} */
         const leaderboard = player.world.leaderboard;

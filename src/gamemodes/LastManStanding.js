@@ -1,8 +1,8 @@
 const FFA = require("./FFA");
 
 class LastManStanding extends FFA {
-    static get gamemodeName() { return "Last Man Standing"; }
-    static get gamemodeType() { return 0; }
+    static get name() { return "Last Man Standing"; }
+    static get type() { return 0; }
 
     /**
      * @param {World} world

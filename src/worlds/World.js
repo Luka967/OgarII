@@ -65,7 +65,7 @@ class World {
             uptime: NaN
         };
 
-        this.setBorder({ x: this.settings.mapX, y: this.settings.mapY, w: this.settings.mapW, h: this.settings.mapH });
+        this.setBorder({ x: this.settings.worldMapX, y: this.settings.worldMapY, w: this.settings.worldMapW, h: this.settings.worldMapH });
     }
 
     get settings() { return this.handle.settings; }
@@ -74,7 +74,7 @@ class World {
     }
 
     afterCreation() {
-        for (let i = 0; i < this.settings.playerBotsPerWorld; i++)
+        for (let i = 0; i < this.settings.worldPlayerBotsPerWorld; i++)
             new PlayerBot(this);
     }
     destroy() {
@@ -93,8 +93,8 @@ class World {
         if (this.finder !== null) this.finder.destroy();
         this.finder = new QuadTree(
             this.border,
-            this.settings.finderMaxLevel,
-            this.settings.finderMaxItems
+            this.settings.worldFinderMaxLevel,
+            this.settings.worldFinderMaxItems
         );
         for (let i = 0, l = this.cells.length; i < l; i++) {
             const cell = this.cells[i];
@@ -156,12 +156,13 @@ class World {
     addPlayer(player) {
         this.players.push(player);
         player.world = this;
+        player.hasWorld = true;
         this.worldChat.add(player.router);
         this.handle.gamemode.onPlayerJoinWorld(player, this);
         player.router.onWorldSet();
         this.handle.logger.debug(`player ${player.id} has been added to world ${this.id}`);
         if (!player.router.isExternal) return;
-        for (let i = 0; i < this.settings.minionsPerPlayer; i++)
+        for (let i = 0; i < this.settings.worldMinionsPerPlayer; i++)
             new Minion(player.router);
     }
     /** @param {Player} player */
@@ -169,7 +170,8 @@ class World {
         this.players.splice(this.players.indexOf(player), 1);
         this.handle.gamemode.onPlayerLeaveWorld(player, this);
         player.world = null;
-        this.worldChat.remove(player.router);        
+        player.hasWorld = false;
+        this.worldChat.remove(player.router);
         while (player.ownedCells.length > 0)
             this.removeCell(player.ownedCells[0]);
         player.router.onWorldReset();
@@ -197,7 +199,7 @@ class World {
      * @returns {Position}
      */
     getSafeSpawnPos(cellSize) {
-        let tries = this.settings.safeSpawnTries;
+        let tries = this.settings.worldSafeSpawnTries;
         while (--tries >= 0) {
             const pos = this.getRandomPos(cellSize);
             if (this.isSafeSpawnPos({ x: pos.x, y: pos.y, w: cellSize, h: cellSize }))
@@ -207,11 +209,11 @@ class World {
     }
     /**
      * @param {number} cellSize
-     * @returns {{color: Color, pos: Position}}
+     * @returns {{ color: Color, pos: Position }}
      */
     getPlayerSpawn(cellSize) {
-        if (this.settings.safeSpawnFromEjected > Math.random() && this.ejectedCells.length > 0) {
-            let tries = this.settings.safeSpawnTries;
+        if (this.settings.worldSafeSpawnFromEjectedChance > Math.random() && this.ejectedCells.length > 0) {
+            let tries = this.settings.worldSafeSpawnTries;
             while (--tries >= 0) {
                 const cell = this.ejectedCells[~~(Math.random() * this.ejectedCells.length)];
                 if (this.isSafeSpawnPos({ x: cell.x, y: cell.y, w: cellSize, h: cellSize })) {
@@ -263,11 +265,9 @@ class World {
         const eat = [], rigid = [];
         let i, l;
 
-        // fire cell onTick
         for (i = 0, l = this.cells.length; i < l; i++)
             this.cells[i].onTick();
-        
-        // spawn passives
+
         while (this.pelletCount < this.settings.pelletCount) {
             const pos = this.getSafeSpawnPos(this.settings.pelletMinSize);
             this.addCell(new Pellet(this, this, pos.x, pos.y));
@@ -280,14 +280,12 @@ class World {
             const pos = this.getSafeSpawnPos(this.settings.mothercellSize);
             this.addCell(new Mothercell(this, pos.x, pos.y));
         }
-        
-        // boosting cell updates
+
         for (i = 0, l = this.boostingCells.length; i < l;) {
             if (!this.boostCell(this.boostingCells[i])) l--;
             else i++;
         }
 
-        // boosting cell checks
         for (i = 0; i < this.boostingCells.length; i++) {
             const cell = this.boostingCells[i];
             if (cell.type !== 2 && cell.type !== 3) continue;
@@ -300,8 +298,7 @@ class World {
                 }
             });
         }
-
-        // player cell updates        
+       
         for (i = 0, l = this.playerCells.length; i < l; i++) {
             const cell = this.playerCells[i];
             this.autosplitPlayerCell(cell);
@@ -311,7 +308,6 @@ class World {
             this.updateCell(cell);
         }
 
-        // player cell checks
         for (i = 0; i < l; i++) {
             const cell = this.playerCells[i];
             this.finder.search(cell.range, /** @param {Cell} other */ (other) => {
@@ -324,16 +320,18 @@ class World {
             });
         }
 
-        // resolve rigids
         for (i = 0, l = rigid.length; i < l;)
             this.resolveRigidCheck(rigid[i++], rigid[i++]);
-
-        // resolve eats
         for (i = 0, l = eat.length; i < l;)
             this.resolveEatCheck(eat[i++], eat[i++]);
 
-        // update players
         this.largestPlayer = null;
+        for (i = 0, l = this.players.length; i < l; i++) {
+            const player = this.players[i];
+            if (!isNaN(player.score) && (this.largestPlayer === null || player.score > this.largestPlayer.score))
+                this.largestPlayer = player;
+        }
+
         for (i = 0, l = this.players.length; i < l; i++) {
             const player = this.players[i];
             player.checkDisconnect();
@@ -361,8 +359,6 @@ class World {
                 router.spawningName = null;
             }
             player.updateViewArea();
-            if (!isNaN(player.score) && (this.largestPlayer === null || player.score > this.largestPlayer.score))
-                this.largestPlayer = player;
         }
         this.compileStatistics();
         this.handle.gamemode.compileLeaderboard(this);
@@ -451,8 +447,8 @@ class World {
     /** @param {Virus} virus */
     splitVirus(virus) {
         const newVirus = new Virus(this, virus.x, virus.y);
-        newVirus.boost.dx = virus.boost.dx;
-        newVirus.boost.dy = virus.boost.dy;
+        newVirus.boost.dx = Math.sin(virus.splitAngle);
+        newVirus.boost.dy = Math.cos(virus.splitAngle);
         newVirus.boost.d = this.settings.virusSplitBoost;
         this.addCell(newVirus);
         this.setCellAsBoosting(newVirus);
@@ -547,7 +543,7 @@ class World {
             else dx /= d, dy /= d;
             const sx = cell.x + dx * cell.size;
             const sy = cell.y + dy * cell.size;
-            const newCell = new EjectedCell(this, sx, sy, cell.color);
+            const newCell = new EjectedCell(this, player, sx, sy, cell.color);
             const a = Math.atan2(dx, dy) - dispersion + Math.random() * 2 * dispersion;
             newCell.boost.dx = Math.sin(a);
             newCell.boost.dy = Math.cos(a);
@@ -654,7 +650,7 @@ class World {
         this.stats.playing = playing;
         this.stats.spectating = spectating;
         this.stats.name = this.settings.serverName;
-        this.stats.gamemode = this.handle.gamemode.gamemodeName;
+        this.stats.gamemode = this.handle.gamemode.name;
         this.stats.loadTime = this.handle.averageTickTime / this.handle.stepMult;
         this.stats.uptime = Math.floor((Date.now() - this.handle.startTime.getTime()) / 1000);
     }

@@ -6,13 +6,13 @@ class Gamemode {
     }
 
     /** @returns {number} @abstract */
-    static get gamemodeType() { throw new Error("Must be overriden"); }
+    static get type() { throw new Error("Must be overriden"); }
     /** @returns {number} */
-    get gamemodeType() { return this.constructor.gamemodeType; }
+    get type() { return this.constructor.type; }
     /** @returns {string} @abstract */
-    static get gamemodeName() { throw new Error("Must be overriden"); }
+    static get name() { throw new Error("Must be overriden"); }
     /** @returns {string} */
-    get gamemodeName() { return this.constructor.gamemodeName; }
+    get name() { return this.constructor.name; }
 
     /** @virtual */
     onHandleStart() { }
@@ -51,12 +51,12 @@ class Gamemode {
     }
     /** @param {Player} player @virtual */
     whenPlayerEject(player) {
-        if (player.world === null) return;
+        if (!player.hasWorld) return;
         player.world.ejectFromPlayer(player);
     }
     /** @param {Player} player @virtual */
     whenPlayerSplit(player) {
-        if (player.world === null) return;
+        if (!player.hasWorld) return;
         player.world.splitPlayer(player);
     }
     /** @param {Player} player @param {string} name @abstract */

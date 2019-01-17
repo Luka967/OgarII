@@ -58,9 +58,12 @@ class PlayerCell extends Cell {
         const settings = this.world.settings;
         let delay = settings.playerNoMergeDelay;
         if (settings.playerMergeTime > 0) {
-            if (settings.playerMergeVersion === "new")
-                delay = Math.round(settings.playerMergeTime + this.mass * settings.playerMergeTimeIncrease) * 25;
-            else delay = Math.max(delay, Math.max(settings.playerMergeTime * 25, Math.round(this.age * settings.playerMergeTimeIncrease) * 25));
+            let mergeDelay;
+            const initial = Math.round(25 * settings.playerMergeTime);
+            const increase = Math.round(25 * this.mass * settings.playerMergeTimeIncrease);
+            if (settings.playerMergeVersion === "old") mergeDelay = initial + increase;
+            else mergeDelay = Math.max(initial, increase);
+            delay = Math.max(delay, mergeDelay);
         }
         this._canMerge = this.age >= delay;
     }

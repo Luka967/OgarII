@@ -14,8 +14,8 @@ class Listener {
         this.handle = handle;
         this.globalChat = new ChatChannel(this);
 
-        /** @type {PlayingRouter[]} */
-        this.allPlayingRouters = [];
+        /** @type {Router[]} */
+        this.routers = [];
         /** @type {Connection[]} */
         this.connections = [];
         /** @type {Counter<IPAddress>} */
@@ -44,8 +44,8 @@ class Listener {
     }
 
     /**
-     * @param {{req: any, origin: string}} info 
-     * @param {*} response 
+     * @param {{req: any, origin: string}} info
+     * @param {*} response
      */
     verifyClient(info, response) {
         /**
@@ -81,16 +81,16 @@ class Listener {
     }
 
     /**
-     * @param {PlayingRouter} router
+     * @param {Router} router
      */
-    addPlayingRouter(router) {
-        this.allPlayingRouters.push(router);
+    addRouter(router) {
+        this.routers.push(router);
     }
     /**
-     * @param {PlayingRouter} router
+     * @param {Router} router
      */
-    removePlayingRouter(router) {
-        this.allPlayingRouters.splice(this.allPlayingRouters.indexOf(router), 1);
+    removeRouter(router) {
+        this.routers.splice(this.routers.indexOf(router), 1);
     }
 
     /**
@@ -102,7 +102,8 @@ class Listener {
         this.connectionsByIP[newConnection.remoteAddress] =
             this.connectionsByIP[newConnection.remoteAddress] + 1 || 1;
         this.connections.push(newConnection);
-        this.globalChat.add(newConnection);
+        if (this.settings.serverChatEnabled)
+            this.globalChat.add(newConnection);
     }
 
     /**
@@ -120,12 +121,12 @@ class Listener {
 
     update() {
         let i, l;
-        for (i = 0, l = this.allPlayingRouters.length; i < l; i++) {
-            const router = this.allPlayingRouters[i];
+        for (i = 0, l = this.routers.length; i < l; i++) {
+            const router = this.routers[i];
             if (!router.shouldClose) continue;
             router.close(); i--; l--;
         }
-        for (i = 0; i < l; i++) this.allPlayingRouters[i].update();
+        for (i = 0; i < l; i++) this.routers[i].update();
         for (i = 0, l = this.connections.length; i < l; i++) {
             const connection = this.connections[i];
             if (Date.now() - connection.lastActivityTime < this.settings.listenerMaxClientDormancy) continue;
@@ -136,5 +137,5 @@ class Listener {
 
 module.exports = Listener;
 
-const PlayingRouter = require("../primitives/PlayingRouter");
+const Router = require("../primitives/Router");
 const ServerHandle = require("../ServerHandle");

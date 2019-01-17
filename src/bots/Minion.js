@@ -11,6 +11,7 @@ class Minion extends Bot {
         following.minions.push(this);
     }
     
+    static get type() { return "minion"; }
     static get separateInTeams() { return false; }
 
     close() {
@@ -19,12 +20,14 @@ class Minion extends Bot {
     }
 
     get shouldClose() {
-        return this.player.world === null ||
-            this.following.socketDisconnected ||
-            this.following.disconnected ||
-           !this.following.hasPlayer ||
-           !this.following.player.exists ||
-            this.following.player.world !== this.player.world;
+        return !this.hasPlayer
+            || !this.player.exists
+            || !this.player.hasWorld
+            ||  this.following.socketDisconnected
+            ||  this.following.disconnected
+            || !this.following.hasPlayer
+            || !this.following.player.exists
+            ||  this.following.player.world !== this.player.world;
     }
     update() {
         const player = this.player;

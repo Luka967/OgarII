@@ -1,4 +1,6 @@
 const Protocol = require("./Protocol");
+const Reader = require("../primitives/Reader");
+const Writer = require("../primitives/Writer");
 
 class LegacyProtocol extends Protocol {
     /**
@@ -10,7 +12,12 @@ class LegacyProtocol extends Protocol {
         this.protocol = NaN;
         this.gotKey = false;
         this.key = NaN;
+
+        this.lastLeaderboardType = null;
     }
+
+    static get type() { return "legacy"; }
+    get subtype() { return `l${!isNaN(this.protocol) ? ("00" + this.protocol).slice(-2) : "//"}`; }
 
     /**
      * @param {Reader} reader
@@ -20,6 +27,9 @@ class LegacyProtocol extends Protocol {
         if (reader.readUInt8() !== 254) return false;
         this.gotProtocol = true;
         this.protocol = reader.readUInt32();
+        if (this.protocol < this.settings.listenerMinLegacyProtocol ||
+            this.protocol > this.settings.listenerMaxLegacyProtocol)
+            return this.fail(1003, "Rejected protocol version");
         if (this.protocol < 4) {
             this.protocol = 4;
             this.logger.debug(`legacy protocol: got version ${this.protocol}, which is lower than 4`);
@@ -32,12 +42,22 @@ class LegacyProtocol extends Protocol {
      */
     onSocketMessage(reader) {
         const messageId = reader.readUInt8();
+        if (!this.gotKey) {
+            if (messageId !== 255) return;
+            if (reader.length < 5) return void this.fail("Unexpected message format");
+            this.gotKey = true;
+            this.key = reader.readUInt32();
+            this.connection.createPlayer();
+            return;
+        }
         switch (messageId) {
             case 0:
                 const name = readZTString(reader, this.protocol);
                 this.connection.spawningName = name.slice(0, this.listener.settings.playerMaxNameLength - 1);
                 break;
-            case 1: this.connection.requestingSpectate = true; break;
+            case 1:
+                this.connection.requestingSpectate = true;
+                break;
             case 16:
                 switch (reader.length) {
                     case 13:
@@ -70,17 +90,17 @@ class LegacyProtocol extends Protocol {
                 else this.connection.ejectAttempts++;
                 break;
             case 22:
-                if (!this.settings.minionEnableERTPControls) break;
+                if (!this.gotKey || !this.settings.minionEnableERTPControls) break;
                 for (let i = 0, l = this.connection.minions.length; i < l; i++)
                     this.connection.minions[i].splitAttempts++;
                 break;
             case 23:
-                if (!this.settings.minionEnableERTPControls) break;
+                if (!this.gotKey || !this.settings.minionEnableERTPControls) break;
                 for (let i = 0, l = this.connection.minions.length; i < l; i++)
                     this.connection.minions[i].ejectAttempts++;
                 break;
             case 24:
-                if (!this.settings.minionEnableERTPControls) break;
+                if (!this.gotKey || !this.settings.minionEnableERTPControls) break;
                 this.connection.minionsFrozen = !this.connection.minionsFrozen;
                 break;
             case 99:
@@ -92,31 +112,20 @@ class LegacyProtocol extends Protocol {
                     return void this.fail(1003, "Unexpected message format");
                 reader.skip(skipLen);
                 const message = readZTString(reader, this.protocol).trim();
-                const globalChat = this.connection.listener.globalChat;
-                if (message.length >= 2 && message[0] === "/") {
-                    if (!this.connection.listener.handle.chatCommands.execute(this, message.slice(1)))
-                        globalChat.directMessage(null, this, "unknown command, execute /help for the list of commands");
-                }
-                else message && globalChat.broadcast(this, message);
+                this.connection.onChatMessage(message);
                 break;
             case 254:
-                if (this.hasPlayer && this.gotKey && this.player.world !== null)
+                if (this.connection.hasPlayer && this.connection.player.hasWorld)
                     this.onStatsRequest();
                 break;
-            case 255:
-                if (this.gotKey) return void this.fail("Unexpected message");
-                if (reader.length < 5) return void this.fail("Unexpected message format");
-                this.gotKey = true;
-                this.key = reader.readUInt32();
-                this.connection.createPlayer();
-            break;
+            case 255: return void this.fail(1003, "Unexpected message");
             default: return void this.fail(1003, "Unknown message type");
         }
     }
 
     /**
-     * @param {ChatSource} source 
-     * @param {string} message 
+     * @param {ChatSource} source
+     * @param {string} message
      */
     onChatMessage(source, message) {
         const writer = new Writer();
@@ -125,8 +134,8 @@ class LegacyProtocol extends Protocol {
         writer.writeUInt8(source.color.r);
         writer.writeUInt8(source.color.g);
         writer.writeUInt8(source.color.b);
-        writeZTString(writer, source.name, protocol);
-        writeZTString(writer, message, protocol);
+        writeZTString(writer, source.name, this.protocol);
+        writeZTString(writer, message, this.protocol);
         this.send(writer.finalize());
     }
 
@@ -142,7 +151,7 @@ class LegacyProtocol extends Protocol {
             playersSpect: stats.spectating,
             playersLimit: stats.limit
         };
-        writeZTString(writer, JSON.stringify(Object.assign({ }, legacy, stats)), protocol);
+        writeZTString(writer, JSON.stringify(Object.assign({}, legacy, stats)), this.protocol);
         this.send(writer.finalize());
     }
 
@@ -168,10 +177,20 @@ class LegacyProtocol extends Protocol {
         writer.writeFloat64(range.x + range.w);
         writer.writeFloat64(range.y + range.h);
         if (includeServerInfo) {
-            writer.writeUInt32(this.handle.gamemode.gamemodeType);
+            writer.writeUInt32(this.handle.gamemode.type);
             writeZTString(writer, `OgarII ${this.handle.version}`, this.protocol);
         }
         this.send(writer.finalize());
+    }
+
+    onWorldReset() {
+        const writer = new Writer();
+        writer.writeUInt8(18);
+        this.send(writer.finalize());
+        if (this.lastLeaderboardType !== null) {
+            this.onLeaderboardUpdate(this.lastLeaderboardType, [], null);
+            this.lastLeaderboardType = null;
+        }
     }
 
     /**
@@ -180,11 +199,11 @@ class LegacyProtocol extends Protocol {
      * @param {LeaderboardDataType[type]=} selfData
      */
     onLeaderboardUpdate(type, data, selfData) {
+        this.lastLeaderboardType = type;
         const writer = new Writer();
         switch (type) {
             case "ffa":
-                if (this.protocol < 11) ffaLeaderboard4(writer, data, this.protocol);
-                else ffaLeaderboard11(writer, data, selfData);
+                ffaLeaderboard[this.protocol](writer, data, selfData, this.protocol);
                 break;
             case "pie":
                 writer.writeUInt8(50);
@@ -193,8 +212,7 @@ class LegacyProtocol extends Protocol {
                     writer.writeFloat32(data[i]);
                 break;
             case "text":
-                if (this.protocol < 14) textBoard4(writer, data, this.protocol);
-                else textBoard14(writer, data, this.protocol);
+                textBoard[this.protocol](writer, data, this.protocol);
                 break;
         }
         this.send(writer.finalize());
@@ -220,6 +238,7 @@ class LegacyProtocol extends Protocol {
      * @param {Cell[]} del
      */
     onVisibleCellUpdate(add, upd, eat, del) {
+        const source = this.connection.player;
         const writer = new Writer();
         writer.writeUInt8(16);
         let i, l, cell;
@@ -234,19 +253,13 @@ class LegacyProtocol extends Protocol {
 
         for (i = 0, l = add.length; i < l; i++) {
             cell = add[i];
-            if (this.protocol < 6)
-                 writeCellData4 (writer, this.protocol, cell, true, true, true, true, true, true);
-            else if (this.protocol < 11)
-                 writeCellData6 (writer, this.protocol, cell, true, true, true, true, true, true);
-            else writeCellData11(writer, this.protocol, cell, true, true, true, true, true, true);
+            writeCellData[this.protocol](writer, source, this.protocol, cell,
+                true, true, true, true, true, true);
         }
         for (i = 0, l = upd.length; i < l; i++) {
             cell = upd[i];
-            if (this.protocol < 6)
-                 writeCellData4 (writer, this.protocol, cell, false, cell.sizeChanged, cell.posChanged, cell.colorChanged, cell.nameChanged, cell.skinChanged);
-            else if (this.protocol < 11)
-                 writeCellData6 (writer, this.protocol, cell, false, cell.sizeChanged, cell.posChanged, cell.colorChanged, cell.nameChanged, cell.skinChanged);
-            else writeCellData11(writer, this.protocol, cell, false, cell.sizeChanged, cell.posChanged, cell.colorChanged, cell.nameChanged, cell.skinChanged);
+            writeCellData[this.protocol](writer, source, this.protocol, cell,
+                false, cell.sizeChanged, cell.posChanged, cell.colorChanged, cell.nameChanged, cell.skinChanged);
         }
         writer.writeUInt32(0);
 
@@ -260,45 +273,81 @@ class LegacyProtocol extends Protocol {
 module.exports = LegacyProtocol;
 
 /**
+ * @type {{ [protocol: number]: (writer: Writer, data: LeaderboardDataType["ffa"][], selfData: LeaderboardDataType["ffa"], protocol: number) => void }}
+ */
+const ffaLeaderboard = {
+    4: ffaLeaderboard4,
+    5: ffaLeaderboard4,
+    6: ffaLeaderboard4,
+    7: ffaLeaderboard4,
+    8: ffaLeaderboard4,
+    9: ffaLeaderboard4,
+    10: ffaLeaderboard4,
+    11: ffaLeaderboard11,
+    12: ffaLeaderboard11,
+    13: ffaLeaderboard11,
+    14: ffaLeaderboard11,
+    15: ffaLeaderboard11,
+    16: ffaLeaderboard11,
+    17: ffaLeaderboard11,
+    18: ffaLeaderboard11
+};
+/**
  * @param {Writer} writer
  * @param {LeaderboardDataType["ffa"][]} data
+ * @param {LeaderboardDataType["ffa"]=} selfData
  * @param {number} protocol
  */
-function ffaLeaderboard4(writer, data, protocol) {
+function ffaLeaderboard4(writer, data, selfData, protocol) {
     writer.writeUInt8(49);
     writer.writeUInt32(data.length);
     for (let i = 0, l = data.length; i < l; i++) {
+        const item = data[i];
         if (protocol === 6)
-            writer.writeUInt32(data[i].highlighted ? 1 : 0);
-        else if (protocol < 6)
-            writer.writeUInt32(data[i].cellId);
-        writeZTString(writer, data[i].name, protocol);
+            writer.writeUInt32(item.highlighted ? 1 : 0);
+        else writer.writeUInt32(item.cellId);
+        writeZTString(writer, item.name, protocol);
     }
 }
 /**
  * @param {Writer} writer
  * @param {LeaderboardDataType["ffa"][]} data
  * @param {LeaderboardDataType["ffa"]=} selfData
+ * @param {number} protocol
  */
-function ffaLeaderboard11(writer, data, selfData) {
-    let hitSelfData = false;
-    writer.writeUInt8(protocol > 13 ? 51 : 53);
+function ffaLeaderboard11(writer, data, selfData, protocol) {
+    writer.writeUInt8(protocol >= 14 ? 53 : 51);
     for (let i = 0, l = data.length; i < l; i++) {
-        if (data[i] === selfData) {
-            hitSelfData = true;
-            writer.writeUInt8(9);
-            writer.writeUInt16(data[i].position);
-        } else {
+        const item = data[i];
+        if (item === selfData)
+            writer.writeUInt8(8);
+        else {
             writer.writeUInt8(2);
-            writer.writeZTStringUTF8(data[i].name);
+            writer.writeZTStringUTF8(item.name);
         }
-    }
-    if (selfData !== null && !hitSelfData) {
-        writer.writeUInt8(9);
-        writer.writeUInt16(selfData.position);
     }
 }
 
+/**
+ * @type {{ [protocol: number]: (writer: Writer, data: LeaderboardDataType["text"][], protocol: number) => void }}
+ */
+const textBoard = {
+    4: textBoard4,
+    5: textBoard4,
+    6: textBoard4,
+    7: textBoard4,
+    8: textBoard4,
+    9: textBoard4,
+    10: textBoard4,
+    11: textBoard4,
+    12: textBoard4,
+    13: textBoard4,
+    14: textBoard14,
+    15: textBoard14,
+    16: textBoard14,
+    17: textBoard14,
+    18: textBoard14
+};
 /**
  * @param {Writer} writer
  * @param {LeaderboardDataType["text"][]} data
@@ -324,7 +373,29 @@ function textBoard14(writer, data, protocol) {
 }
 
 /**
+ * @type {{ [protocol: number]: (writer: Writer, source: Player, protocol: number, cell: Cell, includeType: boolean, includeSize: boolean, includePos: boolean, includeColor: boolean, includeName: boolean, includeSkin: boolean) => void }}
+ */
+const writeCellData = {
+    4: writeCellData4,
+    5: writeCellData4,
+    6: writeCellData6,
+    7: writeCellData6,
+    8: writeCellData6,
+    9: writeCellData6,
+    10: writeCellData6,
+    11: writeCellData11,
+    12: writeCellData11,
+    13: writeCellData11,
+    14: writeCellData11,
+    15: writeCellData11,
+    16: writeCellData11,
+    17: writeCellData11,
+    18: writeCellData11,
+};
+/**
  * @param {Writer} writer
+ * @param {Player} source
+ * @param {number} protocol
  * @param {Cell} cell
  * @param {boolean} includeType
  * @param {boolean} includeSize
@@ -333,10 +404,10 @@ function textBoard14(writer, data, protocol) {
  * @param {boolean} includeName
  * @param {boolean} includeSkin
  */
-function writeCellData4(writer, protocol, cell, includeType, includeSize, includePos, includeColor, includeName, includeSkin) {
+function writeCellData4(writer, source, protocol, cell, includeType, includeSize, includePos, includeColor, includeName, includeSkin) {
     writer.writeUInt32(cell.id);
-    writer[protocol === 4 ? "writeUInt16" : "writeUInt32"](cell.x);
-    writer[protocol === 4 ? "writeUInt16" : "writeUInt32"](cell.y);
+    writer[protocol === 4 ? "writeInt16" : "writeInt32"](cell.x);
+    writer[protocol === 4 ? "writeInt16" : "writeInt32"](cell.y);
     writer.writeUInt16(cell.size);
     writer.writeUInt8(cell.color.r);
     writer.writeUInt8(cell.color.g);
@@ -353,9 +424,10 @@ function writeCellData4(writer, protocol, cell, includeType, includeSize, includ
     if (includeName) writer.writeZTStringUCS2(cell.name);
     else writer.writeUInt16(0);
 }
-
 /**
  * @param {Writer} writer
+ * @param {Player} source
+ * @param {number} protocol
  * @param {Cell} cell
  * @param {boolean} includeType
  * @param {boolean} includeSize
@@ -364,10 +436,10 @@ function writeCellData4(writer, protocol, cell, includeType, includeSize, includ
  * @param {boolean} includeName
  * @param {boolean} includeSkin
  */
-function writeCellData6(writer, protocol, cell, includeType, includeSize, includePos, includeColor, includeName, includeSkin) {
+function writeCellData6(writer, source, protocol, cell, includeType, includeSize, includePos, includeColor, includeName, includeSkin) {
     writer.writeUInt32(cell.id);
-    writer.writeUInt32(cell.x);
-    writer.writeUInt32(cell.y);
+    writer.writeInt32(cell.x);
+    writer.writeInt32(cell.y);
     writer.writeUInt16(cell.size);
 
     let flags = 0;
@@ -387,9 +459,10 @@ function writeCellData6(writer, protocol, cell, includeType, includeSize, includ
     if (includeSkin) writer.writeZTStringUTF8(cell.skin);
     if (includeName) writer.writeZTStringUTF8(cell.name);
 }
-
 /**
  * @param {Writer} writer
+ * @param {Player} source
+ * @param {number} protocol
  * @param {Cell} cell
  * @param {boolean} includeType
  * @param {boolean} includeSize
@@ -398,10 +471,10 @@ function writeCellData6(writer, protocol, cell, includeType, includeSize, includ
  * @param {boolean} includeName
  * @param {boolean} includeSkin
  */
-function writeCellData11(writer, protocol, cell, includeType, includeSize, includePos, includeColor, includeName, includeSkin) {
+function writeCellData11(writer, source, protocol, cell, includeType, includeSize, includePos, includeColor, includeName, includeSkin) {
     writer.writeUInt32(cell.id);
-    writer.writeUInt32(cell.x);
-    writer.writeUInt32(cell.y);
+    writer.writeInt32(cell.x);
+    writer.writeInt32(cell.y);
     writer.writeUInt16(cell.size);
 
     let flags = 0;
@@ -411,10 +484,11 @@ function writeCellData11(writer, protocol, cell, includeType, includeSize, inclu
     if (includeName) flags |= 0x08;
     if (cell.isAgitated) flags |= 0x10;
     if (cell.type === 3) flags |= 0x20;
+    if (cell.type === 3 && cell.owner !== source) flags |= 0x40;
     if (includeType && cell.type === 1) flags |= 0x80;
     writer.writeUInt8(flags);
+    if (includeType && cell.type === 1) writer.writeUInt8(1);
 
-    if (includeType && cell.type === 1) writer.writeUInt8(cell.type);
     if (includeColor) {
         writer.writeUInt8(cell.color.r);
         writer.writeUInt8(cell.color.g);
@@ -442,7 +516,6 @@ function writeZTString(writer, value, protocol) {
 }
 
 const Cell = require("../cells/Cell");
+const Player = require("../worlds/Player");
 const PlayerCell = require("../cells/PlayerCell");
 const Connection = require("../sockets/Connection");
-const Reader = require("../primitives/Reader");
-const Writer = require("../primitives/Writer");

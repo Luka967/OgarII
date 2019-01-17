@@ -1,7 +1,7 @@
-const PlayingRouter = require("../primitives/PlayingRouter");
+const Router = require("../primitives/Router");
 const Reader = require("../primitives/Reader");
 
-class Connection extends PlayingRouter {
+class Connection extends Router {
     /**
      * @param {Listener} listener
      * @param {WebSocket} webSocket
@@ -11,7 +11,7 @@ class Connection extends PlayingRouter {
         this.remoteAddress = webSocket._socket.remoteAddress;
         this.webSocket = webSocket;
         this.lastActivityTime = Date.now();
-        
+
         this.upgradeLevel = 0;
         /** @type {Protocol} */
         this.protocol = null;
@@ -41,8 +41,9 @@ class Connection extends PlayingRouter {
         this.webSocket.removeAllListeners();
     }
 
+    static get type() { return "connection"; }
+    static get isExternal() { return true; }
     static get separateInTeams() { return true; }
-    get isExternal() { return true; }
 
     /**
      * @param {number} code
@@ -71,15 +72,25 @@ class Connection extends PlayingRouter {
             if (this.protocol === null) return void this.closeSocket(1003, "Ambiguous protocol");
         }
     }
-
     createPlayer() {
         super.createPlayer();
         if (this.settings.matchmakerNeedsQueuing) {
-            this.globalChat.directMessage(null, this, "This server requires players to be queued.");
-            this.globalChat.directMessage(null, this, "Try spawning to enqueue.");
+            this.listener.globalChat.directMessage(null, this, "This server requires players to be queued.");
+            this.listener.globalChat.directMessage(null, this, "Try spawning to enqueue.");
         } else this.handle.matchmaker.toggleQueued(this);
     }
 
+    /**
+     * @param {string} message
+     */
+    onChatMessage(message) {
+        const globalChat = this.listener.globalChat;
+        if (message.length >= 2 && message[0] === "/") {
+            if (!this.handle.chatCommands.execute(this, message.slice(1)))
+                globalChat.directMessage(null, this, "unknown command, execute /help for the list of commands");
+        }
+        else message && globalChat.broadcast(this, message);
+    }
     onQPress() {
         if (!this.hasPlayer) return;
         if (this.listener.settings.minionEnableQBasedControl && this.minions.length > 0)
@@ -91,7 +102,7 @@ class Connection extends PlayingRouter {
     }
     update() {
         if (!this.hasPlayer) return;
-        if (this.player.world === null) {
+        if (!this.player.hasWorld) {
             if (this.spawningName !== null)
                 this.handle.matchmaker.toggleQueued(this);
             this.spawningName = null;
@@ -119,12 +130,12 @@ class Connection extends PlayingRouter {
             if (cell.eatenBy !== null) eat.push(cell);
             del.push(cell);
         }
-        
+
         if (player.state === 1 || player.state === 2)
             this.protocol.onSpectatePosition(player.viewArea);
-        this.protocol.onVisibleCellUpdate(add, upd, eat, del);
         if (this.handle.tick % 4 === 0)
             this.handle.gamemode.sendLeaderboard(this);
+        this.protocol.onVisibleCellUpdate(add, upd, eat, del);
     }
     onWorldSet() {
         this.protocol.onNewWorldBounds(this.player.world.border, true, this.protocol);
@@ -132,6 +143,9 @@ class Connection extends PlayingRouter {
     /** @param {PlayerCell} cell */
     onNewOwnedCell(cell) {
         this.protocol.onNewOwnedCell(cell);
+    }
+    onWorldReset() {
+        this.protocol.onWorldReset();
     }
 
     /** @param {Buffer} data */

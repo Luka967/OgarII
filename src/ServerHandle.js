@@ -1,10 +1,15 @@
 const Settings = require("./Settings");
 
 const { CommandList } = require("./commands/CommandList");
-const DefaultCommands = require("./commands/DefaultCommands");
 const GamemodeList = require("./gamemodes/GamemodeList");
-const ProtocolHandle = require("./protocols/ProtocolHandle");
+const ProtocolStore = require("./protocols/ProtocolStore");
+
+const DefaultCommands = require("./commands/DefaultCommands");
+const FFAGamemode = require("./gamemodes/FFA");
+const TeamsGamemode = require("./gamemodes/Teams");
+const LMSGamemode = require("./gamemodes/LastManStanding");
 const LegacyProtocol = require("./protocols/LegacyProtocol");
+const ModernProtocol = require("./protocols/ModernProtocol");
 
 const Stopwatch = require("./primitives/Stopwatch");
 const Logger = require("./primitives/Logger");
@@ -24,7 +29,7 @@ class ServerHandle {
         /** @type {Settings} */
         this.settings = Settings;
 
-        this.protocols = new ProtocolHandle();
+        this.protocols = new ProtocolStore();
         this.gamemodes = new GamemodeList(this);
         /** @type {Gamemode} */
         this.gamemode = null;
@@ -38,12 +43,12 @@ class ServerHandle {
         this.tick = NaN;
         this.tickDelay = NaN;
         this.stepMult = NaN;
-        
+
         this.ticker = new Ticker(40);
         this.ticker.add(this._onTick.bind(this));
         this.stopwatch = new Stopwatch();
         this.logger = new Logger();
-        
+
         this.listener = new Listener(this);
         this.matchmaker = new Matchmaker(this);
         /** @type {Identified<World>} */
@@ -51,9 +56,10 @@ class ServerHandle {
         /** @type {Identified<Player>} */
         this.players = { };
 
-        this.setSettings(settings);
-        this.protocols.register(LegacyProtocol);
         DefaultCommands(this.commands, this.chatCommands);
+        this.protocols.register(ModernProtocol, LegacyProtocol);
+        this.gamemodes.register(FFAGamemode, TeamsGamemode, LMSGamemode);
+        this.setSettings(settings);
     }
 
     get version() { return version; }
@@ -63,7 +69,7 @@ class ServerHandle {
      */
     setSettings(settings) {
         this.settings = Object.assign({ }, Settings, settings);
-        this.tickDelay = 1000 / this.settings.ticksPerSecond;
+        this.tickDelay = 1000 / this.settings.serverUpdateFrequency;
         this.ticker.step = this.tickDelay;
         this.stepMult = this.tickDelay / 40;
     }
@@ -71,8 +77,8 @@ class ServerHandle {
     start() {
         if (this.running) return false;
         this.logger.inform("starting");
-        
-        this.gamemodes.setGamemode(this.settings.gamemode);
+
+        this.gamemodes.setGamemode(this.settings.serverGamemode);
         this.startTime = new Date();
         this.averageTickTime = this.tick = 0;
         this.running = true;
@@ -82,7 +88,7 @@ class ServerHandle {
         this.gamemode.onHandleStart();
 
         this.logger.inform("ticker begin");
-        this.logger.inform(`\u001B[1m\u001B[32mOgarII\u001B[0m\u001B[32m ${this.version}\u001B[0m`);
+        this.logger.inform(`\x1B[1m\x1B[32mOgarII\x1B[0m\x1B[32m ${this.version}\x1B[0m`);
         return true;
     }
 
@@ -133,7 +139,7 @@ class ServerHandle {
     }
 
     /**
-     * @param {PlayingRouter} router
+     * @param {Router} router
      * @returns {Player}
      */
     createPlayer(router) {
@@ -166,8 +172,8 @@ class ServerHandle {
         for (let id in this.worlds)
             this.worlds[id].update();
         this.listener.update();
-        this.gamemode.onHandleTick();
         this.matchmaker.update();
+        this.gamemode.onHandleTick();
 
         this.averageTickTime = this.stopwatch.elapsed();
         this.stopwatch.stop();
@@ -176,5 +182,5 @@ class ServerHandle {
 
 module.exports = ServerHandle;
 
-const PlayingRouter = require("./primitives/PlayingRouter");
+const Router = require("./primitives/Router");
 const Gamemode = require("./gamemodes/Gamemode");

@@ -11,6 +11,7 @@ class Virus extends Cell {
         super(world, x, y, size, { r: 51, g: 255, b: 51 });
 
         this.fedTimes = 0;
+        this.splitAngle = NaN;
     }
 
     get type() { return 2; }
@@ -23,10 +24,16 @@ class Virus extends Cell {
      * @returns {CellEatResult}
      */
     getEatResult(other) {
-        if (other.type === 3 && this.world.virusCount < this.world.settings.virusMaxCount)
-            return 2;
+        if (other.type === 3) return this.getEjectedEatResult(true);
         if (other.type === 4) return 3;
         return 0;
+    }
+    /**
+     * @param {boolean} isSelf
+     * @returns {CellEatResult}
+     */
+    getEjectedEatResult(isSelf) {
+        return this.world.virusCount >= this.world.settings.virusMaxCount ? 0 : isSelf ? 2 : 3;
     }
 
     onSpawned() {
@@ -45,8 +52,7 @@ class Virus extends Cell {
             this.boost.d = newD;
             this.world.setCellAsBoosting(this);
         } else {
-            this.boost.dx = cell.boost.dx;
-            this.boost.dy = cell.boost.dy;
+            this.splitAngle = Math.atan2(cell.boost.dx, cell.boost.dy);
             if (++this.fedTimes >= settings.virusFeedTimes) {
                 this.fedTimes = 0;
                 this.size = settings.virusSize;

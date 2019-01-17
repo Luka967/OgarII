@@ -1,4 +1,5 @@
 const { Command, genCommand } = require("./CommandList");
+const { EOL } = require("os");
 
 /**
  * @param {string} str
@@ -7,6 +8,74 @@ const { Command, genCommand } = require("./CommandList");
  */
 function padRight(str, pad, len) {
     return str + new Array(Math.max(len - str.length, 0)).fill(pad).join("");
+}
+/**
+ * @param {string} str
+ * @param {string} pad
+ * @param {number} len
+ */
+function padLeft(str, pad, len) {
+    return new Array(Math.max(len - str.length, 0)).fill(pad).join("") + str;
+}
+
+/**
+ * @param {GenCommandTable} contents
+ * @param {string} eol
+ */
+function table(contents, eol) {
+    const columnSizes = [];
+    let all = "", i, j, rowText, row, col, size;
+    for (i = 0; i < contents.columns.length; i++) {
+        col = contents.columns[i];
+        size = col.text.length;
+        for (j = 0; j < contents.rows.length; j++)
+            size = Math.max(size, contents.rows[j][i] ? contents.rows[j][i].length : 0);
+        columnSizes.push(size);
+    }
+    for (i = 0, rowText = ""; i < contents.columns.length; i++) {
+        col = contents.columns[i];
+        rowText += (i == 0 ? "" : col.separated ? " | " : " ") + padRight(col.text, col.headPad, columnSizes[i]);
+    }
+    all += rowText + eol;
+    for (i = 0, rowText = ""; i < contents.rows.length; i++, rowText = "") {
+        for (j = 0; j < contents.rows[i].length; j++) {
+            row = contents.rows[i][j] || "";
+            col = contents.columns[j];
+            rowText += (j == 0 ? "" : col.separated ? " | " : " ") + padRight(row, row ? col.rowPad : col.emptyPad, columnSizes[j]);
+        }
+        for (; j < contents.columns.length; j++) {
+            col = contents.columns[j];
+            rowText += (j == 0 ? "" : col.separated ? " | " : " ") + padRight("", col.emptyPad, columnSizes[j]);
+        }
+        all += rowText + eol;
+    }
+    return all;
+}
+
+/** @param {number} value */
+function prettyMemory(value) {
+    const units = ["B", "kiB", "MiB", "GiB"]; let i = 0;
+    for (; i < units.length && value / 1024 > 1; i++)
+        value /= 1024;
+    return `${value.toFixed(1)} ${units[i]}`;
+}
+
+/** @param {number} seconds */
+function prettyTime(seconds) {
+    seconds = ~~seconds;
+
+    let minutes = ~~(seconds / 60);
+    if (minutes < 1) return `${seconds} seconds`;
+    if (seconds === 60) return `1 minute`;
+
+    let hours = ~~(minutes / 60);
+    if (hours < 1) return `${minutes} minute${minutes === 1 ? "" : "s"} ${seconds % 60} second${seconds === 1 ? "" : "s"}`;
+    if (minutes === 60) return `1 hour`;
+
+    let days = ~~(hours / 24);
+    if (days < 1) return `${hours} hour${hours === 1 ? "" : "s"} ${minutes % 60} minute${minutes === 1 ? "" : "s"}`;
+    if (hours === 24) return `1 day`;
+    return `${days} day${days === 1 ? "" : "s"} ${hours % 24} hour${hours === 1 ? "" : "s"}`;
 }
 
 /**
@@ -22,21 +91,75 @@ module.exports = (commands, chatCommands) => {
             exec: (handle, context, args) => {
                 const list = handle.commands.list;
                 const keys = Object.keys(list).sort();
-                let nameLen = 4, argsLen = 10;
-                for (let name in list) {
-                    nameLen = Math.max(nameLen, list[name].name.length + 1);
-                    argsLen = Math.max(argsLen, list[name].args.length);
-                }
-                handle.logger.print(
-                    padRight("NAME", " ", nameLen - 1)
-                  + padRight(" ARGUMENTS", " ", argsLen)
-                  + "  | DESCRIPTION");
-                for (let i = 0, l = keys.length; i < l; i++)
-                    handle.logger.print(
-                        padRight(list[keys[i]].name + " ", " ", nameLen)
-                      + padRight(list[keys[i]].args, " ", argsLen)
-                      + " | "
-                      + list[keys[i]].description);
+                handle.logger.print(table({
+                    columns: [
+                        { text: "NAME",        headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
+                        { text: "ARGUMENTS",   headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
+                        { text: "DESCRIPTION", headPad: " ", emptyPad: " ", rowPad: " ", separated: true  }
+                    ],
+                    rows: keys.map(v => {
+                        return [
+                            list[v].name,
+                            list[v].args,
+                            list[v].description
+                        ]
+                    })
+                }, EOL));
+            }
+        }),
+        genCommand({
+            name: "routers",
+            args: "[router type]",
+            desc: "display information about routers and their players",
+            exec: (handle, context, args) => {
+                const matchingType = args.length >= 1 ? args[0] : null;
+                const routers = handle.listener.routers.filter(v => matchingType === null || v.type == matchingType);
+                handle.logger.print(table({
+                    columns: [
+                        { text: "N",     headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
+                        { text: "TYPE",  headPad: " ", emptyPad: " ", rowPad: " ", separated: true  },
+                        { text: "PRT",   headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
+                        { text: "P",     headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
+                        { text: "PID",   headPad: " ", emptyPad: "/", rowPad: " ", separated: true  },
+                        { text: "FID",   headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "STATE", headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "WID",   headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "SCORE", headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "NAME",  headPad: " ", emptyPad: "/", rowPad: " ", separated: false }
+                    ],
+                    rows: routers.map((v, i) => {
+                        let ret = [
+                            i.toString(),
+                            v.type,
+                            v.protocol ? v.protocol.subtype : "///",
+                            v.hasPlayer ? "Y" : "N"
+                        ];
+                        if (v.hasPlayer) {
+                            ret.push(v.player.id.toString());
+                            switch (v.player.state) {
+                                case -1: ret.push("idle"); break;
+                                case 0:
+                                    ret.push(v.type === "minion" ? v.following.player.id.toString() : null);
+                                    ret.push("alive");
+                                    ret.push(v.player.world.id.toString());
+                                    ret.push(Math.round(v.player.score).toString());
+                                    ret.push(v.player.ownedCells[0].name || "");
+                                    break;
+                                case 1:
+                                    ret.push(v.player.world.largestPlayer !== null ?
+                                        v.player.world.largestPlayer.id.toString() : null);
+                                    ret.push("spec");
+                                    ret.push(v.player.world.id.toString());
+                                    break;
+                                case 2:
+                                    ret.push("roam");
+                                    ret.push(v.player.world.id.toString());
+                                    break;
+                            }
+                        }
+                        return ret;
+                    })
+                }, EOL));
             }
         }),
         genCommand({
@@ -108,20 +231,18 @@ module.exports = (commands, chatCommands) => {
                     logger.print("not running");
                 else {
                     const memory = process.memoryUsage();
-                    memory.heapUsed /= 1048576;
-                    memory.heapTotal /= 1048576;
-                    memory.rss /= 1048576;
-                    const { heapUsed, heapTotal, rss } = memory;
-                    logger.print(`average tick time: ${handle.averageTickTime.toFixed(2)} ms / ${handle.tickDelay} ms`);
-                    logger.print(`${heapUsed.toFixed(1)} MiB used heap / ${heapTotal.toFixed(1)} MiB total heap / ${rss.toFixed(1)} MiB allocated`);
-                    logger.print(`running for ${prettyPrintTime(Math.floor((Date.now() - handle.startTime.getTime()) / 1000))}`);
-                    const connections = handle.listener.connections.length;
-                    const bots = handle.listener.allPlayingRouters.length - connections;
-                    logger.print(`${Object.keys(handle.players).length} players, ${connections} connections, ${bots} bots`);
+                    logger.print(`load:    ${handle.averageTickTime.toFixed(4)} ms / ${handle.tickDelay} ms`);
+                    logger.print(`heap:    ${prettyMemory(memory.heapUsed)} / ${prettyMemory(memory.heapTotal)} / ${prettyMemory(memory.rss)} / ${prettyMemory(memory.external)}`);
+                    logger.print(`time:    ${prettyTime(Math.floor((Date.now() - handle.startTime.getTime()) / 1000))}`);
+                    const external = handle.listener.connections.length;
+                    const internal = handle.listener.routers.length - external;
+                    logger.print(`routers: ${Object.keys(handle.players).length} players, ${external} external, ${internal} internal`);
                     for (let id in handle.worlds) {
-                        const world = handle.worlds[id];
-                        logger.print(`world ${id}: ${world.cells.length} cells - ${world.playerCells.length}P/${world.pelletCount}p/${world.virusCount}v/${world.ejectedCells.length}e/${world.mothercellCount}m`);
-                        logger.print(`    ${world.stats.external} / ${world.stats.limit} players, ${world.stats.playing} playing, ${world.stats.spectating} spectating, ${world.stats.internal} bots`);
+                        const world = handle.worlds[id], stats = world.stats,
+                            cells = [ world.cells.length, world.playerCells.length, world.pelletCount, world.virusCount, world.ejectedCells.length, world.mothercellCount],
+                            statsF = [ stats.external, stats.internal, stats.limit, stats.playing, stats.spectating ];
+                        logger.print(`world ${id}: ${cells[0]} cells - ${cells[1]}P/${cells[2]}p/${cells[3]}v/${cells[4]}e/${cells[5]}m`);
+                        logger.print(`         ${statsF[0]} / ${statsF[1]} / ${statsF[2]} players - ${statsF[3]}p/${statsF[4]}s`);
                     }
                 }
             }
@@ -238,7 +359,7 @@ module.exports = (commands, chatCommands) => {
                 if (isNaN(count)) return void handle.logger.print("invalid number for count");
                 const player = handle.players[id];
                 if (!(player.router instanceof Connection)) return void handle.logger.print("player is a bot");
-                if (player.world === null) return void handle.logger.print("player is not in a world");
+                if (!player.hasWorld) return void handle.logger.print("player is not in a world");
                 for (let i = 0; i < count; i++) new Minion(player.router);
                 handle.logger.print(`added ${count} minions to player`);
             }
@@ -260,7 +381,7 @@ module.exports = (commands, chatCommands) => {
                 if (isNaN(count)) return void handle.logger.print("invalid number for count");
                 const player = handle.players[id];
                 if (!(player.router instanceof Connection)) return void handle.logger.print("player is a bot");
-                if (player.world === null) return void handle.logger.print("player is not in a world");
+                if (!player.hasWorld) return void handle.logger.print("player is not in a world");
                 let realCount = 0;
                 for (let i = 0; i < count && player.router.minions.length > 0; i++) {
                     player.router.minions[0].close();
@@ -345,12 +466,12 @@ module.exports = (commands, chatCommands) => {
             args: "",
             desc: "get your world's id",
             exec: (handle, context, args) => {
-                const worldId = context.hasPlayer ? context.player.world !== null ? context.player.world.id : null : null;
-                handle.listener.globalChat.directMessage(
-                    null,
-                    context,
-                    worldId !== null ? `your world ID is ${worldId}` : "you're not in a world"
-                );
+                const chat = handle.listener.globalChat;
+                if (!context.hasPlayer)
+                    return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
+                if (!context.player.hasWorld)
+                    return void chat.directMessage(null, context, "you're not in a world");
+                chat.directMessage(`your world ID is ${context.player.world.id}`);
             }
         }),
         genCommand({
@@ -361,7 +482,7 @@ module.exports = (commands, chatCommands) => {
                 const chat = handle.listener.globalChat;
                 if (!context.hasPlayer)
                     return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
-                if (context.player.world === null)
+                if (!context.player.hasWorld)
                     return void chat.directMessage(null, context, "you're not in a world");
                 context.player.world.removePlayer(context.player);
             }
@@ -379,7 +500,7 @@ module.exports = (commands, chatCommands) => {
                     return void chat.directMessage(null, context, "invalid world id number format");
                 if (!context.hasPlayer)
                     return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
-                if (context.player.world !== null)
+                if (!context.player.hasWorld)
                     return void chat.directMessage(null, context, "you're already in a world");
                 if (!handle.worlds.hasOwnProperty(id))
                     return void chat.directMessage(null, context, "this world doesn't exist");
@@ -390,23 +511,6 @@ module.exports = (commands, chatCommands) => {
         })
     );
 };
-
-function prettyPrintTime(seconds) {
-    seconds = ~~seconds;
-
-    let minutes = ~~(seconds / 60);
-    if (minutes < 1) return `${seconds} seconds`;
-    if (seconds === 60) return `1 minute`;
-
-    let hours = ~~(minutes / 60);
-    if (hours < 1) return `${minutes} minute${minutes === 1 ? "" : "s"} ${seconds % 60} second${seconds === 1 ? "" : "s"}`;
-    if (minutes === 60) return `1 hour`;
-
-    let days = ~~(hours / 24);
-    if (days < 1) return `${hours} hour${hours === 1 ? "" : "s"} ${minutes % 60} minute${minutes === 1 ? "" : "s"}`;
-    if (hours === 24) return `1 day`;
-    return `${days} day${days === 1 ? "" : "s"} ${hours % 24} hour${hours === 1 ? "" : "s"}`;
-}
 
 const { CommandList } = require("./CommandList");
 const ServerHandle = require("../ServerHandle");

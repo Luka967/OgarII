@@ -1,11 +1,94 @@
-TODO 1.1.4
+TODO
+- Implement cell type assigning system
+- Implement playerlist command
+- Implement message size assertion for the modern protocol
+- Implement adding a new player to specified world if its id has been given in HTTP request path
+- Implement plugin system
 - Implement dual controlling using the modern protocol
 
-TODO 1.1.3
-- Implement a new (in further: modern) protocol
+1.1.12 @ 2018-11-12
+- Fix crash when leaving world then using worldid chat command
+- Implement modern protocol revision 2
+- Client gets its visible cells and leaderboard cleared when leaving a world
+- Formatting
 
-TODO 1.1.2
-- Implement plugin system
+1.1.11 @ 2018-8-31
+- Fix wrong usage of unsigned integers for cell position in legacy protocol
+- Fix crash when matchmakerNeedsQueuing is on
+- Fix virus count being able to exceed virusMaxCount
+- Upgraded uws dependency version
+- Refactored stats command
+- Formatting
+
+1.1.10 @ 2018-8-18
+- Removed delay between commands, no idea why was it there in the first place
+- Default gamemodes are now registered at ServerHandle instead of GamemodeList
+- Renamed PlayerRouter to Router
+- Abstracted the table generating function of help
+- New server command, routers - the equivalent of Ogar's playerlist for OgarII
+- Rename Gamemode.gamemodeType to type
+- Rename Gamemode.gamemodeName to name
+- Actually implement Protocol.type
+- Added Protocol.subtype
+- Renamed ProtocolHandle to ProtocolStore
+- Renamed Listener.allPlayingRouters to routers
+- Renamed Listener.addPlayingRouter to addRouter
+- Renamed Listener.removePlayingRouter to removeRouter
+
+1.1.9 @ 2018-8-16
+- Fix executing an empty string as command killing the command stream
+- Update README
+- Remove all comments
+
+1.1.8 @ 2018-8-12
+- Rename setting gamemode to serverGamemode
+- New setting, serverChatEnabled
+- Replace \uNNNN unicode codes with shorter \xNN variant
+
+1.1.7 @ 2018-8-8
+- Changed setting playerMergeTime's default
+- Format shouldClose function on bots
+- Remove debug console.log
+
+1.1.6 @ 2018-8-7
+- Fixed player cell merging time yet again
+- Fixed the view area being twice larger than it should be, agar.io was trolling me
+
+1.1.5 @ 2018-8-6
+- Renamed setting minionStartSize to minionSpawnSize
+- Teams gamemode now uses minionSpawnSize for spawning minions
+
+1.1.4 @ 2018-8-6
+- Fixed new player cell merging time
+- Refactored and fixed up the legacy protocol
+- Changed setting finderMaxLevel's default from 32 to 16
+- Changed setting finderMaxItems's default from 32 to 16
+- New setting, listenerMinLegacyProtocol
+- New setting, listenerMaxLegacyProtocol
+- New setting, minionStartSize
+- Renamed setting mapX to worldMapX
+- Renamed setting mapY to worldMapY
+- Renamed setting mapW to worldMapW
+- Renamed setting mapH to worldMapH
+- Renamed setting finderMaxLevel to worldFinderMaxLevel
+- Renamed setting finderMaxItems to worldFinderMaxItems
+- Renamed setting safeSpawnTries to worldSafeSpawnTries
+- Renamed setting safeSpawnFromEjected to worldSafeSpawnFromEjectedChance
+- Renamed setting playerDisposeDelay to worldPlayerDisposeDelay
+- Renamed setting ticksPerSecond to serverUpdateFrequency
+- Renamed setting playerBotsPerWorld to worldPlayerBotsPerWorld
+- Renamed setting minionsPerPlayer to worldMinionsPerPlayer
+- Renamed setting maxWorldCount to worldMaxCount
+
+1.1.3 @ 2018-8-5
+- Fix fatal crash in legacy protocol when sending chat message
+- Fix fatal crash in legacy protocol when sending stats
+- Fix bad control to minions in modern protocol
+
+1.1.2 @ 2018-8-5
+- Implement a new "Modern" protocol, which bases around using the minimal amount of different message types, and conserving size by further using flags
+- Fixed the "virus curling bug" mentioned in issue #16
+- Simplify player's world referencing
 
 1.1.1 @ 2018-8-2
 - Replace String, Number and Boolean with string, number and boolean in docs
@@ -20,7 +103,7 @@ TODO 1.1.2
 - Use const & let instead of var wherever it is
 - GamemodeList is and was not a debug item
 - New setting, listenerBannedIPs array
-- Implement per-IP banning (range banning might be tricky)
+- Implement per-IP banning (range banning might be tricky to implement later on)
 - Rename PlayerRouter.isDisconnected to disconnected
 - Add PlayerRouter.shouldClose abstract function
 - Calling Connection.close will either kill the connection or destroy the router depending on the connection status
@@ -94,6 +177,7 @@ Nightly @ 2018-2-17
 - Implement commands, ready for plugin support
 - Logging updates
 - A couple refactors
+
 Nightly @ 2018-2-15
 - Implement logging to file
 - Fix ServerHandle stopping logic

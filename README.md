@@ -1,47 +1,102 @@
 # OgarII
 
-**If you're trying to connect through agar.io, you need to run `core.disableIntegrityChecks(true);` in the console**.
+Your friendly agar.io private server recreation.
 
-**Ask all your questions over on the Agar.io Private Servers guild**:
+- It supports all current agar.io protocol versions (4 - 18).
+
+- It supports handling multiple worlds, all within one instance. Be wary that you can still use up the one CPU core node.js is running on.
+
+- It has a minimal memory footprint, and strictly uses uWebSockets for networking.
+
+- The code uses JSDoc to specify types. Understanding what the code does is down to your understanding of English.
+
+- It is customizable for your quality of life even without plugins, which are about to come soon.
+
+## Notes
+
+- Before connecting from agar.io you will need to do `core.disableIntegrityChecks(true)` in the console.
+
+- OgarII supports a custom protocol made by Luka. To use it, clone the [modern branch](https://github.com/Luka967/Cigar/tree/modern) of [Luka967/Cigar](https://github.com/Luka967/Cigar).
+
+- Ask all your questions over on the [Agar.io Private Servers](https://discord.gg/66X2ESb) guild.
 
 [![link](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/66X2ESb)
 
-This is a full rewrite based off of Ogar/MultiOgar/MultiOgar-Edited that ended up being better than I originally expected. The code is clean and logical. The agar protocol is fully supported - up from version 4 all the way to 17.
-
 ## Running
 
-1. You need a somewhat newer version of node as a lot of the code utilizes ES6 features that are shipped with them. If you get a random syntax error, try updating node to the LTS version first.
+1. Make sure you have node.js version 8 or greater.
 
-2. `git clone` or download&extract the repo contents.
+2. Make sure you have a C++11 compliant compiler for building uWebSockets. If you fail compiling the package on Windows, `npm install -g windows-build-tools`.
 
-3. Run `npm install` to install uWebSockets and json-beautify.
+3. Clone / [download](https://github.com/Luka967/OgarII/archive/master.zip) the repo.
 
-4. `cd cli/`
+4. `npm install` in `/`.
 
-5. `node index.js`
+5. `cd ./cli/`
+
+6. `node index.js`
 
 ## Configuring
 
-- `cli/settings.json` is the way to go.
+- After your first run, OgarII will drop two files in `cli/` / working directory: `log-settings.json` and `settings.json`.
 
-- To change logging settings, modify `cli/log-settings.json`.
+- To change how OgarII runs, modify `cli/settings.json`.
+
+- To change what gets logged, modify `cli/log-settings.json`.
 
 ## Expanding
 
-- To add your own commands, check out `src/Commands.js` on the command API, then use the `ServerHandle.commands.register` function to finally add it. They can be added no matter whether the handle's running or not.
+- To create your own commands, check out `src/commands/CommandList.js` on the command API. To add it to the CLI use `ServerHandle.commands.register`, and for chat commands use `ServerHandle.chatCommands.register`.
 
-- A similar principle works for gamemodes, except that you'd need to inherit `src/Gamemode.js`'s `Gamemode` abstract class, modify the gamemode's functions to your wish, then use `ServerHandle.gamemodes.register` to add your gamemode **before** the handle starts.
+- To create your own gamemodes, inherit `src/Gamemode.js`'s `Gamemode` abstract class, modify event handling to your wish, then add it with `ServerHandle.gamemodes.register` before the handle starts.
 
-- The `ServerHandle` class is standalone, which means that you can completely ditch the `cli/` folder and build your own logging system, or go even further and make a handle for running multiple servers simultaneously and sharing a common statistics endpoint.
+- The `ServerHandle` class is standalone, which means that you can completely ditch the `cli/` folder, `require("./src/ServerHandle.js")` and do whatever you want with it.
 
-## Questions
+## PSA
 
-Ask questions about running, modifying & expanding in the [Agar.io Private Servers guild](https://discord.gg/27v68Sb).
+- Pull requests are not welcome.
 
-**DON'T** ask what additional features will it bring.
+- **DON'T** ask what additional features will it bring.
 
-**DON'T** go around asking ME how do I do this how do I do that. I'm not the Red Cross, nor your personal tech assistant, nor your paid developer.
+- **DON'T** go around asking ME how do I do this how do I do that. I'm not the Red Cross, nor your personal tech assistant, nor your paid developer.
 
-## Contributing
+## Available commands
 
-Pull requests are not welcome.
+```
+NAME       ARGUMENTS            | DESCRIPTION
+addbot     <world id> [count=1] | assign player bots to a world
+addminion  <id> [count=1]       | assign minions to a player
+eval                            | evaluate javascript code in the context of the handle and print the output
+exit                            | stop the handle and close the command stream
+help                            | display all registered commands and their relevant information
+kill       <id>                 | instantly kill a player
+killbot    <world id> [count=1] | remove player bots from a world
+killminion <id> [count=1]       | remove assigned minions from a player
+mass       <id> <mass>          | set cell mass to all of a player's cells
+merge      <id>                 | instantly merge a player
+pause                           | pause the server
+pop        <id>                 | instantly pop a player's first cell
+reload                          | reload the settings from local settings.json
+restart                         | restart the server
+resume                          | unpause the server
+routers    [router type]        | display information about routers and their players
+save                            | save the current settings to settings.json
+setting    <name> [value]       | change/print the value of a setting
+start                           | start the server
+stats                           | display critical information about the server
+stop                            | close the server
+test                            | test command
+```
+
+### `routers` column explanation
+
+`N` - router's index
+`TYPE` - router type (connection, playerbot, minion)
+`PRT` - router's protocol, if a connection
+`P` - does the router have a player
+`PID` - player id
+`FID` - following player id, if minion or spectating
+`STATE` - player's state
+`WID` - player's world id
+`SCORE` - player's mass sum
+`NAME` - player's first owned cell name

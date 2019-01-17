@@ -1,7 +1,3 @@
-const FFA = require("./FFA");
-const Teams = require("./Teams");
-const LastManStanding = require("./LastManStanding");
-
 class GamemodeList {
     /**
      * @param {ServerHandle} handle
@@ -9,19 +5,18 @@ class GamemodeList {
     constructor(handle) {
         this.handle = handle;
         /** @type {Indexed<typeof Gamemode>} */
-        this.list = { };
-        this.register(FFA, Teams, LastManStanding);
+        this.store = { };
     }
 
     /**
-     * @param {typeof Gamemode[]} gamemodeTypes
+     * @param {typeof Gamemode[]} gamemodes
      */
-    register(...gamemodeTypes) {
-        for (let i = 0, l = gamemodeTypes.length; i < l; i++) {
-            const next = gamemodeTypes[i];
-            if (this.list.hasOwnProperty(next.gamemodeName))
-                throw new Error("gamemode conflicts with another already registered one");
-            this.list[next.gamemodeName] = next;
+    register(...gamemodes) {
+        for (let i = 0, l = gamemodes.length; i < l; i++) {
+            const next = gamemodes[i];
+            if (this.store.hasOwnProperty(next.name))
+                throw new Error(`gamemode ${next.name} conflicts with another already registered one`);
+            this.store[next.name] = next;
         }
     }
 
@@ -29,9 +24,9 @@ class GamemodeList {
      * @param {string} name
      */
     setGamemode(name) {
-        if (!this.list.hasOwnProperty(name))
+        if (!this.store.hasOwnProperty(name))
             throw new Error("unknown gamemode");
-        this.handle.gamemode = new (this.list[name])(this.handle);
+        this.handle.gamemode = new (this.store[name])(this.handle);
     }
 }
 

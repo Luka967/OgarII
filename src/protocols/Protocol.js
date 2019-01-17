@@ -9,6 +9,18 @@ class Protocol {
         this.connection = connection;
     }
 
+    /**
+     * @abstract
+     * @returns {string}
+     */
+    static get type() { throw new Error("Must be implemented"); }
+    get type() { return this.constructor.type; }
+    /**
+     * @abstract
+     * @returns {string}
+     */
+    get subtype() { throw new Error("Must be implemented"); }
+
     get listener() { return this.connection.listener; }
     get handle() { return this.connection.listener.handle; }
     get logger() { return this.connection.listener.handle.logger; }
@@ -43,6 +55,10 @@ class Protocol {
      * @param {boolean} includeServerInfo
      */
     onNewWorldBounds(world, includeServerInfo) { throw new Error("Must be implemented"); }
+    /**
+     * @abstract
+     */
+    onWorldReset() { throw new Error("Must be implemented"); }
     /**
      * @abstract
      * @param {LeaderboardType} type

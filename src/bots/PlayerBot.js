@@ -1,5 +1,4 @@
 const Bot = require("./Bot");
-const { throwIfBadNumber } = require("../primitives/Misc");
 
 class PlayerBot extends Bot {
     /**
@@ -13,13 +12,13 @@ class PlayerBot extends Bot {
         this.target = null;
     }
 
+    static get type() { return "playerbot"; }
     static get separateInTeams() { return true; }
 
     get shouldClose() {
-        return
-            !this.hasPlayer
-         || !this.player.exists
-         || this.player.world === null;
+        return !this.hasPlayer
+            || !this.player.exists
+            || !this.player.hasWorld;
     }
     update() {
         if (this.splitCooldownTicks > 0) this.splitCooldownTicks--;
@@ -38,7 +37,7 @@ class PlayerBot extends Bot {
         for (let i = 0, l = player.ownedCells.length; i < l; i++)
             if (cell === null || player.ownedCells[i].size > cell.size)
                 cell = player.ownedCells[i];
-        if (cell === null) return; // ???
+        if (cell === null) return;
         
         if (this.target != null) {
             if (!this.target.exists || !this.canEat(cell.size, this.target.size))

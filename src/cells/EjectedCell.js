@@ -3,13 +3,15 @@ const Cell = require("./Cell");
 class EjectedCell extends Cell {
     /**
      * @param {World} world
+     * @param {Player} owner
      * @param {number} x
      * @param {number} y
      * @param {Color} color
      */
-    constructor(world, x, y, color) {
+    constructor(world, owner, x, y, color) {
         const size = world.settings.ejectedSize;
         super(world, x, y, size, color);
+        this.owner = owner;
     }
 
     get type() { return 3; }
@@ -22,7 +24,8 @@ class EjectedCell extends Cell {
      * @returns {CellEatResult}
      */
     getEatResult(other) {
-        if (other.type === 2 || other.type === 4) return 3;
+        if (other.type === 2) return other.getEjectedEatResult(false);
+        if (other.type === 4) return 3;
         if (other.type === 3) {
             if (!other.isBoosting) other.world.setCellAsBoosting(other);
             return 1;
@@ -41,3 +44,4 @@ class EjectedCell extends Cell {
 module.exports = EjectedCell;
 
 const World = require("../worlds/World");
+const Player = require("../worlds/Player");

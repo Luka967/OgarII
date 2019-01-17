@@ -32,8 +32,8 @@ class Teams extends Gamemode {
         super(handle);
     }
 
-    static get gamemodeName() { return "Teams"; }
-    static get gamemodeType() { return 1; }
+    static get name() { return "Teams"; }
+    static get type() { return 1; }
 
     /**
      * @param {World} world
@@ -71,7 +71,9 @@ class Teams extends Gamemode {
      */
     onPlayerSpawnRequest(player, name) {
         if (player.state === 0) return;
-        const size = this.handle.settings.playerSpawnSize;
+        const size = player.router.type === "minion" ?
+            this.handle.settings.minionSpawnSize :
+            this.handle.settings.playerSpawnSize;
         const pos = player.world.getSafeSpawnPos(size);
         if (player.router.separateInTeams)
             player.world.spawnPlayer(player, getTeamColor(player.team), pos, size, name, null);
@@ -87,8 +89,8 @@ class Teams extends Gamemode {
         for (let i = 0; i < world.playerCells.length; i++) {
             const cell = world.playerCells[i];
             if (cell.owner.team === null) continue;
-            teams[cell.owner.team] += cell.size;
-            sum += cell.size;
+            teams[cell.owner.team] += cell.squareSize;
+            sum += cell.squareSize;
         }
         for (let i = 0; i < teamCount; i++) teams[i] /= sum;
     }

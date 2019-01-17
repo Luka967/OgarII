@@ -1,9 +1,9 @@
-const PlayingRouter = require("../primitives/PlayingRouter");
+const Router = require("../primitives/Router");
 
 /**
  * @abstract
 */
-class Bot extends PlayingRouter {
+class Bot extends Router {
     /**
      * @param {World} world
      */
@@ -13,7 +13,7 @@ class Bot extends PlayingRouter {
         world.addPlayer(this.player);
     }
 
-    get isExternal() { return false; }
+    static get isExternal() { return false; }
 
     close() {
         super.close();

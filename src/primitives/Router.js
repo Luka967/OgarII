@@ -1,5 +1,5 @@
 /** @interface */
-class PlayingRouter {
+class Router {
     /**
      * @param {Listener} listener
      */
@@ -20,12 +20,22 @@ class PlayingRouter {
         this.ejectAttempts = 0;
 
         this.hasPlayer = false;
+        /** @type {Player} */
         this.player = null;
-        this.listener.addPlayingRouter(this);
+        
+        this.listener.addRouter(this);
     }
 
+    /** @abstract @returns {string} */
+    static get type() { throw new Error("Must be overriden"); }
+    /** @returns {string} */
+    get type() { return this.constructor.type; }
+
     /** @abstract @returns {boolean} */
-    get isExternal() { throw new Error("Must be overriden"); }
+    static get isExternal() { throw new Error("Must be overriden"); }
+    /** @returns {boolean} */
+    get isExternal() { return this.constructor.isExternal; }
+
     /** @abstract @returns {boolean} */
     static get separateInTeams() { throw new Error("Must be overriden"); }
     /** @returns {boolean} */
@@ -82,7 +92,7 @@ class PlayingRouter {
 
     /** @virtual */
     close() {
-        this.listener.removePlayingRouter(this);
+        this.listener.removeRouter(this);
     }
 
     /** @abstract @returns {boolean} */
@@ -95,7 +105,7 @@ class PlayingRouter {
     }
 }
 
-module.exports = PlayingRouter;
+module.exports = Router;
 
 const Listener = require("../sockets/Listener");
 const Player = require("../worlds/Player");

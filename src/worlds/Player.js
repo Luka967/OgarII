@@ -1,4 +1,4 @@
-const PlayingRouter = require("../primitives/PlayingRouter");
+const Router = require("../primitives/Router");
 const ServerHandle = require("../ServerHandle");
 const World = require("./World");
 const Cell = require("../cells/Cell");
@@ -8,7 +8,7 @@ class Player {
     /**
      * @param {ServerHandle} handle
      * @param {number} id
-     * @param {PlayingRouter} router
+     * @param {Router} router
      */
     constructor(handle, id, router) {
         this.handle = handle;
@@ -20,6 +20,7 @@ class Player {
          * @type {PlayerState}
          */
         this.state = -1;
+        this.hasWorld = false;
         /** @type {World} */
         this.world = null;
         /** @type {any} */
@@ -45,8 +46,7 @@ class Player {
     get settings() { return this.handle.settings; }
 
     destroy() {
-        if (this.world !== null)
-            this.world.removePlayer(this);
+        if (this.hasWorld) this.world.removePlayer(this);
         this.exists = false;
     }
 
@@ -81,8 +81,8 @@ class Player {
                 this.viewArea.y = y / l;
                 this.score = score;
                 s = this.viewArea.s = Math.pow(Math.min(64 / s, 1), 0.4);
-                this.viewArea.w = 1920 / s / 2 * this.settings.playerViewScaleMult * this.handle.stepMult;
-                this.viewArea.h = 1080 / s / 2 * this.settings.playerViewScaleMult * this.handle.stepMult;
+                this.viewArea.w = 1920 / s / 2 * this.settings.playerViewScaleMult;
+                this.viewArea.h = 1080 / s / 2 * this.settings.playerViewScaleMult;
                 break;
             case 1:
                 this.score = NaN;
@@ -125,7 +125,7 @@ class Player {
     checkDisconnect() {
         if (!this.router.disconnected) return;
         if (this.state !== 0) return void this.handle.removePlayer(this.id);
-        const disposeDelay = this.settings.playerDisposeDelay;
+        const disposeDelay = this.settings.worldPlayerDisposeDelay;
         if (disposeDelay > 0 && this.handle.tick - this.router.disconnectionTick >= disposeDelay)
             this.handle.removePlayer(this.id);
     }
