@@ -27,7 +27,7 @@ class PlayerBot extends Bot {
         this.player.updateVisibleCells();
         const player = this.player;
         if (player.state === -1) {
-            this.spawningName = "Player bot";
+            this.spawningName = this.listener.settings.worldPlayerBotNames[Math.floor(Math.random() * this.listener.settings.worldPlayerBotNames.length)] || "Player bot";
             this.onSpawnRequest();
             this.spawningName = null;
         }
