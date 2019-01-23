@@ -7,7 +7,7 @@ const value = Object.seal({
     listenerMaxClientDormancy: 1000 * 60,
     listenerMaxConnectionsPerIP: -1,
     listenerMinLegacyProtocol: 1,
-    listenerMaxLegacyProtocol: 18,
+    listenerMaxLegacyProtocol: 20,
     listeningPort: 443,
 
     serverUpdateFrequency: 25,
