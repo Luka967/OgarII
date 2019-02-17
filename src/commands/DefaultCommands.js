@@ -52,9 +52,31 @@ function table(contents, eol) {
     return all;
 }
 
+/**
+ * @param {SettingIdType} id
+ */
+function splitSettingId(id) {
+    let items = [], reg, i = 0;
+    while ((reg = /([a-z]+)|([A-Z][a-z]+)|([A-Z])/.exec(id)) != null && ++i < 10) {
+        const capture = reg[1] || reg[2] || reg[3];
+        items.push(capture.toLowerCase()), id = id.replace(capture, "");
+    }
+    return items;
+}
+/**
+ * @param {string[]} a
+ * @param {string[]} b
+ */
+function getSplitSettingHits(a, b) {
+    let hits = 0;
+    for (let i = 0, l = b.length; i < l; i++)
+        if (a.indexOf(b[i]) !== -1) hits++;
+    return hits;
+}
+
 /** @param {number} value */
 function prettyMemory(value) {
-    const units = ["B", "kiB", "MiB", "GiB"]; let i = 0;
+    const units = ["B", "kiB", "MiB", "GiB", "TiB"]; let i = 0;
     for (; i < units.length && value / 1024 > 1; i++)
         value /= 1024;
     return `${value.toFixed(1)} ${units[i]}`;
@@ -76,6 +98,25 @@ function prettyTime(seconds) {
     if (days < 1) return `${hours} hour${hours === 1 ? "" : "s"} ${minutes % 60} minute${minutes === 1 ? "" : "s"}`;
     if (hours === 24) return `1 day`;
     return `${days} day${days === 1 ? "" : "s"} ${hours % 24} hour${hours === 1 ? "" : "s"}`;
+}
+/** @param {number} seconds */
+function shortPrettyTime(milliseconds) {
+    let seconds = ~~(milliseconds / 1000);
+    if (seconds < 1) return `${milliseconds}ms`;
+    if (milliseconds === 1000) return `1s`;
+
+    let minutes = ~~(seconds / 60);
+    if (minutes < 1) return `${seconds}s`;
+    if (seconds === 60) return `1m`;
+
+    let hours = ~~(minutes / 60);
+    if (hours < 1) return `${minutes}m`;
+    if (minutes === 60) return `1h`;
+
+    let days = ~~(hours / 24);
+    if (days < 1) return `${hours}h`;
+    if (hours === 24) return `1d`;
+    return `${days}d`;
 }
 
 /**
@@ -112,50 +153,73 @@ module.exports = (commands, chatCommands) => {
             args: "[router type]",
             desc: "display information about routers and their players",
             exec: (handle, context, args) => {
+                if (args.length > 1)
+                    return void handle.logger.print("too many arguments");
                 const matchingType = args.length >= 1 ? args[0] : null;
-                const routers = handle.listener.routers.filter(v => matchingType === null || v.type == matchingType);
+                const routers = handle.listener.routers
+                    .filter(v => matchingType === null || v.type == matchingType);
                 handle.logger.print(table({
                     columns: [
-                        { text: "N",     headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
-                        { text: "TYPE",  headPad: " ", emptyPad: " ", rowPad: " ", separated: true  },
-                        { text: "PRT",   headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
-                        { text: "P",     headPad: " ", emptyPad: " ", rowPad: " ", separated: false },
-                        { text: "PID",   headPad: " ", emptyPad: "/", rowPad: " ", separated: true  },
-                        { text: "FID",   headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
-                        { text: "STATE", headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
-                        { text: "WID",   headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
-                        { text: "SCORE", headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
-                        { text: "NAME",  headPad: " ", emptyPad: "/", rowPad: " ", separated: false }
+                        { text: "INDEX",    headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "TYPE",     headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "SOURCE",   headPad: " ", emptyPad: "/", rowPad: " ", separated: true  },
+                        { text: "ACTIVE",   headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "DORMANT",  headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "PROTOCOL", headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "PID",      headPad: " ", emptyPad: "/", rowPad: " ", separated: false }
                     ],
-                    rows: routers.map((v, i) => {
+                    rows: routers.map((v, i) => [
+                        i.toString(),
+                        v.type,
+                        v.type === "connection" ? v.remoteAddress : null,
+                        shortPrettyTime(Date.now() - v.connectTime),
+                        shortPrettyTime(Date.now() - v.lastActivityTime),
+                        v.protocol ? v.protocol.subtype : null,
+                        v.hasPlayer ? v.player.id.toString() : null,
+                    ])
+                }, EOL));
+            }
+        }),
+        genCommand({
+            name: "players",
+            args: "[world id or \"any\"] [router type]",
+            desc: "display information about players",
+            exec: (handle, context, args) => {
+                if (args.length > 2)
+                    return void handle.logger.print("too many arguments");
+                const worldId = args.length >= 1 ? parseInt(args[0]) || null : null;
+                const routerType = args.length === 2 ? args[1] : null;
+                const players = handle.listener.routers
+                    .filter(v => v.hasPlayer && (routerType == null || v.type == routerType))
+                    .map(v => v.player)
+                    .filter(v => worldId == null || (v.hasWorld && v.world.id === worldId));
+                handle.logger.print(table({
+                    columns: [
+                        { text: "ID",        headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "WORLD",     headPad: " ", emptyPad: "/", rowPad: " ", separated: true  },
+                        { text: "FOLLOWING", headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "STATE",     headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "SCORE",     headPad: " ", emptyPad: "/", rowPad: " ", separated: false },
+                        { text: "NAME",      headPad: " ", emptyPad: "/", rowPad: " ", separated: false }
+                    ],
+                    rows: players.map((v) => {
                         let ret = [
-                            i.toString(),
-                            v.type,
-                            v.protocol ? v.protocol.subtype : "///",
-                            v.hasPlayer ? "Y" : "N"
+                            v.id.toString(),
+                            v.hasWorld ? v.world.id.toString() : null,
                         ];
-                        if (v.hasPlayer) {
-                            ret.push(v.player.id.toString());
-                            switch (v.player.state) {
-                                case -1: ret.push("idle"); break;
-                                case 0:
-                                    ret.push(v.type === "minion" ? v.following.player.id.toString() : null);
-                                    ret.push("alive");
-                                    ret.push(v.player.world.id.toString());
-                                    ret.push(Math.round(v.player.score).toString());
-                                    ret.push(v.player.ownedCells[0].name || "");
-                                    break;
-                                case 1:
-                                    ret.push(v.player.world.largestPlayer !== null ?
-                                        v.player.world.largestPlayer.id.toString() : null);
-                                    ret.push("spec");
-                                    ret.push(v.player.world.id.toString());
-                                    break;
-                                case 2:
-                                    ret.push("roam");
-                                    ret.push(v.player.world.id.toString());
-                                    break;
-                            }
+                        if (v.type === "minion") ret.push(v.following.player.id.toString());
+                        else if (v.hasWorld && v.state === 1) ret.push(v.world.largestPlayer.id.toString());
+                        else ret.push(null);
+
+                        switch (v.state) {
+                            case -1: ret.push("idle"); break;
+                            case 0:
+                                ret.push("alive");
+                                ret.push(Math.round(v.score).toString());
+                                ret.push(v.ownedCells[0].name);
+                                break;
+                            case 1: ret.push("spec"); break;
+                            case 2: ret.push("roam"); break;
                         }
                         return ret;
                     })
@@ -167,14 +231,33 @@ module.exports = (commands, chatCommands) => {
             args: "<name> [value]",
             desc: "change/print the value of a setting",
             exec: (handle, context, args) => {
-                if (args.length < 1) return void handle.logger.print("no setting name provided");
-                if (!handle.settings.hasOwnProperty(args[0]))
-                    return void handle.logger.print("no such setting");
-                if (args.length >= 2) {
-                    handle.settings[args[0]] = eval(args.slice(1).join(" "));
-                    handle.setSettings(handle.settings);
+                if (args.length < 1)
+                    return void handle.logger.print("no setting name provided");
+                const settingName = args[0];
+                if (!handle.settings.hasOwnProperty(settingName)) {
+                    const settingIdSplit = splitSettingId(settingName);
+                    const possible = Object.keys(handle.settings)
+                        .map(v => { return { name: v, hits: getSplitSettingHits(splitSettingId(v), settingIdSplit) }; })
+                        .sort((a, b) => b.hits - a.hits)
+                        .filter((v) => v.hits > 0)
+                        .filter((v, i, array) => array[0].hits === v.hits)
+                        .map(v => v.name);
+                    let printing = "no such setting";
+                    if (possible.length > 0) {
+                        printing += `; did you mean ${possible.slice(0, 3).join(", ")}`
+                        if (possible.length > 3) printing += `, ${possible.length - 3} other`;
+                        printing += "?"
+                    }
+                    return void handle.logger.print(printing);
                 }
-                handle.logger.print(handle.settings[args[0]]);
+                if (args.length >= 2) {
+                    const settingValue = eval(args.slice(1).join(" "));
+                    const newSettings = Object.assign({ }, handle.settings, {
+                        settingName: settingValue
+                    });
+                    handle.setSettings(newSettings);
+                }
+                handle.logger.print(handle.settings[settingName]);
             }
         }),
         genCommand({
@@ -205,7 +288,7 @@ module.exports = (commands, chatCommands) => {
         genCommand({
             name: "eval",
             args: "",
-            desc: "evaluate javascript code in the context of the handle and print the output",
+            desc: "evaluate javascript code in a function bound to server handle",
             exec: (handle, context, args) => {
                 handle.logger.print(
                     (function() {
@@ -323,13 +406,33 @@ module.exports = (commands, chatCommands) => {
                 if (player.state !== 0) return void handle.logger.print("player is not alive");
                 for (let i = 0, l = player.ownedCells.length; i < l; i++)
                     player.world.removeCell(player.ownedCells[0]);
-                handle.logger.print(`killed player`);
+                handle.logger.print("player killed");
             }
         }),
         genCommand({
-            name: "pop",
+            name: "killall",
+            args: "<world id>",
+            desc: "instantly kill all players in a world",
+            exec: (handle, context, args) => {
+                if (args.length === 0) return void handle.logger.print("missing world id");
+                const id = parseInt(args[0]);
+                if (isNaN(id)) return void handle.logger.print("invalid number for world id");
+                if (!handle.worlds.hasOwnProperty(id))
+                    return void handle.logger.print("no world has this id");
+                const players = handle.worlds[id].players;
+                for (let i = 0; i < players.length; i++) {
+                    const player = players[i];
+                    if (player.state !== 0) continue;
+                    for (let j = 0, l = player.ownedCells.length; j < l; j++)
+                        player.world.removeCell(player.ownedCells[0]);
+                }
+                handle.logger.print(`${players.length} player${players.length === 1 ? "" : "s"} killed`);
+            }
+        }),
+        genCommand({
+            name: "explode",
             args: "<id>",
-            desc: "instantly pop a player's first cell",
+            desc: "instantly explode a player's first cell",
             exec: (handle, context, args) => {
                 if (args.length === 0) return void handle.logger.print("missing player id");
                 const id = parseInt(args[0]);
@@ -339,7 +442,7 @@ module.exports = (commands, chatCommands) => {
                 const player = handle.players[id];
                 if (player.state !== 0) return void handle.logger.print("player is not alive");
                 player.world.popPlayerCell(player.ownedCells[0]);
-                handle.logger.print(`popped player`);
+                handle.logger.print("player exploded");
             }
         }),
         genCommand({
@@ -365,7 +468,7 @@ module.exports = (commands, chatCommands) => {
             }
         }),
         genCommand({
-            name: "killminion",
+            name: "rmminion",
             args: "<id> [count=1]",
             desc: "remove assigned minions from a player",
             exec: (handle, context, args) => {
@@ -410,7 +513,7 @@ module.exports = (commands, chatCommands) => {
             }
         }),
         genCommand({
-            name: "killbot",
+            name: "rmbot",
             args: "<world id> [count=1]",
             desc: "remove player bots from a world",
             exec: (handle, context, args) => {
@@ -457,7 +560,7 @@ module.exports = (commands, chatCommands) => {
                 handle.listener.globalChat.directMessage(
                     null,
                     context,
-                    context.hasPlayer ? `your ID is ${context.player.id}` : "you don't have a player instance associated with yourself"
+                    context.hasPlayer ? `your ID is ${context.player.id}` : "you don't have a player associated with yourself"
                 );
             }
         }),
@@ -468,7 +571,7 @@ module.exports = (commands, chatCommands) => {
             exec: (handle, context, args) => {
                 const chat = handle.listener.globalChat;
                 if (!context.hasPlayer)
-                    return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
+                    return void chat.directMessage(null, context, "you don't have a player associated with yourself");
                 if (!context.player.hasWorld)
                     return void chat.directMessage(null, context, "you're not in a world");
                 chat.directMessage(`your world ID is ${context.player.world.id}`);
@@ -481,7 +584,7 @@ module.exports = (commands, chatCommands) => {
             exec: (handle, context, args) => {
                 const chat = handle.listener.globalChat;
                 if (!context.hasPlayer)
-                    return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
+                    return void chat.directMessage(null, context, "you don't have a player associated with yourself");
                 if (!context.player.hasWorld)
                     return void chat.directMessage(null, context, "you're not in a world");
                 context.player.world.removePlayer(context.player);

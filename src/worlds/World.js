@@ -70,7 +70,7 @@ class World {
 
     get settings() { return this.handle.settings; }
     get nextCellId() {
-        return this._nextCellId === 4294967296 ? (this._nextCellId = 1) : this._nextCellId++;
+        return this._nextCellId >= 4294967296 ? (this._nextCellId = 1) : this._nextCellId++;
     }
 
     afterCreation() {
@@ -298,7 +298,7 @@ class World {
                 }
             });
         }
-       
+
         for (i = 0, l = this.playerCells.length; i < l; i++) {
             const cell = this.playerCells[i];
             this.autosplitPlayerCell(cell);
@@ -324,13 +324,6 @@ class World {
             this.resolveRigidCheck(rigid[i++], rigid[i++]);
         for (i = 0, l = eat.length; i < l;)
             this.resolveEatCheck(eat[i++], eat[i++]);
-
-        this.largestPlayer = null;
-        for (i = 0, l = this.players.length; i < l; i++) {
-            const player = this.players[i];
-            if (!isNaN(player.score) && (this.largestPlayer === null || player.score > this.largestPlayer.score))
-                this.largestPlayer = player;
-        }
 
         for (i = 0, l = this.players.length; i < l; i++) {
             const player = this.players[i];
@@ -360,6 +353,14 @@ class World {
             }
             player.updateViewArea();
         }
+
+        this.largestPlayer = null;
+        for (i = 0, l = this.players.length; i < l; i++) {
+            const player = this.players[i];
+            if (!isNaN(player.score) && (this.largestPlayer === null || player.score > this.largestPlayer.score))
+                this.largestPlayer = player;
+        }
+
         this.compileStatistics();
         this.handle.gamemode.compileLeaderboard(this);
 
@@ -560,11 +561,11 @@ class World {
      */
     popPlayerCell(cell) {
         const splits = this.distributeCellMass(cell);
-        const angles = this.distributePopAngles(cell, splits);
         for (let i = 0, l = splits.length; i < l; i++) {
-            this.launchPlayerCell(cell, splits[i], {
-                dx: Math.sin(angles[i]),
-                dy: Math.cos(angles[i]),
+            const angle = Math.random() * 2 * Math.PI;
+            this.launchPlayerCell(cell, Math.sqrt(splits[i] * 100), {
+                dx: Math.sin(angle),
+                dy: Math.cos(angle),
                 d: this.settings.playerSplitBoost
             });
         }
@@ -605,33 +606,6 @@ class World {
         }
         nextMass = massLeft / cellsLeft;
         return splits.concat(new Array(cellsLeft).fill(nextMass));
-    }
-
-    /**
-     * @param {Cell} cell
-     * @param {number[]} splits
-     */
-    distributePopAngles(cell, splits) {
-        splits.sort((a, b) => Math.round(Math.random() * 3 - 1.5));
-        /** @type {number[]} */
-        const angles = [];
-        const l = splits.length;
-        let cellSize = cell.squareSize;
-        let angleSum = 0;
-        for (let i = 0; i < l; i++) {
-            splits[i] = Math.sqrt(100 * splits[i]);
-            cellSize -= splits[i] * splits[i];
-        }
-        cellSize = Math.sqrt(cellSize);
-        for (let i = 0; i < l; i++) {
-            angles.push(angleSum);
-            angleSum += splits[i] / (splits[i] + cellSize) / Math.PI / 2;
-        }
-
-        const start = Math.random() * 2 * Math.PI;
-        for (let i = 0; i < l; i++)
-            angles[i] = start + angles[i] * 8 * Math.PI;
-        return angles;
     }
 
     compileStatistics() {

@@ -10,6 +10,7 @@ class Connection extends Router {
         super(listener);
         this.remoteAddress = webSocket._socket.remoteAddress;
         this.webSocket = webSocket;
+        this.connectTime = Date.now();
         this.lastActivityTime = Date.now();
 
         this.upgradeLevel = 0;

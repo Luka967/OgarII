@@ -10,7 +10,7 @@ const value = Object.seal({
     listenerMaxLegacyProtocol: 20,
     listeningPort: 443,
 
-    serverUpdateFrequency: 25,
+    serverFrequency: 25,
     serverName: "An unnamed server",
     serverGamemode: "FFA",
     serverChatEnabled: true,
@@ -26,7 +26,7 @@ const value = Object.seal({
     worldPlayerDisposeDelay: 25 * 60,
 
     worldPlayerBotsPerWorld: 0,
-    worldPlayerBotNames: ['Best gamer', 'OgarII is cool', 'cell', 'pro', 'King', 'Queen', 'boss', 'List of noobs:', 'Team?', 'An unnamed cell', 'bored', 'lol'],
+    worldPlayerBotNames: [],
     worldMinionsPerPlayer: 0,
     worldMaxPlayers: 50,
     worldMaxCount: 2,
@@ -64,13 +64,13 @@ const value = Object.seal({
     mothercellPelletBoost: 90,
     mothercellMaxPellets: 96,
     mothercellMaxSize: 65535,
-    
+
     playerRoamSpeed: 32,
     playerRoamViewScale: 0.4,
     playerViewScaleMult: 1,
     playerMinViewScale: 0.01,
     playerMaxNameLength: 16,
-    
+
     playerMinSize: 32,
     playerSpawnSize: 32,
     playerMaxSize: 1500,

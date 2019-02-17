@@ -35,6 +35,13 @@ const commandStream = readline.createInterface({
     historySize: 64,
     removeHistoryDuplicates: true
 });
+commandStream.once("SIGINT", () => {
+    logger.inform("command stream caught SIGINT");
+    commandStreamClosing = true;
+    commandStream.close();
+    currentHandle.stop();
+    process.exitCode = 0;
+});
 function ask() {
     if (commandStreamClosing) return;
     commandStream.question("@ ", (input) => {
@@ -42,16 +49,11 @@ function ask() {
         if (!(input = input.trim())) return;
         logger.printFile(`@ ${input}`);
         if (!currentHandle.commands.execute(null, input))
-            logger.warn(`unknown command ${input}`);
+            logger.print(`unknown command ${input}`);
     });
 }
 logger.inform("command stream open");
 setTimeout(ask, 1000);
-process.once("SIGINT", () => {
-    logger.inform("(caught SIGINT)");
-    currentHandle.stop();
-    process.exitCode = 0;
-});
 
 currentHandle.commands.register(
     genCommand({

@@ -114,6 +114,8 @@ class ModernProtocol extends Protocol {
 
     onWorldReset() {
         this.clearCellsPending = true;
+        this.worldBorderPending = false;
+        this.worldStatsPending = false;
         this.onVisibleCellUpdate([], [], [], []);
     }
 
@@ -186,6 +188,7 @@ class ModernProtocol extends Protocol {
             writer.writeUInt8(parseInt(item[0]));
             writer.writeUInt8(parseInt(item[1]));
             writer.writeUInt8(parseInt(item[2]));
+            this.serverInfoPending = false;
         }
         if (this.worldStatsPending) {
             item = this.connection.player.world.stats;

@@ -11,7 +11,7 @@ class QuadTree {
      * @param {Range} range
      * @param {number} maxLevel
      * @param {number} maxItems
-     * @param {QuadTree=} root 
+     * @param {QuadTree=} root
      */
     constructor(range, maxLevel, maxItems, root) {
         this.root = root;
@@ -33,7 +33,7 @@ class QuadTree {
         if (!this.hasSplit) return;
         for (i = 0; i < 4; i++) this.branches[i].destroy();
     }
-    /** 
+    /**
      * @param {QuadItem} item
      */
     insert(item) {
@@ -48,7 +48,7 @@ class QuadTree {
         quad.items.push(item);
         quad.split();
     }
-    /** 
+    /**
      * @param {InsertedQuadItem} item
      */
     update(item) {
@@ -72,7 +72,7 @@ class QuadTree {
         oldQuad.merge();
         newQuad.split();
     }
-    /** 
+    /**
      * @param {InsertedQuadItem} item
      */
     remove(item) {
@@ -82,7 +82,7 @@ class QuadTree {
         quad.merge();
     }
 
-    /** 
+    /**
      * @private
      */
     split() {
@@ -106,7 +106,7 @@ class QuadTree {
             this.items.splice(i, 1); i--; l--;
         }
     }
-    /** 
+    /**
      * @private
      */
     merge() {

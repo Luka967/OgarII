@@ -7,7 +7,7 @@ class Router {
         this.listener = listener;
         this.disconnected = false;
         this.disconnectionTick = NaN;
-        
+
         this.mouseX = 0;
         this.mouseY = 0;
 
@@ -22,7 +22,7 @@ class Router {
         this.hasPlayer = false;
         /** @type {Player} */
         this.player = null;
-        
+
         this.listener.addRouter(this);
     }
 
@@ -63,7 +63,7 @@ class Router {
     onWorldReset() { }
     /** @param {PlayerCell} cell @virtual */
     onNewOwnedCell(cell) { }
-    
+
     /** @virtual */
     onSpawnRequest() {
         if (!this.hasPlayer) return;

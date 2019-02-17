@@ -27,7 +27,8 @@ class PlayerBot extends Bot {
         this.player.updateVisibleCells();
         const player = this.player;
         if (player.state === -1) {
-            this.spawningName = this.listener.settings.worldPlayerBotNames[Math.floor(Math.random() * this.listener.settings.worldPlayerBotNames.length)] || "Player bot";
+            const names = this.listener.settings.worldPlayerBotNames;
+            this.spawningName = names[~~(Math.random() * names.length)] || "Player bot";
             this.onSpawnRequest();
             this.spawningName = null;
         }
@@ -38,7 +39,7 @@ class PlayerBot extends Bot {
             if (cell === null || player.ownedCells[i].size > cell.size)
                 cell = player.ownedCells[i];
         if (cell === null) return;
-        
+
         if (this.target != null) {
             if (!this.target.exists || !this.canEat(cell.size, this.target.size))
                 this.target = null;

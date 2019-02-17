@@ -32,7 +32,7 @@ class Mothercell extends Cell {
 
         this.activePelletFormQueue += settings.mothercellActiveSpawnSpeed * this.world.handle.stepMult;
         this.passivePelletFormQueue += Math.random() * settings.mothercellPassiveSpawnChance * this.world.handle.stepMult;
-    
+
         while (this.activePelletFormQueue > 0) {
             if (this.squareSize > minSpawnSqSize)
                 this.spawnPellet(), this.squareSize -= pelletSize * pelletSize;
@@ -43,7 +43,7 @@ class Mothercell extends Cell {
         while (this.passivePelletFormQueue > 0) {
             if (this.pelletCount < settings.mothercellMaxPellets)
                 this.spawnPellet();
-            this.passivePelletFormQueue--;            
+            this.passivePelletFormQueue--;
         }
     }
     spawnPellet() {

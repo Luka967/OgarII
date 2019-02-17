@@ -69,7 +69,7 @@ class ServerHandle {
      */
     setSettings(settings) {
         this.settings = Object.assign({ }, Settings, settings);
-        this.tickDelay = 1000 / this.settings.serverUpdateFrequency;
+        this.tickDelay = 1000 / this.settings.serverFrequency;
         this.ticker.step = this.tickDelay;
         this.stepMult = this.tickDelay / 40;
     }

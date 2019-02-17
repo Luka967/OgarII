@@ -63,7 +63,8 @@ class Player {
     }
 
     updateViewArea() {
-        if (this.world === null) return;        
+        if (this.world === null) return;
+        this.updateState(this.state);
         let s;
         switch (this.state) {
             case -1: this.score = NaN; break;
