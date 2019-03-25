@@ -57,7 +57,7 @@ class ChatChannel {
      * @param {string} message
      */
     broadcast(source, message) {
-        if (!source.hasPlayer || this.shouldFilter(message))
+        if (source && !source.hasPlayer || this.shouldFilter(message))
             return;
         const sourceInfo = source == null ? serverSource : getSourceFromConnection(source);
         for (let i = 0, l = this.connections.length; i < l; i++)
