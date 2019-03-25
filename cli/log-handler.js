@@ -57,20 +57,6 @@ function filename(date) {
     return `${dy}-${dm}-${dd}T${th}-${tm}-${ts}.log`;
 }
 
-/**
- * @param {Date=} date
- */
-function time(date) {
-    const date = date || new Date();
-    const th = date.getHours();
-    const tm = date.getMinutes();
-    const ts = date.getSeconds();
-    th = ("00" + th).slice(-2);
-    tm = ("00" + tm).slice(-2);
-    ts = ("00" + ts).slice(-2);
-    return `${th}:${tm}:${ts}`;
-}
-
 const logFolderLoc = settings.fileLogDirectory;
 const logLoc = `${settings.fileLogDirectory}latest.log`;
 const oldLogsFolderLoc = settings.fileLogDirectory + "old/";
@@ -84,12 +70,21 @@ if (fs.existsSync(logLoc)) {
     } else fs.unlinkSync(logLoc);
 }
 
-let fstream = fs.createWriteStream(logLoc);
+let fstream = fs.createWriteStream(logLoc, {
+    flags: "wx"
+});
+/** @type {string[]} */
 let fqueue = [];
+/** @type {string} */
 let fconsuming = null;
 let fprocessing = false;
 let synchronous = false;
 
+/**
+ * @param {Date} date
+ * @param {LogEventLevel} level
+ * @param {string} message
+ */
 function formatConsole(date, level, message) {
     switch (level) {
         case "PRINT":
@@ -98,6 +93,11 @@ function formatConsole(date, level, message) {
         default: return `${dateTime(date)} [${level}] ${message}`;
     }
 }
+/**
+ * @param {Date} date
+ * @param {LogEventLevel} level
+ * @param {string} message
+ */
 function formatFile(date, level, message) {
     switch (level) {
         case "PRINT":
@@ -107,6 +107,11 @@ function formatFile(date, level, message) {
     }
 }
 
+/**
+ * @param {Date} date
+ * @param {LogEventLevel} level
+ * @param {string} message
+ */
 function write(date, level, message) {
     if (settings.showingConsole[level])
         console.log(formatConsole(date, level, message));
@@ -131,9 +136,9 @@ function fprocessSync() {
     fs.appendFileSync(logLoc, tail, "utf-8");
     fqueue.splice(0);
 }
-process.once("uncaughtException", function(exception) {
+process.once("uncaughtException", function(e) {
     synchronous = true;
-    write(new Date(), "FATAL", exception.stack);
+    write(new Date(), "FATAL", e.stack);
     write(new Date(), "ERROR", "uncaught exception - process is terminating");
     fprocessSync();
     process.removeAllListeners("exit");

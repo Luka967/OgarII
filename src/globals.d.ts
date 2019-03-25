@@ -1,8 +1,8 @@
-interface Position {
+interface Point {
     x: number;
     y: number;
 }
-interface Range extends Position {
+interface Range extends Point {
     w: number;
     h: number;
 }
@@ -52,13 +52,6 @@ interface WorldStats {
     uptime: number;
 }
 
-declare type CommandExecutor = (handle: ServerHandle, context: any, args: string[]) => void;
-interface CommandGeneratorInfo {
-    name: string;
-    args: string;
-    desc: string;
-    exec: CommandExecutor;
-}
 interface GenCommandTable {
     columns: {
         text: string;
@@ -70,7 +63,8 @@ interface GenCommandTable {
     rows: string[][];
 }
 
-declare type LogEvent = (date: Date, level: "DEBUG" | "ACCESS" | "INFO" | "WARN" | "ERROR" | "FATAL", message: string) => void;
+declare type LogEventLevel = "DEBUG" | "ACCESS" | "INFO" | "WARN" | "ERROR" | "FATAL";
+declare type LogEvent = (date: Date, level: LogEventLevel, message: string) => void;
 declare type LogMessageData = any[];
 
 /**

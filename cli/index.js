@@ -4,6 +4,17 @@ const ServerHandle = require("../src/ServerHandle");
 const { genCommand } = require("../src/commands/CommandList");
 const readline = require("readline");
 
+const DefaultCommands = require("../src/commands/DefaultCommands");
+const DefaultProtocols = [
+    require("../src/protocols/LegacyProtocol"),
+    require("../src/protocols/ModernProtocol"),
+];
+const DefaultGamemodes = [
+    require("../src/gamemodes/FFA"),
+    require("../src/gamemodes/Teams"),
+    require("../src/gamemodes/LastManStanding")
+];
+
 /** @returns {DefaultSettings} */
 function readSettings() {
     try { return JSON.parse(fs.readFileSync("./settings.json", "utf-8")); }
@@ -42,20 +53,28 @@ commandStream.once("SIGINT", () => {
     currentHandle.stop();
     process.exitCode = 0;
 });
-function ask() {
-    if (commandStreamClosing) return;
-    commandStream.question("@ ", (input) => {
-        setTimeout(ask, 0);
-        if (!(input = input.trim())) return;
-        logger.printFile(`@ ${input}`);
-        if (!currentHandle.commands.execute(null, input))
-            logger.print(`unknown command ${input}`);
-    });
-}
-logger.inform("command stream open");
-setTimeout(ask, 1000);
 
+
+DefaultCommands(currentHandle.commands, currentHandle.chatCommands);
+currentHandle.protocols.register(...DefaultProtocols);
+currentHandle.gamemodes.register(...DefaultGamemodes);
 currentHandle.commands.register(
+    genCommand({
+        name: "start",
+        args: "",
+        desc: "start the handle",
+        exec: (handle, context, args) => {
+            if (!handle.start()) handle.logger.print("failed");
+        }
+    }),
+    genCommand({
+        name: "stop",
+        args: "",
+        desc: "stop the handle",
+        exec: (handle, context, args) => {
+            if (!handle.stop()) handle.logger.print("failed");
+        }
+    }),
     genCommand({
         name: "exit",
         args: "",
@@ -86,4 +105,18 @@ currentHandle.commands.register(
     }),
 );
 
+function ask() {
+    if (commandStreamClosing) return;
+    commandStream.question("@ ", (input) => {
+        setTimeout(ask, 0);
+        if (!(input = input.trim())) return;
+        logger.printFile(`@ ${input}`);
+        if (!currentHandle.commands.execute(null, input))
+            logger.print(`unknown command ${input}`);
+    });
+}
+setTimeout(() => {
+    logger.debug("command stream open");
+    ask();
+}, 1000);
 currentHandle.start();

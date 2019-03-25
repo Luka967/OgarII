@@ -111,7 +111,7 @@ class LegacyProtocol extends Protocol {
                 if (reader.length < 2 + skipLen)
                     return void this.fail(1003, "Unexpected message format");
                 reader.skip(skipLen);
-                const message = readZTString(reader, this.protocol).trim();
+                const message = readZTString(reader, this.protocol);
                 this.connection.onChatMessage(message);
                 break;
             case 254:

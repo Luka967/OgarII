@@ -13,7 +13,11 @@ const value = Object.seal({
     serverFrequency: 25,
     serverName: "An unnamed server",
     serverGamemode: "FFA",
-    serverChatEnabled: true,
+
+    chatEnabled: true,
+    /** @type {string[]} */
+    chatFilteredPhrases: [],
+    chatCooldown: 1000,
 
     worldMapX: 0,
     worldMapY: 0,

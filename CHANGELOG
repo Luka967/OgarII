@@ -1,3 +1,25 @@
+1.2.1 @ 2019-03-25
+- Clean up gitignore
+- Add missing JSDoc to CLI log handler
+- Rename Ticker.isRunning to running
+- Rename definition Position to Point
+- Refactor CommandList JSDoc for better type recognition in default commands
+- Refactor default commands
+- Refactor usage of first player cell for player name and color
+- Updated stats command
+- Moved registering gamemodes, protocols and commands to be done in CLI
+- Fixed bug where internal routers' ACTIVE and DORMANT columns in routers command are NaN
+- Removed command pause
+- Removed unnecessary requires
+- Map IPv6-mapped IPv4 remote addresses to true IPv4
+- Check connections for forbidden IPs in Listener update
+- New command, forbid
+- New command, pardon
+- Renamed setting serverChatEnabled to chatEnabled
+- New setting, chatCooldown
+- New setting, chatFilteredPhrases
+- Prepare for NPM release
+
 1.2.0 @ 2019-02-17
 - Fix crash when leaving world
 - Fix crash when spectating a player that gets destroyed

@@ -10,13 +10,10 @@ const serverSource = {
 
 /** @param {Connection} connection */
 function getSourceFromConnection(connection) {
-    if (!connection.hasPlayer) return null;
-    const player = connection.player;
-    const hasCells = player.state === 0;
     return {
         isServer: false,
-        name: !hasCells ? "Spectator" : (player.ownedCells[0].name || "An unnamed cell"),
-        color: hasCells ? player.ownedCells[0].color : { r: 127, g: 127, b: 127 }
+        name: connection.player.chatName,
+        color: connection.player.chatColor
     };
 }
 
@@ -29,6 +26,8 @@ class ChatChannel {
         /** @type {Connection[]} */
         this.connections = [];
     }
+
+    get settings() { return this.listener.handle.settings; }
 
     /**
      * @param {Connection} connection
@@ -44,21 +43,34 @@ class ChatChannel {
     }
 
     /**
+     * @param {string} message
+     */
+    shouldFilter(message) {
+        message = message.toLowerCase();
+        for (let i = 0, l = this.settings.chatFilteredPhrases.length; i < l; i++)
+            if (message.indexOf(this.settings.chatFilteredPhrases[i]) !== -1)
+                return true;
+        return false;
+    }
+    /**
      * @param {Connection=} source
      * @param {string} message
      */
     broadcast(source, message) {
+        if (!source.hasPlayer || this.shouldFilter(message))
+            return;
         const sourceInfo = source == null ? serverSource : getSourceFromConnection(source);
         for (let i = 0, l = this.connections.length; i < l; i++)
             this.connections[i].protocol.onChatMessage(sourceInfo, message);
     }
-
     /**
      * @param {Connection=} source
      * @param {Connection} recipient
      * @param {string} message
      */
     directMessage(source, recipient, message) {
+        if ((source && !source.hasPlayer) || this.shouldFilter(message))
+            return;
         const sourceInfo = source == null ? serverSource : getSourceFromConnection(source);
         recipient.protocol.onChatMessage(sourceInfo, message);
     }

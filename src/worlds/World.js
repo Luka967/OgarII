@@ -180,7 +180,7 @@ class World {
 
     /**
      * @param {number} cellSize
-     * @returns {Position}
+     * @returns {Point}
      */
     getRandomPos(cellSize) {
         return {
@@ -196,7 +196,7 @@ class World {
     }
     /**
      * @param {number} cellSize
-     * @returns {Position}
+     * @returns {Point}
      */
     getSafeSpawnPos(cellSize) {
         let tries = this.settings.worldSafeSpawnTries;
@@ -209,7 +209,7 @@ class World {
     }
     /**
      * @param {number} cellSize
-     * @returns {{ color: Color, pos: Position }}
+     * @returns {{ color: Color, pos: Point }}
      */
     getPlayerSpawn(cellSize) {
         if (this.settings.worldSafeSpawnFromEjectedChance > Math.random() && this.ejectedCells.length > 0) {
@@ -228,7 +228,7 @@ class World {
     /**
      * @param {Player} player
      * @param {Color} color
-     * @param {Position} pos
+     * @param {Point} pos
      * @param {number} size
      * @param {string} name
      * @param {string} skin

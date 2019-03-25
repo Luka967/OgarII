@@ -1,5 +1,6 @@
 const Router = require("../primitives/Router");
 const Reader = require("../primitives/Reader");
+const { filterIPAddress } = require("../primitives/Misc");
 
 class Connection extends Router {
     /**
@@ -8,10 +9,11 @@ class Connection extends Router {
      */
     constructor(listener, webSocket) {
         super(listener);
-        this.remoteAddress = webSocket._socket.remoteAddress;
+        this.remoteAddress = filterIPAddress(webSocket._socket.remoteAddress);
         this.webSocket = webSocket;
         this.connectTime = Date.now();
         this.lastActivityTime = Date.now();
+        this.lastChatTime = Date.now();
 
         this.upgradeLevel = 0;
         /** @type {Protocol} */
@@ -85,12 +87,17 @@ class Connection extends Router {
      * @param {string} message
      */
     onChatMessage(message) {
+        message = message.trim();
+        if (!message) return;
         const globalChat = this.listener.globalChat;
+        const lastChatTime = this.lastChatTime;
+        this.lastChatTime = Date.now();
         if (message.length >= 2 && message[0] === "/") {
             if (!this.handle.chatCommands.execute(this, message.slice(1)))
                 globalChat.directMessage(null, this, "unknown command, execute /help for the list of commands");
         }
-        else message && globalChat.broadcast(this, message);
+        else if (Date.now() - lastChatTime >= this.settings.chatCooldown)
+            globalChat.broadcast(this, message);
     }
     onQPress() {
         if (!this.hasPlayer) return;

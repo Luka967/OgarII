@@ -4,7 +4,7 @@ class Ticker {
      */
     constructor(step) {
         this.step = step || 16.67;
-        this.isRunning = false;
+        this.running = false;
         /** @type {Function[]} */
         this.callbacks = [];
     }
@@ -29,16 +29,16 @@ class Ticker {
         return this;
     }
     start() {
-        if (this.isRunning) throw new Error("The ticker has already started");
+        if (this.running) throw new Error("The ticker has already started");
         this._bind = this._tick.bind(this);
-        this.isRunning = true;
+        this.running = true;
         this._suppTime = Date.now();
         this._timeoutId = setTimeout(this._bind, this.step);
-        this.isRunning = true;
+        this.running = true;
         return this;
     }
     _tick() {
-        if (!this.isRunning) return;
+        if (!this.running) return;
         for (let i = 0, l = this.callbacks.length; i < l; i++)
             this.callbacks[i]();
         this._suppTime += this.step;
@@ -47,12 +47,12 @@ class Ticker {
         this._timeoutId = setTimeout(this._bind, diff);
     }
     stop() {
-        if (!this.isRunning) throw new Error("The ticker hasn't started");
+        if (!this.running) throw new Error("The ticker hasn't started");
         clearTimeout(this._timeoutId);
         delete this._timeoutId;
         delete this._suppTime;
         delete this._bind;
-        this.isRunning = false;
+        this.running = false;
         return this;
     }
 }

@@ -52,7 +52,7 @@ module.exports = {
     Command: Command,
     CommandList: CommandList,
     /**
-     * @param {CommandGeneratorInfo} info
+     * @param {{ args: string, desc: string, name: string, exec: (handle: ServerHandle, context: any, args: string[]) => void }} info
      */
     genCommand(info) {
         return new Command(info.name, info.desc, info.args, info.exec);

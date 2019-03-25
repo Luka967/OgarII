@@ -3,6 +3,7 @@ const WebSocketServer = WebSocket.Server;
 
 const Connection = require("./Connection");
 const ChatChannel = require("./ChatChannel");
+const { filterIPAddress } = require("../primitives/Misc");
 
 class Listener {
     /**
@@ -48,10 +49,7 @@ class Listener {
      * @param {*} response
      */
     verifyClient(info, response) {
-        /**
-         * @type {string}
-         */
-        const address = info.req.socket.remoteAddress;
+        const address = filterIPAddress(info.req.socket.remoteAddress);
         this.logger.onAccess(`REQUEST FROM ${address}, ${info.secure ? "" : "not "}secure, Origin: ${info.origin}`);
         if (this.connections.length > this.settings.listenerMaxConnections) {
             this.logger.debug("listenerMaxConnections reached, dropping new connections");
@@ -102,7 +100,7 @@ class Listener {
         this.connectionsByIP[newConnection.remoteAddress] =
             this.connectionsByIP[newConnection.remoteAddress] + 1 || 1;
         this.connections.push(newConnection);
-        if (this.settings.serverChatEnabled)
+        if (this.settings.chatEnabled)
             this.globalChat.add(newConnection);
     }
 
@@ -129,8 +127,10 @@ class Listener {
         for (i = 0; i < l; i++) this.routers[i].update();
         for (i = 0, l = this.connections.length; i < l; i++) {
             const connection = this.connections[i];
-            if (Date.now() - connection.lastActivityTime < this.settings.listenerMaxClientDormancy) continue;
-            connection.closeSocket(1003, "Maximum dormancy time exceeded");
+            if (this.settings.listenerForbiddenIPs.indexOf(connection.remoteAddress) !== -1)
+                connection.closeSocket(1003, "Remote address is forbidden");
+            else if (Date.now() - connection.lastActivityTime >= this.settings.listenerMaxClientDormancy)
+                connection.closeSocket(1003, "Maximum dormancy time exceeded");
         }
     }
 }

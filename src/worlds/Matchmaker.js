@@ -54,7 +54,7 @@ class Matchmaker {
             for (let i = 0; i < bulkSize; i++) {
                 const next = this.queued.shift();
                 if (this.handle.settings.matchmakerNeedsQueuing)
-                    this.handle.listener.globalChat.directMessage(null, next, "match found! Try spawning again");
+                    this.handle.listener.globalChat.directMessage(null, next, "match found!");
                 world.addPlayer(next.player);
             }
         }

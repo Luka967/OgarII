@@ -16,9 +16,12 @@ class Player {
         this.router = router;
         this.exists = true;
 
-        /**
-         * @type {PlayerState}
-         */
+        this.leaderboardName = null;
+        this.chatName = "Spectator";
+        /** @type {Color} */
+        this.chatColor = { r: 127, g: 127, b: 127 };
+
+        /** @type {PlayerState} */
         this.state = -1;
         this.hasWorld = false;
         /** @type {World} */
@@ -54,12 +57,12 @@ class Player {
      * @param {PlayerState} targetState
      */
     updateState(targetState) {
-        if (this.world === null) this.state = -1;
-        else if (this.ownedCells.length > 0) this.state = 0;
-        else if (targetState === -1) this.state = -1;
-        else if (this.world.largestPlayer === null) this.state = 2;
-        else if (this.state === 1 && targetState === 2) this.state = 2;
-        else this.state = 1;
+        if (this.world === null)                            this.state = -1;
+        else if (this.ownedCells.length > 0)                this.state = 0;
+        else if (targetState === -1)                        this.state = -1;
+        else if (this.world.largestPlayer === null)         this.state = 2;
+        else if (this.state === 1 && targetState === 2)     this.state = 2;
+        else                                                this.state = 1;
     }
 
     updateViewArea() {

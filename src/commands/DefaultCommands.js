@@ -1,6 +1,11 @@
 const { Command, genCommand } = require("./CommandList");
 const { EOL } = require("os");
 
+const Minion = require("../bots/Minion");
+const PlayerBot = require("../bots/PlayerBot");
+
+const IPvalidate = /((^\s*((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))\s*$)|(^\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s*$))/;
+
 /**
  * @param {string} str
  * @param {string} pad
@@ -51,7 +56,6 @@ function table(contents, eol) {
     }
     return all;
 }
-
 /**
  * @param {SettingIdType} id
  */
@@ -81,7 +85,15 @@ function prettyMemory(value) {
         value /= 1024;
     return `${value.toFixed(1)} ${units[i]}`;
 }
-
+/** @param {NodeJS.MemoryUsage} value */
+function prettyMemoryData(value) {
+    return {
+        heapUsed: prettyMemory(memory.heapUsed),
+        heapTotal: prettyMemory(memory.heapTotal),
+        rss: prettyMemory(memory.rss),
+        external: prettyMemory(memory.external)
+    }
+}
 /** @param {number} seconds */
 function prettyTime(seconds) {
     seconds = ~~seconds;
@@ -120,6 +132,86 @@ function shortPrettyTime(milliseconds) {
 }
 
 /**
+ * @param {string[]} args
+ * @param {ServerHandle} handle
+ * @param {number} index
+ * @param {boolean} needAlive
+ */
+function getPlayerByID(args, handle, index, needAlive) {
+    if (args.length <= index)
+        return handle.logger.print("missing player id"), false;
+    const id = parseInt(args[index]);
+    if (isNaN(id))
+        return handle.logger.print("invalid number for player id"), false;
+    if (!handle.players.hasOwnProperty(id))
+        return handle.logger.print("no player has this id"), false;
+    if (handle.players[id].state !== 0 && needAlive)
+        return handle.logger.print("player is not alive"), false;
+    return handle.players[id];
+}
+/**
+ * @param {string[]} args
+ * @param {ServerHandle} handle
+ * @param {number} index
+ * @param {boolean} needRunning
+ */
+function getWorldByID(args, handle, index, needRunning) {
+    if (args.length <= index)
+        return handle.logger.print("missing world id"), false;
+    const id = parseInt(args[index]);
+    if (isNaN(id))
+        return handle.logger.print("invalid number for world id"), false;
+    if (!handle.worlds.hasOwnProperty(id))
+        return handle.logger.print("no world has this id"), false;
+    if (handle.worlds[id].frozen && needRunning)
+        return handle.logger.print("world is frozen"), false;
+    return handle.worlds[id];
+}
+
+/**
+ * @param {string[]} args
+ * @param {ServerHandle} handle
+ * @param {number} index
+ * @param {string} argName
+ */
+function getFloat(args, handle, index, argName) {
+    if (args.length <= index)
+        return handle.logger.print(`missing ${argName}`), false;
+    const value = parseFloat(args[index]);
+    if (isNaN(value))
+        return handle.logger.print(`invalid number for ${argName}`), false;
+    return value;
+}
+/**
+ * @param {string[]} args
+ * @param {ServerHandle} handle
+ * @param {number} index
+ * @param {string} argName
+ */
+function getInt(args, handle, index, argName) {
+    if (args.length <= index)
+        return handle.logger.print(`missing ${argName}`), false;
+    const value = parseInt(args[index]);
+    if (isNaN(value))
+        return handle.logger.print(`invalid number for ${argName}`), false;
+    return value;
+}
+/**
+ * @param {string[]} args
+ * @param {ServerHandle} handle
+ * @param {number} index
+ * @param {string} argName
+ */
+function getString(args, handle, index, argName) {
+    if (args.length <= index)
+        return handle.logger.print(`missing ${argName}`), false;
+    const value = args[index].trim();
+    if (value.length === 0)
+        return handle.logger.print(`invalid string for ${argName}`), false;
+    return value;
+}
+
+/**
  * @param {CommandList} commands
  * @param {CommandList} chatCommands
  */
@@ -153,8 +245,6 @@ module.exports = (commands, chatCommands) => {
             args: "[router type]",
             desc: "display information about routers and their players",
             exec: (handle, context, args) => {
-                if (args.length > 1)
-                    return void handle.logger.print("too many arguments");
                 const matchingType = args.length >= 1 ? args[0] : null;
                 const routers = handle.listener.routers
                     .filter(v => matchingType === null || v.type == matchingType);
@@ -172,8 +262,8 @@ module.exports = (commands, chatCommands) => {
                         i.toString(),
                         v.type,
                         v.type === "connection" ? v.remoteAddress : null,
-                        shortPrettyTime(Date.now() - v.connectTime),
-                        shortPrettyTime(Date.now() - v.lastActivityTime),
+                        v.type === "connection" ? shortPrettyTime(Date.now() - v.connectTime) : null,
+                        v.type === "connection" ? shortPrettyTime(Date.now() - v.lastActivityTime) : null,
                         v.protocol ? v.protocol.subtype : null,
                         v.hasPlayer ? v.player.id.toString() : null,
                     ])
@@ -185,8 +275,6 @@ module.exports = (commands, chatCommands) => {
             args: "[world id or \"any\"] [router type]",
             desc: "display information about players",
             exec: (handle, context, args) => {
-                if (args.length > 2)
-                    return void handle.logger.print("too many arguments");
                 const worldId = args.length >= 1 ? parseInt(args[0]) || null : null;
                 const routerType = args.length === 2 ? args[1] : null;
                 const players = handle.listener.routers
@@ -216,7 +304,7 @@ module.exports = (commands, chatCommands) => {
                             case 0:
                                 ret.push("alive");
                                 ret.push(Math.round(v.score).toString());
-                                ret.push(v.ownedCells[0].name);
+                                ret.push(v.leaderboardName);
                                 break;
                             case 1: ret.push("spec"); break;
                             case 2: ret.push("roam"); break;
@@ -224,6 +312,30 @@ module.exports = (commands, chatCommands) => {
                         return ret;
                     })
                 }, EOL));
+            }
+        }),
+        genCommand({
+            name: "stats",
+            args: "",
+            desc: "display critical information about the server",
+            exec: (handle, context, args) => {
+                const logger = handle.logger;
+                const memory = prettyMemoryData(process.memoryUsage());
+                const external = handle.listener.connections.length;
+                const internal = handle.listener.routers.length - external;
+                logger.print("not running");
+                logger.print(`load:    ${handle.averageTickTime.toFixed(4)} ms / ${handle.tickDelay} ms`);
+                logger.print(`heap:    ${memory.heapUsed} / ${memory.heapTotal} / ${memory.rss} / ${memory.external}`);
+                logger.print(`time:    ${prettyTime(Math.floor((Date.now() - handle.startTime.getTime()) / 1000))}`);
+                logger.print(`routers: ${external} external, ${internal} internal, ${external + internal} total`)
+                logger.print(`players: ${Object.keys(handle.players).length}`);
+                for (let id in handle.worlds) {
+                    const world = handle.worlds[id], stats = world.stats,
+                        cells = [ world.cells.length, world.playerCells.length, world.pelletCount, world.virusCount, world.ejectedCells.length, world.mothercellCount],
+                        statsF = [ stats.external, stats.internal, stats.limit, stats.playing, stats.spectating ];
+                    logger.print(`world ${id}: ${cells[0]} cells - ${cells[1]}P/${cells[2]}p/${cells[3]}v/${cells[4]}e/${cells[5]}m`);
+                    logger.print(`         ${statsF[0]} / ${statsF[1]} / ${statsF[2]} players - ${statsF[3]}p/${statsF[4]}s`);
+                }
             }
         }),
         genCommand({
@@ -261,31 +373,6 @@ module.exports = (commands, chatCommands) => {
             }
         }),
         genCommand({
-            name: "stop",
-            args: "",
-            desc: "close the server",
-            exec: (handle, context, args) => {
-                if (!handle.stop()) handle.logger.print("failed");
-            }
-        }),
-        genCommand({
-            name: "restart",
-            args: "",
-            desc: "restart the server",
-            exec: (handle, context, args) => {
-                if (!handle.stop()) return void handle.logger.print("failed");
-                handle.start();
-            }
-        }),
-        genCommand({
-            name: "start",
-            args: "",
-            desc: "start the server",
-            exec: (handle, context, args) => {
-                if (!handle.start()) handle.logger.print("failed");
-            }
-        }),
-        genCommand({
             name: "eval",
             args: "",
             desc: "evaluate javascript code in a function bound to server handle",
@@ -305,49 +392,23 @@ module.exports = (commands, chatCommands) => {
             exec: (handle, context, args) => handle.logger.print("success successful")
         }),
         genCommand({
-            name: "stats",
+            name: "restart",
             args: "",
-            desc: "display critical information about the server",
+            desc: "stop then immediately start the handle",
             exec: (handle, context, args) => {
-                const logger = handle.logger;
-                if (!handle.running)
-                    logger.print("not running");
-                else {
-                    const memory = process.memoryUsage();
-                    logger.print(`load:    ${handle.averageTickTime.toFixed(4)} ms / ${handle.tickDelay} ms`);
-                    logger.print(`heap:    ${prettyMemory(memory.heapUsed)} / ${prettyMemory(memory.heapTotal)} / ${prettyMemory(memory.rss)} / ${prettyMemory(memory.external)}`);
-                    logger.print(`time:    ${prettyTime(Math.floor((Date.now() - handle.startTime.getTime()) / 1000))}`);
-                    const external = handle.listener.connections.length;
-                    const internal = handle.listener.routers.length - external;
-                    logger.print(`routers: ${Object.keys(handle.players).length} players, ${external} external, ${internal} internal`);
-                    for (let id in handle.worlds) {
-                        const world = handle.worlds[id], stats = world.stats,
-                            cells = [ world.cells.length, world.playerCells.length, world.pelletCount, world.virusCount, world.ejectedCells.length, world.mothercellCount],
-                            statsF = [ stats.external, stats.internal, stats.limit, stats.playing, stats.spectating ];
-                        logger.print(`world ${id}: ${cells[0]} cells - ${cells[1]}P/${cells[2]}p/${cells[3]}v/${cells[4]}e/${cells[5]}m`);
-                        logger.print(`         ${statsF[0]} / ${statsF[1]} / ${statsF[2]} players - ${statsF[3]}p/${statsF[4]}s`);
-                    }
-                }
+                if (!handle.stop()) return void handle.logger.print("failed");
+                handle.start();
             }
         }),
         genCommand({
             name: "pause",
             args: "",
-            desc: "pause the server",
+            desc: "toggle handle pause",
             exec: (handle, context, args) => {
                 if (!handle.running) return void handle.logger.print("handle not started");
-                if (!handle.ticker.isRunning) return void handle.logger.print("not running");
-                handle.ticker.stop();
-            }
-        }),
-        genCommand({
-            name: "resume",
-            args: "",
-            desc: "unpause the server",
-            exec: (handle, context, args) => {
-                if (!handle.running) return void handle.logger.print("handle not started");
-                if (handle.ticker.isRunning) return void handle.logger.print("already running");
-                handle.ticker.start();
+                if (handle.ticker.running)
+                    handle.ticker.stop();
+                else handle.ticker.start();
             }
         }),
         genCommand({
@@ -355,16 +416,10 @@ module.exports = (commands, chatCommands) => {
             args: "<id> <mass>",
             desc: "set cell mass to all of a player's cells",
             exec: (handle, context, args) => {
-                if (args.length === 0) return void handle.logger.print("missing player id");
-                if (args.length === 1) return void handle.logger.print("missing mass input");
-                const id = parseInt(args[0]);
-                if (isNaN(id)) return void handle.logger.print("invalid number for player id");
-                if (!handle.players.hasOwnProperty(id))
-                    return void handle.logger.print("no player has this id");
-                const mass = parseFloat(args[1]);
-                if (isNaN(mass)) return void handle.logger.print("invalid number for mass input");
-                const player = handle.players[id];
-                if (player.state !== 0) return void handle.logger.print("player is not alive");
+                const player = getPlayerByID(args, handle, 0, true);
+                const mass = getFloat(args, handle, 1, "mass");
+                if (player === false || mass === false)
+                    return;
                 const l = player.ownedCells.length;
                 for (let i = 0; i < l; i++) player.ownedCells[i].mass = mass;
                 handle.logger.print(`player now has ${mass * l} mass`);
@@ -375,13 +430,9 @@ module.exports = (commands, chatCommands) => {
             args: "<id>",
             desc: "instantly merge a player",
             exec: (handle, context, args) => {
-                if (args.length === 0) return void handle.logger.print("missing player id");
-                const id = parseInt(args[0]);
-                if (isNaN(id)) return void handle.logger.print("invalid number for player id");
-                if (!handle.players.hasOwnProperty(id))
-                    return void handle.logger.print("no player has this id");
-                const player = handle.players[id];
-                if (player.state !== 0) return void handle.logger.print("player is not alive");
+                const player = getPlayerByID(args, handle, 0, true);
+                if (player === false)
+                    return;
                 const l = player.ownedCells.length;
                 let sqSize = 0;
                 for (let i = 0; i < l; i++) sqSize += player.ownedCells[i].squareSize;
@@ -397,16 +448,64 @@ module.exports = (commands, chatCommands) => {
             args: "<id>",
             desc: "instantly kill a player",
             exec: (handle, context, args) => {
-                if (args.length === 0) return void handle.logger.print("missing player id");
-                const id = parseInt(args[0]);
-                if (isNaN(id)) return void handle.logger.print("invalid number for player id");
-                if (!handle.players.hasOwnProperty(id))
-                    return void handle.logger.print("no player has this id");
-                const player = handle.players[id];
-                if (player.state !== 0) return void handle.logger.print("player is not alive");
+                const player = getPlayerByID(args, handle, 0, true);
+                if (player === false)
+                    return;
                 for (let i = 0, l = player.ownedCells.length; i < l; i++)
                     player.world.removeCell(player.ownedCells[0]);
                 handle.logger.print("player killed");
+            }
+        }),
+        genCommand({
+            name: "explode",
+            args: "<id>",
+            desc: "instantly explode a player's first cell",
+            exec: (handle, context, args) => {
+                const player = getPlayerByID(args, handle, 0, true);
+                if (player === false)
+                    return;
+                player.world.popPlayerCell(player.ownedCells[0]);
+                handle.logger.print("player exploded");
+            }
+        }),
+        genCommand({
+            name: "addminion",
+            args: "<id> [count]",
+            desc: "assign minions to a player",
+            exec: (handle, context, args) => {
+                if (args.length === 1) args[1] = "1";
+                const player = getPlayerByID(args, handle, 0, false);
+                const count = getInt(args, handle, 1, "count");
+                if (player === false || count === false)
+                    return;
+                if (!player.router.isExternal)
+                    return void handle.logger.print("player is a bot");
+                if (!player.hasWorld)
+                    return void handle.logger.print("player is not in a world");
+                for (let i = 0; i < count; i++) new Minion(player.router);
+                handle.logger.print(`added ${count} minions to player`);
+            }
+        }),
+        genCommand({
+            name: "rmminion",
+            args: "<id> [count]",
+            desc: "remove assigned minions from a player",
+            exec: (handle, context, args) => {
+                if (args.length === 1) args[1] = "1";
+                const player = getPlayerByID(args, handle, 0, false);
+                const count = getInt(args, handle, 1, "count");
+                if (player === false || count === false)
+                    return;
+                if (!player.router.isExternal)
+                    return void handle.logger.print("player is a bot");
+                if (!player.hasWorld)
+                    return void handle.logger.print("player is not in a world");
+                let realCount = 0;
+                for (let i = 0; i < count && player.router.minions.length > 0; i++) {
+                    player.router.minions[0].close();
+                    realCount++;
+                }
+                handle.logger.print(`removed ${realCount} minions from player`);
             }
         }),
         genCommand({
@@ -414,11 +513,9 @@ module.exports = (commands, chatCommands) => {
             args: "<world id>",
             desc: "instantly kill all players in a world",
             exec: (handle, context, args) => {
-                if (args.length === 0) return void handle.logger.print("missing world id");
-                const id = parseInt(args[0]);
-                if (isNaN(id)) return void handle.logger.print("invalid number for world id");
-                if (!handle.worlds.hasOwnProperty(id))
-                    return void handle.logger.print("no world has this id");
+                const world = getWorldByID(args, handle, 0, false);
+                if (world === false)
+                    return;
                 const players = handle.worlds[id].players;
                 for (let i = 0; i < players.length; i++) {
                     const player = players[i];
@@ -430,84 +527,16 @@ module.exports = (commands, chatCommands) => {
             }
         }),
         genCommand({
-            name: "explode",
-            args: "<id>",
-            desc: "instantly explode a player's first cell",
-            exec: (handle, context, args) => {
-                if (args.length === 0) return void handle.logger.print("missing player id");
-                const id = parseInt(args[0]);
-                if (isNaN(id)) return void handle.logger.print("invalid number for player id");
-                if (!handle.players.hasOwnProperty(id))
-                    return void handle.logger.print("no player has this id");
-                const player = handle.players[id];
-                if (player.state !== 0) return void handle.logger.print("player is not alive");
-                player.world.popPlayerCell(player.ownedCells[0]);
-                handle.logger.print("player exploded");
-            }
-        }),
-        genCommand({
-            name: "addminion",
-            args: "<id> [count=1]",
-            desc: "assign minions to a player",
-            exec: (handle, context, args) => {
-                const Connection = require("../sockets/Connection");
-                const Minion = require("../bots/Minion");
-                if (args.length === 0) return void handle.logger.print("missing player id");
-                if (args.length === 1) args[1] = "1";
-                const id = parseInt(args[0]);
-                if (isNaN(id)) return void handle.logger.print("invalid number for player id");
-                if (!handle.players.hasOwnProperty(id))
-                    return void handle.logger.print("no player has this id");
-                const count = parseInt(args[1]);
-                if (isNaN(count)) return void handle.logger.print("invalid number for count");
-                const player = handle.players[id];
-                if (!(player.router instanceof Connection)) return void handle.logger.print("player is a bot");
-                if (!player.hasWorld) return void handle.logger.print("player is not in a world");
-                for (let i = 0; i < count; i++) new Minion(player.router);
-                handle.logger.print(`added ${count} minions to player`);
-            }
-        }),
-        genCommand({
-            name: "rmminion",
-            args: "<id> [count=1]",
-            desc: "remove assigned minions from a player",
-            exec: (handle, context, args) => {
-                const Connection = require("../sockets/Connection");
-                const Minion = require("../bots/Minion");
-                if (args.length === 0) return void handle.logger.print("missing player id");
-                if (args.length === 1) args[1] = "1";
-                const id = parseInt(args[0]);
-                if (isNaN(id)) return void handle.logger.print("invalid number for player id");
-                if (!handle.players.hasOwnProperty(id))
-                    return void handle.logger.print("no player has this id");
-                const count = parseInt(args[1]);
-                if (isNaN(count)) return void handle.logger.print("invalid number for count");
-                const player = handle.players[id];
-                if (!(player.router instanceof Connection)) return void handle.logger.print("player is a bot");
-                if (!player.hasWorld) return void handle.logger.print("player is not in a world");
-                let realCount = 0;
-                for (let i = 0; i < count && player.router.minions.length > 0; i++) {
-                    player.router.minions[0].close();
-                    realCount++;
-                }
-                handle.logger.print(`removed ${realCount} minions from player`);
-            }
-        }),
-        genCommand({
             name: "addbot",
             args: "<world id> [count=1]",
             desc: "assign player bots to a world",
             exec: (handle, context, args) => {
-                const PlayerBot = require("../bots/PlayerBot");
-                if (args.length === 0) return void handle.logger.print("missing world id");
                 if (args.length === 1) args[1] = "1";
-                const id = parseInt(args[0]);
-                if (isNaN(id)) return void handle.logger.print("invalid number for world id");
-                if (!handle.worlds.hasOwnProperty(id))
-                    return void handle.logger.print("no world has this id");
-                const count = parseInt(args[1]);
-                if (isNaN(count)) return void handle.logger.print("invalid number for count");
-                const world = handle.worlds[id];
+
+                const world = getWorldByID(args, handle, 0, false);
+                const count = getInt(args, handle, 1, "count");
+                if (world === false || count === false)
+                    return;
                 for (let i = 0; i < count; i++) new PlayerBot(world);
                 handle.logger.print(`added ${count} player bots to world`);
             }
@@ -517,23 +546,61 @@ module.exports = (commands, chatCommands) => {
             args: "<world id> [count=1]",
             desc: "remove player bots from a world",
             exec: (handle, context, args) => {
-                const PlayerBot = require("../bots/PlayerBot");
-                if (args.length === 0) return void handle.logger.print("missing world id");
                 if (args.length === 1) args[1] = "1";
-                const id = parseInt(args[0]);
-                if (isNaN(id)) return void handle.logger.print("invalid number for world id");
-                if (!handle.worlds.hasOwnProperty(id))
-                    return void handle.logger.print("no world has this id");
-                const count = parseInt(args[1]);
-                if (isNaN(count)) return void handle.logger.print("invalid number for count");
-                const world = handle.worlds[id];
+
+                const world = getWorldByID(args, handle, 0, false);
+                const count = getInt(args, handle, 1, "count");
+                if (world === false || count === false)
+                    return;
                 let realCount = 0;
                 for (let i = 0, l = world.players.length; i < l && realCount < count; i++) {
-                    if (!(world.players[i].router instanceof PlayerBot)) continue;
+                    if (world.players[i].router.type !== "playerbot") continue;
                     world.players[i].router.close();
                     realCount++; i--; l--;
                 }
                 handle.logger.print(`removed ${realCount} player bots from world`);
+            }
+        }),
+        genCommand({
+            name: "forbid",
+            args: "<IP address / player id>",
+            desc: "forbid (ban) specified IP or a connected player",
+            exec: (handle, context, args) => {
+                if (args.length < 1)
+                    return void handle.logger.print("");
+                const id = getString(args, handle, 0, "IP address / player id");
+                if (id === false)
+                    return;
+                let ip;
+                if (!IPvalidate.test(ip = id)) {
+                    if (!handle.players.hasOwnProperty(id))
+                        return void handle.logger.print("no player has this id");
+                    const player = handle.players[id];
+                    if (!player.router.isExternal)
+                        return void handle.logger.print("player is a bot");
+                    ip = player.router.remoteAddress;
+                }
+                handle.settings.listenerForbiddenIPs.push(ip);
+                handle.logger.print(`IP address ${ip} is now forbidden`);
+            }
+        }),
+        genCommand({
+            name: "pardon",
+            args: "<IP address>",
+            desc: "pardon (unban) specified IP",
+            exec: (handle, context, args) => {
+                if (args.length < 1)
+                    return void handle.logger.print("");
+                const id = getString(args, handle, 0, "IP address");
+                if (id === false)
+                    return;
+                if (!IPvalidate.test(ip = id))
+                    return void handle.logger.print("invalid IP address");
+                const index = handle.settings.listenerForbiddenIPs.indexOf(ip);
+                if (index === -1)
+                    return void handle.logger.print("specified IP address is not forbidden");
+                handle.settings.listenerForbiddenIPs.splice(index, 1);
+                handle.logger.print(`IP address ${ip} has been pardoned`);
             }
         })
     );

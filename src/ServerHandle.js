@@ -4,13 +4,6 @@ const { CommandList } = require("./commands/CommandList");
 const GamemodeList = require("./gamemodes/GamemodeList");
 const ProtocolStore = require("./protocols/ProtocolStore");
 
-const DefaultCommands = require("./commands/DefaultCommands");
-const FFAGamemode = require("./gamemodes/FFA");
-const TeamsGamemode = require("./gamemodes/Teams");
-const LMSGamemode = require("./gamemodes/LastManStanding");
-const LegacyProtocol = require("./protocols/LegacyProtocol");
-const ModernProtocol = require("./protocols/ModernProtocol");
-
 const Stopwatch = require("./primitives/Stopwatch");
 const Logger = require("./primitives/Logger");
 const Ticker = require("./primitives/Ticker");
@@ -56,9 +49,6 @@ class ServerHandle {
         /** @type {Identified<Player>} */
         this.players = { };
 
-        DefaultCommands(this.commands, this.chatCommands);
-        this.protocols.register(ModernProtocol, LegacyProtocol);
-        this.gamemodes.register(FFAGamemode, TeamsGamemode, LMSGamemode);
         this.setSettings(settings);
     }
 
@@ -96,7 +86,7 @@ class ServerHandle {
         if (!this.running) return false;
         this.logger.inform("stopping");
 
-        if (this.ticker.isRunning)
+        if (this.ticker.running)
             this.ticker.stop();
         for (let id in this.worlds)
             this.removeWorld(id);
@@ -149,6 +139,7 @@ class ServerHandle {
         this.players[id] = newPlayer;
         router.player = newPlayer;
         this.gamemode.onNewPlayer(newPlayer);
+        this.logger.debug(`added a player with id ${id}`);
         return newPlayer;
     }
 
@@ -162,6 +153,7 @@ class ServerHandle {
         this.players[id].destroy();
         this.players[id].exists = false;
         delete this.players[id];
+        this.logger.debug(`removed player with id ${id}`);
         return true;
     }
 

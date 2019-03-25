@@ -1,6 +1,19 @@
 const Gamemode = require("./Gamemode");
 const Misc = require("../primitives/Misc");
-const Minion = require("../bots/Minion");
+
+/**
+ * @param {Player} player
+ * @param {Player} requesting
+ * @param {number} index
+ */
+function getLeaderboardData(player, requesting, index) {
+    return {
+        name: player.leaderboardName,
+        highlighted: requesting.id === player.id,
+        cellId: player.ownedCells[0].id,
+        position: 1 + index
+    };
+}
 
 class FFA extends Gamemode {
     /** @param {ServerHandle} handle */
@@ -19,6 +32,7 @@ class FFA extends Gamemode {
              this.handle.settings.playerSpawnSize;
         const spawnInfo = player.world.getPlayerSpawn(size);
         player.world.spawnPlayer(player, spawnInfo.color || Misc.randomColor(), spawnInfo.pos, size, name, null);
+        player.chatName = player.leaderboardName = name;
     }
 
     /** @param {World} world */
@@ -41,20 +55,6 @@ class FFA extends Gamemode {
 }
 
 module.exports = FFA;
-
-/**
- * @param {Player} player
- * @param {Player} requesting
- * @param {number} index
- */
-function getLeaderboardData(player, requesting, index) {
-    return {
-        name: player.ownedCells[0].name,
-        highlighted: requesting.id === player.id,
-        cellId: player.ownedCells[0].id,
-        position: 1 + index
-    };
-}
 
 const ServerHandle = require("../ServerHandle");
 const World = require("../worlds/World");

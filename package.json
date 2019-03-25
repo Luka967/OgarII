@@ -1,11 +1,12 @@
 {
     "name": "ogarii",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "FOSS implementation of a private Agar.io gameserver",
     "license": "Apache-2.0",
     "author": {
         "name": "Luka Djokovic",
-        "url": "https://github.com/Luka967"
+        "url": "https://github.com/Luka967",
+        "email": "luka.djokovic2@gmail.com"
     },
     "repository": {
         "type": "git",
