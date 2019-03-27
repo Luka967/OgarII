@@ -1,11 +1,20 @@
+1.2.2 @ 2019-03-27
+- Fix crash on ping or pong websocket event due to bad bind
+- Moved Router from primitives to sockets
+- Removed settings listenerMinLegacyProtocol and listenerMaxLegacyProtocol
+- Updated command eval to show error stack on thrown error
+- New command, crash
+- Updated JSDoc for QuadTree for template support
+- Minor bug fixes with log handler
+
 1.2.1 @ 2019-03-25
 - Clean up gitignore
 - Add missing JSDoc to CLI log handler
-- Rename Ticker.isRunning to running
-- Rename definition Position to Point
-- Refactor CommandList JSDoc for better type recognition in default commands
-- Refactor default commands
-- Refactor usage of first player cell for player name and color
+- Renamed Ticker.isRunning to running
+- Renamed definition Position to Point
+- Refactored CommandList JSDoc for better type recognition in default commands
+- Refactored default commands
+- Refactored usage of first player cell for player name and color
 - Updated stats command
 - Moved registering gamemodes, protocols and commands to be done in CLI
 - Fixed bug where internal routers' ACTIVE and DORMANT columns in routers command are NaN

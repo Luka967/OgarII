@@ -380,7 +380,7 @@ module.exports = (commands, chatCommands) => {
                 handle.logger.print(
                     (function() {
                         try { return eval(args.join(" ")); }
-                        catch (e) { return !e ? e : (e.toString() || e); }
+                        catch (e) { return !e ? e : (e.stack || e); }
                     }).bind(handle)()
                 );
             }
@@ -390,6 +390,12 @@ module.exports = (commands, chatCommands) => {
             args: "",
             desc: "test command",
             exec: (handle, context, args) => handle.logger.print("success successful")
+        }),
+        genCommand({
+            name: "crash",
+            args: "",
+            desc: "manually force an error throw",
+            exec: (handle, context, args) => { throw new Error("manual crash"); }
         }),
         genCommand({
             name: "restart",

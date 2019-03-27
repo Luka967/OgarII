@@ -107,6 +107,6 @@ class Router {
 
 module.exports = Router;
 
-const Listener = require("../sockets/Listener");
+const Listener = require("./Listener");
 const Player = require("../worlds/Player");
 const PlayerCell = require("../cells/PlayerCell");

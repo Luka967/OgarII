@@ -1,4 +1,4 @@
-const Router = require("../primitives/Router");
+const Router = require("./Router");
 const Reader = require("../primitives/Reader");
 const { filterIPAddress } = require("../primitives/Misc");
 
@@ -31,8 +31,8 @@ class Connection extends Router {
 
         webSocket.on("close", this.onSocketClose.bind(this));
         webSocket.on("message", this.onSocketMessage.bind(this));
-        webSocket.on("ping", this.closeSocket.bind(webSocket, 1003, "Unexpected message format"));
-        webSocket.on("pong", this.closeSocket.bind(webSocket, 1003, "Unexpected message format"));
+        webSocket.on("ping", this.closeSocket.bind(this, 1003, "Unexpected message format"));
+        webSocket.on("pong", this.closeSocket.bind(this, 1003, "Unexpected message format"));
     }
 
     close() {

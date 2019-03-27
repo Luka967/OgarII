@@ -1,8 +1,10 @@
+[![shield to Agar.io Private Servers guild](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=shield)](https://discord.gg/66X2ESb)
+
 # OgarII
 
 Your friendly agar.io private server recreation.
 
-- It supports all current agar.io protocol versions (4 - 20).
+- It supports all current agar.io protocol versions.
 
 - It supports handling multiple worlds, all within one instance. Be wary that you can still use up the one CPU core node.js is running on.
 
@@ -14,8 +16,6 @@ Your friendly agar.io private server recreation.
 
 - Ask all your questions over on the [Agar.io Private Servers](https://discord.gg/66X2ESb) Discord guild.
 
-[![link](https://discordapp.com/api/guilds/407210435721560065/embed.png?style=banner2)](https://discord.gg/66X2ESb)
-
 - Before connecting from agar.io you will need to do `core.disableIntegrityChecks(true)` in the console.
 
 ## Running
@@ -23,7 +23,6 @@ Your friendly agar.io private server recreation.
 1. Make sure you have node.js version 8 or greater.
 
 2. Make sure you have a C++11 compliant compiler for building uWebSockets.
-
     - If you're on Windows, `npm install -g windows-build-tools`.
     - If you're on GNU/Linux, use your package manager to install a supported C++ compiler such as GCC.
 
@@ -49,4 +48,4 @@ Your friendly agar.io private server recreation.
 
 - To create your own gamemodes, inherit `src/Gamemode.js`'s `Gamemode` abstract class, modify event handling to your wish, then add it with `ServerHandle.gamemodes.register` before the handle starts.
 
-- The `ServerHandle` class is standalone, which means that you can completely ditch the `cli/` folder, `require("./src/ServerHandle.js")` and do whatever you want with it.
+- The `ServerHandle` class is standalone, which means that you can completely ditch the `cli/` folder, `require("./src/ServerHandle.js")` and do whatever you want with it. OgarII is also available as an npm package for this exact purpose.

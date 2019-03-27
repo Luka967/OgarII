@@ -28,7 +28,7 @@ const fs = require("fs");
 
 if (fs.existsSync("./log-settings.json"))
     settings = Object.assign(settings, JSON.parse(fs.readFileSync("./log-settings.json", "utf-8")));
-else fs.writeFileSync("./log-settings.json", JSON.stringify(settings, null, 4), "utf-8");
+fs.writeFileSync("./log-settings.json", JSON.stringify(settings, null, 4), "utf-8");
 
 /**
  * @param {Date=} date
@@ -57,22 +57,20 @@ function filename(date) {
     return `${dy}-${dm}-${dd}T${th}-${tm}-${ts}.log`;
 }
 
-const logFolderLoc = settings.fileLogDirectory;
-const logLoc = `${settings.fileLogDirectory}latest.log`;
-const oldLogsFolderLoc = settings.fileLogDirectory + "old/";
+const logFolder = settings.fileLogDirectory;
+const logFile = `${settings.fileLogDirectory}latest.log`;
+const oldLogsFolder = settings.fileLogDirectory + "old/";
 
-if (!fs.existsSync(logFolderLoc)) fs.mkdirSync(logFolderLoc);
-if (fs.existsSync(logLoc)) {
+if (!fs.existsSync(logFolder)) fs.mkdirSync(logFolder);
+if (fs.existsSync(logFile)) {
     if (settings.fileLogSaveOld) {
-        if (!fs.existsSync(oldLogsFolderLoc)) fs.mkdirSync(oldLogsFolderLoc);
-        const oldLogLoc = `${settings.fileLogDirectory}old/${filename(fs.statSync(logLoc).ctime)}`;
-        fs.renameSync(logLoc, oldLogLoc);
-    } else fs.unlinkSync(logLoc);
+        if (!fs.existsSync(oldLogsFolder)) fs.mkdirSync(oldLogsFolder);
+        const oldLogFile = `${settings.fileLogDirectory}old/${filename(fs.statSync(logFile).ctime)}`;
+        fs.renameSync(logFile, oldLogFile);
+    } else fs.unlinkSync(logFile);
 }
 
-let fstream = fs.createWriteStream(logLoc, {
-    flags: "wx"
-});
+let fstream = fs.createWriteStream(logFile, { flags: "wx" });
 /** @type {string[]} */
 let fqueue = [];
 /** @type {string} */
@@ -127,26 +125,25 @@ function fprocess() {
     fconsuming = fqueue.join("");
     fstream.write(fconsuming, fprocess);
     fqueue.splice(0);
-    return void (fprocessing = false);
+    return void (fprocessing = true);
 }
 function fprocessSync() {
     fstream.destroy();
     fstream = null;
-    const tail = `${fconsuming || ""}${fqueue.join("")}`;
-    fs.appendFileSync(logLoc, tail, "utf-8");
+    const tail = fqueue.join("");
+    fs.appendFileSync(logFile, tail, "utf-8");
     fqueue.splice(0);
 }
 process.once("uncaughtException", function(e) {
     synchronous = true;
     write(new Date(), "FATAL", e.stack);
-    write(new Date(), "ERROR", "uncaught exception - process is terminating");
     fprocessSync();
     process.removeAllListeners("exit");
     process.exit(1);
 });
 process.once("exit", function(code) {
     synchronous = true;
-    write(new Date(), "INFO", `ended with code ${code}`);
+    write(new Date(), "DEBUG", `process ended with code ${code}`);
     fprocessSync();
 });
 

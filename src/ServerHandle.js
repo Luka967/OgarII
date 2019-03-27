@@ -174,5 +174,5 @@ class ServerHandle {
 
 module.exports = ServerHandle;
 
-const Router = require("./primitives/Router");
+const Router = require("./sockets/Router");
 const Gamemode = require("./gamemodes/Gamemode");

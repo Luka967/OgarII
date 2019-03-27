@@ -47,7 +47,7 @@ class World {
 
         /** @type {Range} */
         this.border = { x: NaN, y: NaN, w: NaN, h: NaN };
-        /** @type {QuadTree} */
+        /** @type {QuadTree<Cell>} */
         this.finder = null;
 
         /**
@@ -289,7 +289,7 @@ class World {
         for (i = 0; i < this.boostingCells.length; i++) {
             const cell = this.boostingCells[i];
             if (cell.type !== 2 && cell.type !== 3) continue;
-            this.finder.search(cell.range, /** @param {Cell} other */ (other) => {
+            this.finder.search(cell.range, (other) => {
                 if (cell.id === other.id) return;
                 switch (cell.getEatResult(other)) {
                     case 1: rigid.push(cell, other); break;
@@ -310,7 +310,7 @@ class World {
 
         for (i = 0; i < l; i++) {
             const cell = this.playerCells[i];
-            this.finder.search(cell.range, /** @param {Cell} other */ (other) => {
+            this.finder.search(cell.range, (other) => {
                 if (cell.id === other.id) return;
                 switch (cell.getEatResult(other)) {
                     case 1: rigid.push(cell, other); break;

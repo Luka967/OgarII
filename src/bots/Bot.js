@@ -1,4 +1,4 @@
-const Router = require("../primitives/Router");
+const Router = require("../sockets/Router");
 
 /**
  * @abstract

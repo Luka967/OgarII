@@ -1,17 +1,21 @@
 const { intersects, fullyIntersects, getQuadIntersect, getQuadFullIntersect } = require("../primitives/Misc");
 
 /**
- * @typedef {{ __root: undefined, range: Range }} QuadItem
- * @typedef {{ __root: QuadTree, range: Range }} InsertedQuadItem
+ * @template T
+ * @typedef {T | { __root: QuadTree<T>, range: Range }} QuadItem
+ *
  * @typedef {-1 | 0 | 1 | 2 | 3} DefiniteQuad
-*/
+ */
 
+/**
+ * @template T
+ */
 class QuadTree {
     /**
      * @param {Range} range
      * @param {number} maxLevel
      * @param {number} maxItems
-     * @param {QuadTree=} root
+     * @param {QuadTree<T>=} root
      */
     constructor(range, maxLevel, maxItems, root) {
         this.root = root;
@@ -34,7 +38,7 @@ class QuadTree {
         for (i = 0; i < 4; i++) this.branches[i].destroy();
     }
     /**
-     * @param {QuadItem} item
+     * @param {QuadItem<T>} item
      */
     insert(item) {
         let quad = this;
@@ -49,7 +53,7 @@ class QuadTree {
         quad.split();
     }
     /**
-     * @param {InsertedQuadItem} item
+     * @param {QuadItem<T>} item
      */
     update(item) {
         const oldQuad = item.__root;
@@ -73,7 +77,7 @@ class QuadTree {
         newQuad.split();
     }
     /**
-     * @param {InsertedQuadItem} item
+     * @param {QuadItem<T>} item
      */
     remove(item) {
         const quad = item.__root;
@@ -123,7 +127,7 @@ class QuadTree {
 
     /**
      * @param {Range} range
-     * @param {(item: InsertedQuadItem) => void} callback
+     * @param {(item: QuadItem<T>) => void} callback
      */
     search(range, callback) {
         for (let i = 0, l = this.items.length, item; i < l; i++)
@@ -141,7 +145,7 @@ class QuadTree {
     }
     /**
      * @param {Range} range
-     * @param {(item: InsertedQuadItem) => boolean} selector
+     * @param {(item: QuadItem<T>) => boolean} selector
      * @returns {boolean}
      */
     containsAny(range, selector) {
@@ -161,7 +165,7 @@ class QuadTree {
         return false;
     }
 
-    /** @returns {InsertedQuadItem[]} */
+    /** @returns {QuadItem<T>[]} */
     getItems() {
         if (!this.hasSplit) return this.items.slice(0);
         else return this.items.slice(0).concat(this.branches[0].getItems(),

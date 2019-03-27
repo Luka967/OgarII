@@ -27,9 +27,6 @@ class LegacyProtocol extends Protocol {
         if (reader.readUInt8() !== 254) return false;
         this.gotProtocol = true;
         this.protocol = reader.readUInt32();
-        if (this.protocol < this.settings.listenerMinLegacyProtocol ||
-            this.protocol > this.settings.listenerMaxLegacyProtocol)
-            return this.fail(1003, "Rejected protocol version");
         if (this.protocol < 4) {
             this.protocol = 4;
             this.logger.debug(`legacy protocol: got version ${this.protocol}, which is lower than 4`);

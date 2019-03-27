@@ -1,4 +1,4 @@
-const Router = require("../primitives/Router");
+const Router = require("../sockets/Router");
 const ServerHandle = require("../ServerHandle");
 const World = require("./World");
 const Cell = require("../cells/Cell");
