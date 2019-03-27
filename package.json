@@ -1,6 +1,6 @@
 {
     "name": "ogarii",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "FOSS implementation of a private Agar.io gameserver",
     "license": "Apache-2.0",
     "author": {
