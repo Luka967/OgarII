@@ -18,6 +18,7 @@ class Router {
         this.hasProcessedQ = false;
         this.splitAttempts = 0;
         this.ejectAttempts = 0;
+        this.ejectTick = listener.handle.tick;
 
         this.hasPlayer = false;
         /** @type {Player} */

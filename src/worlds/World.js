@@ -330,13 +330,15 @@ class World {
             player.checkDisconnect();
             if (!player.exists) { i--; l--; continue; }
             const router = player.router;
-            while (router.splitAttempts > 0) {
+            for (let j = 0, k = this.settings.playerSplitCap; j < k && router.splitAttempts > 0; j++) {
                 router.attemptSplit();
                 router.splitAttempts--;
             }
-            if (router.ejectAttempts > 0) {
+            const nextEjectTick = this.handle.tick - this.settings.playerEjectDelay;
+            if (router.ejectAttempts > 0 && nextEjectTick >= router.ejectTick) {
                 router.attemptEject();
                 router.ejectAttempts = 0;
+                router.ejectTick = this.handle.tick;
             }
             if (router.isPressingQ) {
                 if (!router.hasProcessedQ)

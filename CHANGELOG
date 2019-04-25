@@ -1,3 +1,9 @@
+1.2.3 @ 2019-04-26
+- Fix crash when executing stats command
+- Fix bad control flow when handle isn't running and executing stats command
+- New setting, playerSplitCap, to control maximum amount of possible splits in one tick
+- New setting, playerEjectDelay, to control ejecting speed
+
 1.2.2 @ 2019-03-27
 - Fix crash on ping or pong websocket event due to bad bind
 - Moved Router from primitives to sockets

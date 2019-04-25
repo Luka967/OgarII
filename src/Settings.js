@@ -78,6 +78,8 @@ const value = Object.seal({
     playerMaxSize: 1500,
     playerMinSplitSize: 60,
     playerMinEjectSize: 60,
+    playerSplitCap: 255,
+    playerEjectDelay: 2,
     playerMaxCells: 16,
 
     playerMoveMult: 1,

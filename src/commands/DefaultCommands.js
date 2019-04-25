@@ -88,10 +88,10 @@ function prettyMemory(value) {
 /** @param {NodeJS.MemoryUsage} value */
 function prettyMemoryData(value) {
     return {
-        heapUsed: prettyMemory(memory.heapUsed),
-        heapTotal: prettyMemory(memory.heapTotal),
-        rss: prettyMemory(memory.rss),
-        external: prettyMemory(memory.external)
+        heapUsed: prettyMemory(value.heapUsed),
+        heapTotal: prettyMemory(value.heapTotal),
+        rss: prettyMemory(value.rss),
+        external: prettyMemory(value.external)
     }
 }
 /** @param {number} seconds */
@@ -323,10 +323,13 @@ module.exports = (commands, chatCommands) => {
                 const memory = prettyMemoryData(process.memoryUsage());
                 const external = handle.listener.connections.length;
                 const internal = handle.listener.routers.length - external;
-                logger.print("not running");
+                if (!handle.running) {
+                    logger.print("not running");
+                    return;
+                }
                 logger.print(`load:    ${handle.averageTickTime.toFixed(4)} ms / ${handle.tickDelay} ms`);
-                logger.print(`heap:    ${memory.heapUsed} / ${memory.heapTotal} / ${memory.rss} / ${memory.external}`);
-                logger.print(`time:    ${prettyTime(Math.floor((Date.now() - handle.startTime.getTime()) / 1000))}`);
+                logger.print(`memory:  ${memory.heapUsed} / ${memory.heapTotal} / ${memory.rss} / ${memory.external}`);
+                logger.print(`uptime:  ${prettyTime(Math.floor((Date.now() - handle.startTime.getTime()) / 1000))}`);
                 logger.print(`routers: ${external} external, ${internal} internal, ${external + internal} total`)
                 logger.print(`players: ${Object.keys(handle.players).length}`);
                 for (let id in handle.worlds) {
