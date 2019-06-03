@@ -71,7 +71,7 @@ class PlayerCell extends Cell {
     onSpawned() {
         this.owner.router.onNewOwnedCell(this);
         this.owner.ownedCells.push(this);
-        this.world.playerCells.push(this);
+        this.world.playerCells.unshift(this);
     }
 
     onRemoved() {

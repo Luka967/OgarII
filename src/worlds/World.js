@@ -325,10 +325,19 @@ class World {
         for (i = 0, l = eat.length; i < l;)
             this.resolveEatCheck(eat[i++], eat[i++]);
 
+        this.largestPlayer = null;
         for (i = 0, l = this.players.length; i < l; i++) {
             const player = this.players[i];
-            player.checkDisconnect();
+            if (!isNaN(player.score) && (this.largestPlayer === null || player.score > this.largestPlayer.score))
+                this.largestPlayer = player;
+        }
+
+        for (i = 0, l = this.players.length; i < l; i++) {
+            const player = this.players[i];
+            player.checkExistence();
             if (!player.exists) { i--; l--; continue; }
+            if (player.state === 1 && this.largestPlayer == null)
+                player.updateState(2);
             const router = player.router;
             for (let j = 0, k = this.settings.playerSplitCap; j < k && router.splitAttempts > 0; j++) {
                 router.attemptSplit();
@@ -356,17 +365,11 @@ class World {
             player.updateViewArea();
         }
 
-        this.largestPlayer = null;
-        for (i = 0, l = this.players.length; i < l; i++) {
-            const player = this.players[i];
-            if (!isNaN(player.score) && (this.largestPlayer === null || player.score > this.largestPlayer.score))
-                this.largestPlayer = player;
-        }
-
         this.compileStatistics();
         this.handle.gamemode.compileLeaderboard(this);
 
-        if (this.stats.external <= 0) this.handle.removeWorld(this.id);
+        if (this.stats.external <= 0 && Object.keys(this.handle.worlds).length > this.settings.worldMinCount)
+            this.handle.removeWorld(this.id);
     }
 
     /**
@@ -377,9 +380,10 @@ class World {
         let dx = b.x - a.x;
         let dy = b.y - a.y;
         let d = Math.sqrt(dx * dx + dy * dy);
-        if (d <= 0) return;
         const m = a.size + b.size - d;
-        if (m <= 0) return; dx /= d; dy /= d;
+        if (m <= 0) return;
+        if (d === 0) d = 1, dx = 1, dy = 0;
+        else dx /= d, dy /= d;
         const M = a.squareSize + b.squareSize;
         const aM = b.squareSize / M;
         const bM = a.squareSize / M;
@@ -481,7 +485,9 @@ class World {
      */
     launchPlayerCell(cell, size, boost) {
         cell.squareSize -= size * size;
-        const newCell = new PlayerCell(cell.owner, cell.x, cell.y, size, cell.color, cell.name, cell.skin);
+        const x = cell.x + boost.dx;
+        const y = cell.y + boost.dy;
+        const newCell = new PlayerCell(cell.owner, x, y, size, cell.color, cell.name, cell.skin);
         newCell.boost.dx = boost.dx;
         newCell.boost.dy = boost.dy;
         newCell.boost.d = boost.d;

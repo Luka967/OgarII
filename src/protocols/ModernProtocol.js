@@ -42,7 +42,7 @@ class ModernProtocol extends Protocol {
         if (reader.readUInt8() !== 1) return false;
         this.gotProtocol = true;
         this.protocol = reader.readUInt32();
-        if (this.protocol !== 1) return void this.fail(1003, "Unexpected protocol version");
+        if (this.protocol !== 3) return void this.fail(1003, "Unsupported protocol version");
         this.connection.createPlayer();
         return true;
     }
@@ -169,17 +169,17 @@ class ModernProtocol extends Protocol {
         writer.writeUInt16(globalFlags);
 
         if (this.spectateAreaPending != null) {
-            writer.writeInt32(this.spectateAreaPending.x);
-            writer.writeInt32(this.spectateAreaPending.y);
+            writer.writeFloat32(this.spectateAreaPending.x);
+            writer.writeFloat32(this.spectateAreaPending.y);
             writer.writeFloat32(this.spectateAreaPending.s);
             this.spectateAreaPending = null;
         }
         if (this.worldBorderPending != null) {
             item = this.worldBorderPending;
-            writer.writeInt32(item.x - item.w);
-            writer.writeInt32(item.x + item.w);
-            writer.writeInt32(item.y - item.h);
-            writer.writeInt32(item.y + item.h);
+            writer.writeFloat32(item.x - item.w);
+            writer.writeFloat32(item.x + item.w);
+            writer.writeFloat32(item.y - item.h);
+            writer.writeFloat32(item.y + item.h);
             this.worldBorderPending = null;
         }
         if (this.serverInfoPending) {
@@ -264,8 +264,8 @@ class ModernProtocol extends Protocol {
                 item = add[i];
                 writer.writeUInt32(item.id);
                 writer.writeUInt8(item.type);
-                writer.writeInt32(item.x);
-                writer.writeInt32(item.y);
+                writer.writeFloat32(item.x);
+                writer.writeFloat32(item.y);
                 writer.writeUInt16(item.size);
                 writer.writeUInt8(item.color.r);
                 writer.writeUInt8(item.color.g);
@@ -293,8 +293,8 @@ class ModernProtocol extends Protocol {
                 writer.writeUInt32(item.id);
                 writer.writeUInt8(flags);
                 if (item.posChanged) {
-                    writer.writeInt32(item.x);
-                    writer.writeInt32(item.y);
+                    writer.writeFloat32(item.x);
+                    writer.writeFloat32(item.y);
                 }
                 if (item.sizeChanged)
                     writer.writeUInt16(item.size);

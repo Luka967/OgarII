@@ -131,13 +131,17 @@ class PlayerBot extends Bot {
         return aSize > bSize * 1.140175425099138;
     }
     /**
-     * @param {number} a
-     * @param {number} b
+     * @param {number} aSize
+     * @param {number} bSize
      * @param {number} d
      */
     canSplitkill(aSize, bSize, d) {
-        const splitD = Math.max(2 * aSize, this.listener.settings.playerSplitBoost);
-        return aSize / 1.4142135623730951 > bSize * 1.140175425099138 && d - splitD <= aSize - bSize / 3;
+        const splitDistance = Math.max(
+            2 * aSize / 1.4142135623730951,
+            this.listener.settings.playerSplitBoost
+        );
+        return aSize / 1.4142135623730951 > bSize * 1.140175425099138 &&
+               d - splitDistance <= aSize - bSize / 3;
     }
 }
 

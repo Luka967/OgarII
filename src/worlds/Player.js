@@ -67,7 +67,6 @@ class Player {
 
     updateViewArea() {
         if (this.world === null) return;
-        this.updateState(this.state);
         let s;
         switch (this.state) {
             case -1: this.score = NaN; break;
@@ -126,7 +125,7 @@ class Player {
         this.world.finder.search(this.viewArea, (cell) => visibleCells[cell.id] = cell);
     }
 
-    checkDisconnect() {
+    checkExistence() {
         if (!this.router.disconnected) return;
         if (this.state !== 0) return void this.handle.removePlayer(this.id);
         const disposeDelay = this.settings.worldPlayerDisposeDelay;

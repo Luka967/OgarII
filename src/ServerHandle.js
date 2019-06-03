@@ -38,7 +38,7 @@ class ServerHandle {
         this.stepMult = NaN;
 
         this.ticker = new Ticker(40);
-        this.ticker.add(this._onTick.bind(this));
+        this.ticker.add(this.onTick.bind(this));
         this.stopwatch = new Stopwatch();
         this.logger = new Logger();
 
@@ -92,6 +92,8 @@ class ServerHandle {
             this.removeWorld(id);
         for (let id in this.players)
             this.removePlayer(id);
+        for (let i = 0, l = this.listener.routers; i < l; i++)
+            this.listener.routers[0].close();
         this.gamemode.onHandleStop();
         this.listener.close();
 
@@ -157,7 +159,7 @@ class ServerHandle {
         return true;
     }
 
-    _onTick() {
+    onTick() {
         this.stopwatch.begin();
         this.tick++;
 

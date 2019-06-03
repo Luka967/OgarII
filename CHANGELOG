@@ -1,3 +1,19 @@
+1.2.4 @ 2019-06-03
+- Support legacy protocol 21
+- Support modern protocol 3
+- Fix playercells staying in one place when split at the same tick
+- Fix free-roaming not working
+- New setting, worldMinCount, prevents empty worlds from destroying
+- Updated setting ejectedSize to match vanilla
+- Updated setting ejectingLoss to match vanilla
+- Format PlayerBot.canSplitkill
+- Format Ticker
+- If setting minionName is "*", the minion spawning name will include the following player's name
+- Minions will not spawn if the following player is not alive
+- Replace QuadTree.getItems to getItemCount as getting all items is useless
+- Use util.inspect for eval command
+- Routers now close when the server handle closes
+
 1.2.3 @ 2019-04-26
 - Fix crash when executing stats command
 - Fix bad control flow when handle isn't running and executing stats command
