@@ -31,6 +31,7 @@ const value = Object.seal({
     worldPlayerBotNames: [],
     worldMinionsPerPlayer: 0,
     worldMaxPlayers: 50,
+    worldMinCount: 0,
     worldMaxCount: 2,
     matchmakerNeedsQueuing: false,
     matchmakerBulkSize: 1,
@@ -54,8 +55,8 @@ const value = Object.seal({
     virusPushBoost: 120,
     virusMonotonePops: false,
 
-    ejectedSize: 43,
-    ejectingLoss: 48,
+    ejectedSize: 38,
+    ejectingLoss: 43,
     ejectDispersion: 0.3,
     ejectedCellBoost: 780,
 

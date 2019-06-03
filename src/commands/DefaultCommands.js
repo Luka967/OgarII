@@ -1,5 +1,6 @@
 const { Command, genCommand } = require("./CommandList");
 const { EOL } = require("os");
+const { inspect } = require("util");
 
 const Minion = require("../bots/Minion");
 const PlayerBot = require("../bots/PlayerBot");
@@ -367,9 +368,8 @@ module.exports = (commands, chatCommands) => {
                 }
                 if (args.length >= 2) {
                     const settingValue = eval(args.slice(1).join(" "));
-                    const newSettings = Object.assign({ }, handle.settings, {
-                        settingName: settingValue
-                    });
+                    const newSettings = Object.assign({ }, handle.settings);
+                    newSettings[settingName] = settingValue;
                     handle.setSettings(newSettings);
                 }
                 handle.logger.print(handle.settings[settingName]);
@@ -380,12 +380,11 @@ module.exports = (commands, chatCommands) => {
             args: "",
             desc: "evaluate javascript code in a function bound to server handle",
             exec: (handle, context, args) => {
-                handle.logger.print(
-                    (function() {
-                        try { return eval(args.join(" ")); }
-                        catch (e) { return !e ? e : (e.stack || e); }
-                    }).bind(handle)()
-                );
+                const result = (function() {
+                    try { return eval(args.join(" ")); }
+                    catch (e) { return !e ? e : (e.stack || e); }
+                }).bind(handle)();
+                handle.logger.print(inspect(result, true, 1, false));
             }
         }),
         genCommand({
@@ -405,7 +404,7 @@ module.exports = (commands, chatCommands) => {
             args: "",
             desc: "stop then immediately start the handle",
             exec: (handle, context, args) => {
-                if (!handle.stop()) return void handle.logger.print("failed");
+                if (!handle.stop()) return void handle.logger.print("handle not started");
                 handle.start();
             }
         }),

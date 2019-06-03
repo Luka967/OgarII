@@ -26,7 +26,7 @@ class QuadTree {
         this.maxItems = maxItems;
         this.range = range;
 
-        /** @type {InsertedQuadItem[]} */
+        /** @type {QuadItem<T>[]} */
         this.items = [];
         this.hasSplit = false;
     }
@@ -96,6 +96,7 @@ class QuadTree {
         const y = this.range.y;
         const hw = this.range.w / 2;
         const hh = this.range.h / 2;
+        /** @type {QuadTree<T>[]} */
         this.branches = [
             new QuadTree({ x: x - hw, y: y - hh, w: hw, h: hh }, this.maxLevel, this.maxItems, this),
             new QuadTree({ x: x + hw, y: y - hh, w: hw, h: hh }, this.maxLevel, this.maxItems, this),
@@ -166,10 +167,13 @@ class QuadTree {
     }
 
     /** @returns {QuadItem<T>[]} */
-    getItems() {
-        if (!this.hasSplit) return this.items.slice(0);
-        else return this.items.slice(0).concat(this.branches[0].getItems(),
-            this.branches[1].getItems(), this.branches[2].getItems(), this.branches[3].getItems());
+    getItemCount() {
+        if (!this.hasSplit) return this.items.length;
+        else return this.items.length +
+            this.branches[0].getItemCount() +
+            this.branches[1].getItemCount() +
+            this.branches[2].getItemCount() +
+            this.branches[3].getItemCount();
     }
     /** @returns {number} */
     getBranchCount() {
@@ -183,7 +187,7 @@ class QuadTree {
      * @returns {string}
      */
     debugStr() {
-        let str = `items ${this.items.length}/${this.getItems().length} level ${this.level} x ${this.range.x} y ${this.range.y} w ${this.range.w} h ${this.range.h}\n`;
+        let str = `items ${this.items.length}/${this.maxItems}/${this.getItemCount()} level ${this.level} x ${this.range.x} y ${this.range.y} w ${this.range.w} h ${this.range.h}\n`;
         if (this.hasSplit) {
             str += new Array(1 + this.level * 2).join(" ") + this.branches[0].debugStr();
             str += new Array(1 + this.level * 2).join(" ") + this.branches[1].debugStr();

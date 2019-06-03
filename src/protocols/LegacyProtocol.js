@@ -289,7 +289,8 @@ const ffaLeaderboard = {
     17: ffaLeaderboard11,
     18: ffaLeaderboard11,
     19: ffaLeaderboard11,
-    20: ffaLeaderboard11
+    20: ffaLeaderboard11,
+    21: ffaLeaderboard11
 };
 /**
  * @param {Writer} writer
@@ -347,7 +348,8 @@ const textBoard = {
     17: textBoard14,
     18: textBoard14,
     19: textBoard14,
-    20: textBoard14
+    20: textBoard14,
+    21: textBoard14
 };
 /**
  * @param {Writer} writer
@@ -394,6 +396,7 @@ const writeCellData = {
     18: writeCellData11,
     19: writeCellData11,
     20: writeCellData11,
+    21: writeCellData11
 };
 /**
  * @param {Writer} writer
