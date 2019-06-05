@@ -1,3 +1,7 @@
+1.2.5 @ 2019-06-05
+- Fix crash when executing worldid player command
+- Fix joinworld player command not letting player with no world join
+
 1.2.4 @ 2019-06-03
 - Support legacy protocol 21
 - Support modern protocol 3
