@@ -1,9 +1,12 @@
+/**
+ * @template T
+ */
 class Command {
     /**
      * @param {string} name
      * @param {string} description
      * @param {string} args
-     * @param {(handle: ServerHandle, context: any, args: string[]) => void} executor
+     * @param {(handle: ServerHandle, context: T, args: string[]) => void} executor
      */
     constructor(name, description, args, executor) {
         this.name = name.toLowerCase();
@@ -17,6 +20,9 @@ class Command {
     }
 }
 
+/**
+ * @template T
+ */
 class CommandList {
     constructor(handle) {
         this.handle = handle;
@@ -36,7 +42,7 @@ class CommandList {
     }
 
     /**
-     * @param {any} context
+     * @param {T} context
      * @param {string} input
      */
     execute(context, input) {
@@ -52,7 +58,8 @@ module.exports = {
     Command: Command,
     CommandList: CommandList,
     /**
-     * @param {{ args: string, desc: string, name: string, exec: (handle: ServerHandle, context: any, args: string[]) => void }} info
+     * @template T
+     * @param {{ args: string, desc: string, name: string, exec: (handle: ServerHandle, context: T, args: string[]) => void }} info
      */
     genCommand(info) {
         return new Command(info.name, info.desc, info.args, info.exec);

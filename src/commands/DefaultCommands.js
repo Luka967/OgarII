@@ -622,7 +622,8 @@ module.exports = (commands, chatCommands) => {
                 handle.listener.globalChat.directMessage(null, context, "available commands:");
                 for (let name in list)
                     handle.listener.globalChat.directMessage(
-                        null, context,
+                        null,
+                        context,
                         `${name}${list[name].args.length > 0 ? " " : ""}${list[name].args} - ${list[name].description}`
                     );
             }
@@ -649,7 +650,11 @@ module.exports = (commands, chatCommands) => {
                     return void chat.directMessage(null, context, "you don't have a player associated with yourself");
                 if (!context.player.hasWorld)
                     return void chat.directMessage(null, context, "you're not in a world");
-                chat.directMessage(`your world ID is ${context.player.world.id}`);
+                chat.directMessage(
+                    null,
+                    context,
+                    `your world ID is ${context.player.world.id}`
+                );
             }
         }),
         genCommand({
@@ -678,7 +683,7 @@ module.exports = (commands, chatCommands) => {
                     return void chat.directMessage(null, context, "invalid world id number format");
                 if (!context.hasPlayer)
                     return void chat.directMessage(null, context, "you don't have a player instance associated with yourself");
-                if (!context.player.hasWorld)
+                if (context.player.hasWorld)
                     return void chat.directMessage(null, context, "you're already in a world");
                 if (!handle.worlds.hasOwnProperty(id))
                     return void chat.directMessage(null, context, "this world doesn't exist");
