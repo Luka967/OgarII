@@ -237,6 +237,7 @@ class World {
         const playerCell = new PlayerCell(player, pos.x, pos.y, size, color, name, skin);
         this.addCell(playerCell);
         player.updateState(0);
+        player.chatColor = color;
     }
 
     update() {
