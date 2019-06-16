@@ -28,7 +28,11 @@ class PlayerBot extends Bot {
         const player = this.player;
         if (player.state === -1) {
             const names = this.listener.settings.worldPlayerBotNames;
+            const skins = this.listener.settings.worldPlayerBotSkins;
+            /** @type {string} */
             this.spawningName = names[~~(Math.random() * names.length)] || "Player bot";
+            if (this.spawningName.indexOf("<*>") !== -1)
+                this.spawningName = this.spawningName.replace("<*>", `<${skins[~~(Math.random() * skins.length)]}>`);
             this.onSpawnRequest();
             this.spawningName = null;
         }

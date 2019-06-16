@@ -15,11 +15,6 @@ interface Quadrant {
 interface ViewArea extends Range {
     s: number;
 }
-interface Color {
-    r: number;
-    g: number;
-    b: number;
-}
 interface Boost {
     dx: number;
     dy: number;
@@ -32,7 +27,7 @@ interface Spawner {
 interface ChatSource {
     name: string;
     isServer: string;
-    color: Color;
+    color: number;
 }
 interface FFALeaderboardEntry {
     name: string;

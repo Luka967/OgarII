@@ -65,7 +65,7 @@ class Connection extends Router {
      */
     onSocketMessage(data) {
         if (data instanceof String) return void this.closeSocket(1003, "Unexpected message format");
-        if (data.byteLength > 256 || data.byteLength === 0)
+        if (data.byteLength > 512 || data.byteLength === 0)
             return void this.closeSocket(1009, "Unexpected message size");
         this.lastActivityTime = Date.now();
         const reader = new Reader(Buffer.from(data), 0);

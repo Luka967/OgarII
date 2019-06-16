@@ -6,6 +6,8 @@ class Writer {
     constructor() {
         offset = 0;
     }
+    get offset() { return offset; }
+
     /**
      * @param {number} a
      */
@@ -22,42 +24,56 @@ class Writer {
      * @param {number} a
      */
     writeUInt16(a) {
-        sharedBuf.writeUInt16LE(a, offset, true);
+        sharedBuf.writeUInt16LE(a, offset);
         offset += 2;
     }
     /**
      * @param {number} a
      */
     writeInt16(a) {
-        sharedBuf.writeUInt16LE(a, offset, true);
+        sharedBuf.writeUInt16LE(a, offset);
         offset += 2;
     }
     /**
      * @param {number} a
      */
+    writeUInt24(a) {
+        sharedBuf.writeUIntLE(a, offset, 3);
+        offset += 3;
+    }
+    /**
+     * @param {number} a
+     */
+    writeInt24(a) {
+        sharedBuf.writeUIntLE(a, offset, 3);
+        offset += 3;
+    }
+    /**
+     * @param {number} a
+     */
     writeUInt32(a) {
-        sharedBuf.writeUInt32LE(a, offset, true);
+        sharedBuf.writeUInt32LE(a, offset);
         offset += 4;
     }
     /**
      * @param {number} a
      */
     writeInt32(a) {
-        sharedBuf.writeInt32LE(a, offset, true);
+        sharedBuf.writeInt32LE(a, offset);
         offset += 4;
     }
     /**
      * @param {number} a
      */
     writeFloat32(a) {
-        sharedBuf.writeFloatLE(a, offset, true);
+        sharedBuf.writeFloatLE(a, offset);
         offset += 4;
     }
     /**
      * @param {number} a
      */
     writeFloat64(a) {
-        sharedBuf.writeDoubleLE(a, offset, true);
+        sharedBuf.writeDoubleLE(a, offset);
         offset += 8;
     }
     /**
@@ -80,6 +96,13 @@ class Writer {
             offset += tbuf.copy(sharedBuf, offset);
         }
         sharedBuf[offset++] = 0;
+    }
+    /**
+     * @param {number} a
+     */
+    writeColor(a) {
+        sharedBuf.writeUIntLE(((a & 0xFF) << 16) | (((a >> 8) & 0xFF) << 8) | (a >> 16), offset, 3);
+        offset += 3;
     }
     /**
      * @param {Buffer} a

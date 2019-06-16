@@ -7,7 +7,7 @@ class Cell {
      * @param {number} x
      * @param {number} y
      * @param {number} size
-     * @param {Color} color
+     * @param {number} color
      */
     constructor(world, x, y, size, color) {
         this.world = world;
@@ -18,14 +18,10 @@ class Cell {
         this.id = world.nextCellId;
         this.birthTick = world.handle.tick;
         this.exists = false;
-
-        this._x = x;
-        this._y = y;
-        this._size = size;
-        this._color = color;
+        /** @type {Cell} */
+        this.eatenBy = null;
         /** @type {Range} */
         this.range = null;
-
         this.isBoosting = false;
         /** @type {Boost} */
         this.boost = {
@@ -34,12 +30,15 @@ class Cell {
             d: 0
         };
 
-        /** @type {string} */
-        this._name = this._skin = null;
-        /** @type {Cell} */
-        this.eatenBy = null;
         /** @type {Player} */
         this.owner = null;
+
+        this.x = x;
+        this.y = y;
+        this.size = size;
+        this.color = color;
+        this.name = null;
+        this.skin = null;
 
         this.posChanged =
             this.sizeChanged =
@@ -64,7 +63,7 @@ class Cell {
      * @returns {boolean}
      */
     get isAgitated() { throw new Error("Must be overriden"); }
-    /** 
+    /**
      * @abstract
      * @returns {boolean}
     */
@@ -96,7 +95,7 @@ class Cell {
     set mass(value) { this.size = Math.sqrt(100 * value); }
 
     get color() { return this._color; }
-    /** @param {Color} value */
+    /** @param {number} value */
     set color(value) { this._color = value; this.colorChanged = true; }
 
     get name() { return this._name; }

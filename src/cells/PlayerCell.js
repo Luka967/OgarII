@@ -6,15 +6,13 @@ class PlayerCell extends Cell {
      * @param {number} x
      * @param {number} y
      * @param {number} size
-     * @param {Color} color
-     * @param {string} name
-     * @param {string} skin
+     * @param {number} color
      */
-    constructor(owner, x, y, size, color, name, skin) {
-        super(owner.world, x, y, size, color);
+    constructor(owner, x, y, size) {
+        super(owner.world, x, y, size, owner.cellColor);
         this.owner = owner;
-        this._name = name || "";
-        this._skin = skin || "";
+        this.name = owner.cellName || "";
+        this.skin = owner.cellSkin || "";
         this._canMerge = false;
     }
 
@@ -55,6 +53,14 @@ class PlayerCell extends Cell {
 
     onTick() {
         super.onTick();
+
+        if (this.name !== this.owner.cellName)
+            this.name = this.owner.cellName;
+        if (this.skin !== this.owner.cellSkin)
+            this.skin = this.owner.cellSkin;
+        if (this.color !== this.owner.cellColor)
+            this.color = this.owner.cellColor;
+
         const settings = this.world.settings;
         let delay = settings.playerNoMergeDelay;
         if (settings.playerMergeTime > 0) {

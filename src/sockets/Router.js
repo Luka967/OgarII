@@ -68,7 +68,17 @@ class Router {
     /** @virtual */
     onSpawnRequest() {
         if (!this.hasPlayer) return;
-        this.listener.handle.gamemode.onPlayerSpawnRequest(this.player, this.spawningName);
+        let name = this.spawningName.slice(0, this.settings.playerMaxNameLength);
+        /** @type {string} */
+        let skin;
+        if (this.settings.playerAllowSkinInName) {
+            const regex = /\<(.*)\>(.*)/.exec(name);
+            if (regex !== null) {
+                name = regex[2];
+                skin = regex[1];
+            }
+        }
+        this.listener.handle.gamemode.onPlayerSpawnRequest(this.player, name, skin);
     }
     /** @virtual */
     onSpectateRequest() {

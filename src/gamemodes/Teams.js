@@ -1,10 +1,10 @@
 const Gamemode = require("./Gamemode");
 const Misc = require("../primitives/Misc");
 
-const highlightBase = 204,
-       lowlightBase = 51,
-      highlightDiff = 52,
-       lowlightDiff = 52;
+const highlightBase = 231,
+       lowlightBase = 23,
+      highlightDiff = 24,
+       lowlightDiff = 24;
 const teamColors = [
     { r: highlightBase, g: lowlightBase, b: lowlightBase },
     { r: lowlightBase, g: highlightBase, b: lowlightBase },
@@ -19,11 +19,10 @@ function getTeamColor(index) {
     const random = Math.random();
     const highlight = highlightBase + ~~(random * highlightDiff);
     const lowlight  =  lowlightBase - ~~(random * lowlightDiff);
-    return {
-        r: teamColors[index].r === highlightBase ? highlight : lowlight,
-        g: teamColors[index].g === highlightBase ? highlight : lowlight,
-        b: teamColors[index].b === highlightBase ? highlight : lowlight
-    };
+    const r = teamColors[index].r === highlightBase ? highlight : lowlight;
+    const g = teamColors[index].g === highlightBase ? highlight : lowlight;
+    const b = teamColors[index].b === highlightBase ? highlight : lowlight;
+    return (r << 16) | (g << 8) | b;
 }
 
 class Teams extends Gamemode {
@@ -54,6 +53,7 @@ class Teams extends Gamemode {
             s = world.teams[i].length < world.teams[s].length ? i : s;
         world.teams[s].push(player);
         player.team = s;
+        player.chatColor = getTeamColor(player.team);
     }
     /**
      * @param {Player} player
@@ -68,16 +68,19 @@ class Teams extends Gamemode {
     /**
      * @param {Player} player
      * @param {string} name
+     * @param {string} skin
      */
-    onPlayerSpawnRequest(player, name) {
-        if (player.state === 0) return;
+    onPlayerSpawnRequest(player, name, skin) {
+        if (player.state === 0 || !player.hasWorld) return;
         const size = player.router.type === "minion" ?
             this.handle.settings.minionSpawnSize :
             this.handle.settings.playerSpawnSize;
         const pos = player.world.getSafeSpawnPos(size);
-        if (player.router.separateInTeams)
-            player.world.spawnPlayer(player, getTeamColor(player.team), pos, size, name, null);
-        else player.world.spawnPlayer(player, Misc.randomColor(), pos, size, name, null);
+        const color = player.router.separateInTeams ? getTeamColor(player.team) : Misc.randomColor();
+        player.cellName = player.chatName = player.leaderboardName = name;
+        player.cellSkin = null;
+        player.chatColor = player.cellColor = color;
+        player.world.spawnPlayer(player, pos, size);
     }
 
     /**

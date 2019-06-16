@@ -367,7 +367,7 @@ module.exports = (commands, chatCommands) => {
                     return void handle.logger.print(printing);
                 }
                 if (args.length >= 2) {
-                    const settingValue = eval(args.slice(1).join(" "));
+                    const settingValue = JSON.parse(args.slice(1).join(" "));
                     const newSettings = Object.assign({ }, handle.settings);
                     newSettings[settingName] = settingValue;
                     handle.setSettings(newSettings);
@@ -524,7 +524,7 @@ module.exports = (commands, chatCommands) => {
                 const world = getWorldByID(args, handle, 0, false);
                 if (world === false)
                     return;
-                const players = handle.worlds[id].players;
+                const players = world.players;
                 for (let i = 0; i < players.length; i++) {
                     const player = players[i];
                     if (player.state !== 0) continue;

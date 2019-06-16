@@ -209,7 +209,7 @@ class World {
     }
     /**
      * @param {number} cellSize
-     * @returns {{ color: Color, pos: Point }}
+     * @returns {{ color: number, pos: Point }}
      */
     getPlayerSpawn(cellSize) {
         if (this.settings.worldSafeSpawnFromEjectedChance > Math.random() && this.ejectedCells.length > 0) {
@@ -227,14 +227,11 @@ class World {
 
     /**
      * @param {Player} player
-     * @param {Color} color
      * @param {Point} pos
      * @param {number} size
-     * @param {string} name
-     * @param {string} skin
      */
-    spawnPlayer(player, color, pos, size, name, skin) {
-        const playerCell = new PlayerCell(player, pos.x, pos.y, size, color, name, skin);
+    spawnPlayer(player, pos, size) {
+        const playerCell = new PlayerCell(player, pos.x, pos.y, size);
         this.addCell(playerCell);
         player.updateState(0);
     }
@@ -485,9 +482,9 @@ class World {
      */
     launchPlayerCell(cell, size, boost) {
         cell.squareSize -= size * size;
-        const x = cell.x + boost.dx;
-        const y = cell.y + boost.dy;
-        const newCell = new PlayerCell(cell.owner, x, y, size, cell.color, cell.name, cell.skin);
+        const x = cell.x + 20 * boost.dx;
+        const y = cell.y + 20 * boost.dy;
+        const newCell = new PlayerCell(cell.owner, x, y, size);
         newCell.boost.dx = boost.dx;
         newCell.boost.dy = boost.dy;
         newCell.boost.d = boost.d;

@@ -8,7 +8,7 @@ class Virus extends Cell {
      */
     constructor(world, x, y) {
         const size = world.settings.virusSize;
-        super(world, x, y, size, { r: 51, g: 255, b: 51 });
+        super(world, x, y, size, 0x33FF33);
 
         this.fedTimes = 0;
         this.splitAngle = NaN;

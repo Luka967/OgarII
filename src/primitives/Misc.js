@@ -1,29 +1,25 @@
 const IPv4MappedValidate = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/;
 
 module.exports = {
-    /**
-     * @returns {Color}
-     */
     randomColor() {
         switch (~~(Math.random() * 6)) {
-            case 0: return { r: ~~(Math.random() * 0x100), g: 0x10, b: 0xFF };
-            case 1: return { r: ~~(Math.random() * 0x100), g: 0xFF, b: 0x10 };
-            case 2: return { r: 0x10, g: 0xFF, b: ~~(Math.random() * 0x100) };
-            case 3: return { r: 0x10, g: ~~(Math.random() * 0x100), b: 0xFF };
-            case 4: return { r: 0xFF, g: ~~(Math.random() * 0x100), b: 0x10 };
-            case 5: return { r: 0xFF, g: 0x10, b: ~~(Math.random() * 0x100) };
+            case 0: return (~~(Math.random() * 0x100) << 16) | (0xFF << 8) | 0x10;
+            case 1: return (~~(Math.random() * 0x100) << 16) | (0x10 << 8) | 0xFF;
+            case 2: return (0xFF << 16) | (~~(Math.random() * 0x100) << 8) | 0x10;
+            case 3: return (0x10 << 16) | (~~(Math.random() * 0x100) << 8) | 0xFF;
+            case 4: return (0x10 << 16) | (0xFF << 8) | ~~(Math.random() * 0x100);
+            case 5: return (0xFF << 16) | (0x10 << 8) | ~~(Math.random() * 0x100);
         }
     },
     /**
-     * @param {Color=} color
-     * @returns {Color}
+     * @param {number=} color
      */
     grayscaleColor(color) {
         /** @type {number} */
         let weight;
-        if (color) weight = ~~(0.299 * color.r + 0.587 * color.g + 0.114 * color.b);
+        if (color) weight = ~~(0.299 * (color & 0xFF) + 0.587 * ((color.g >> 8) & 0xFF) + 0.114 * (color.b >> 16));
         else weight = 0x7F + ~~(Math.random() * 0x80);
-        return { r: weight, g: weight, b: weight };
+        return (weight << 16) | (weight << 8) | weight;
     },
     /** @param {number[]} n */
     throwIfBadNumber(...n) {
@@ -86,5 +82,5 @@ module.exports = {
         return unmapped ? unmapped[1] : a;
     },
 
-    version: "1.2.5"
+    version: "1.3.0"
 };

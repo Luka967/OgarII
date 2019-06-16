@@ -16,7 +16,9 @@ function getLeaderboardData(player, requesting, index) {
 }
 
 class FFA extends Gamemode {
-    /** @param {ServerHandle} handle */
+    /**
+     * @param {ServerHandle} handle
+     */
     constructor(handle) {
         super(handle);
     }
@@ -24,23 +26,34 @@ class FFA extends Gamemode {
     static get type() { return 0; }
     static get name() { return "FFA"; }
 
-    /** @param {Player} player @param {string} name */
-    onPlayerSpawnRequest(player, name) {
+    /**
+     * @param {Player} player
+     * @param {string} name
+     * @param {string} skin
+     */
+    onPlayerSpawnRequest(player, name, skin) {
         if (player.state === 0 || !player.hasWorld) return;
         const size = player.router.type === "minion" ?
              this.handle.settings.minionSpawnSize :
              this.handle.settings.playerSpawnSize;
         const spawnInfo = player.world.getPlayerSpawn(size);
-        player.world.spawnPlayer(player, spawnInfo.color || Misc.randomColor(), spawnInfo.pos, size, name, null);
-        player.chatName = player.leaderboardName = name;
+        const color = spawnInfo.color || Misc.randomColor();
+        player.cellName = player.chatName = player.leaderboardName = name;
+        player.cellSkin = skin;
+        player.chatColor = player.cellColor = color;
+        player.world.spawnPlayer(player, spawnInfo.pos, size, name, null);
     }
 
-    /** @param {World} world */
+    /**
+     * @param {World} world
+     */
     compileLeaderboard(world) {
         world.leaderboard = world.players.slice(0).filter((v) => !isNaN(v.score)).sort((a, b) => b.score - a.score);
     }
 
-    /** @param {Connection} connection */
+    /**
+     * @param {Connection} connection
+     */
     sendLeaderboard(connection) {
         if (!connection.hasPlayer) return;
         const player = connection.player;

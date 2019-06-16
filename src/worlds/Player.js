@@ -16,10 +16,17 @@ class Player {
         this.router = router;
         this.exists = true;
 
+        /** @type {string} */
         this.leaderboardName = null;
+        /** @type {string} */
+        this.cellName = null;
         this.chatName = "Spectator";
-        /** @type {Color} */
-        this.chatColor = { r: 127, g: 127, b: 127 };
+        /** @type {string} */
+        this.cellSkin = null;
+        /** @type {number} */
+        this.cellColor = 0x7F7F7F;
+        /** @type {number} */
+        this.chatColor = 0x7F7F7F;
 
         /** @type {PlayerState} */
         this.state = -1;

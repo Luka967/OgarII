@@ -78,7 +78,8 @@ class ServerHandle {
         this.gamemode.onHandleStart();
 
         this.logger.inform("ticker begin");
-        this.logger.inform(`\x1B[1m\x1B[32mOgarII\x1B[0m\x1B[32m ${this.version}\x1B[0m`);
+        this.logger.inform(`OgarII ${this.version}`);
+        this.logger.inform(`gamemode: ${this.gamemode.name}`);
         return true;
     }
 

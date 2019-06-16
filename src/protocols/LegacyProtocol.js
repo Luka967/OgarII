@@ -49,8 +49,7 @@ class LegacyProtocol extends Protocol {
         }
         switch (messageId) {
             case 0:
-                const name = readZTString(reader, this.protocol);
-                this.connection.spawningName = name.slice(0, this.listener.settings.playerMaxNameLength - 1);
+                this.connection.spawningName = readZTString(reader, this.protocol);
                 break;
             case 1:
                 this.connection.requestingSpectate = true;
@@ -128,9 +127,7 @@ class LegacyProtocol extends Protocol {
         const writer = new Writer();
         writer.writeUInt8(99);
         writer.writeUInt8(source.isServer * 128);
-        writer.writeUInt8(source.color.r);
-        writer.writeUInt8(source.color.g);
-        writer.writeUInt8(source.color.b);
+        writer.writeColor(source.color);
         writeZTString(writer, source.name, this.protocol);
         writeZTString(writer, message, this.protocol);
         this.send(writer.finalize());
@@ -415,9 +412,7 @@ function writeCellData4(writer, source, protocol, cell, includeType, includeSize
     writer[protocol === 4 ? "writeInt16" : "writeInt32"](cell.x);
     writer[protocol === 4 ? "writeInt16" : "writeInt32"](cell.y);
     writer.writeUInt16(cell.size);
-    writer.writeUInt8(cell.color.r);
-    writer.writeUInt8(cell.color.g);
-    writer.writeUInt8(cell.color.b);
+    writer.writeColor(cell.color);
 
     let flags = 0;
     if (cell.isSpiked) flags |= 0x01;
@@ -457,11 +452,7 @@ function writeCellData6(writer, source, protocol, cell, includeType, includeSize
     if (cell.type === 3) flags |= 0x20;
     writer.writeUInt8(flags);
 
-    if (includeColor) {
-        writer.writeUInt8(cell.color.r);
-        writer.writeUInt8(cell.color.g);
-        writer.writeUInt8(cell.color.b);
-    }
+    if (includeColor) writer.writeColor(cell.color);
     if (includeSkin) writer.writeZTStringUTF8(cell.skin);
     if (includeName) writer.writeZTStringUTF8(cell.name);
 }
@@ -495,11 +486,7 @@ function writeCellData11(writer, source, protocol, cell, includeType, includeSiz
     writer.writeUInt8(flags);
     if (includeType && cell.type === 1) writer.writeUInt8(1);
 
-    if (includeColor) {
-        writer.writeUInt8(cell.color.r);
-        writer.writeUInt8(cell.color.g);
-        writer.writeUInt8(cell.color.b);
-    }
+    if (includeColor) writer.writeColor(cell.color);
     if (includeSkin) writer.writeZTStringUTF8(cell.skin);
     if (includeName) writer.writeZTStringUTF8(cell.name);
 }

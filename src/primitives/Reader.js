@@ -8,6 +8,7 @@ class Reader {
         this.offset = offset || 0;
         this.length = data.length;
     }
+
     readUInt8() {
         return this.data[this.offset++];
     }
@@ -23,6 +24,16 @@ class Reader {
     readInt16() {
         const a = this.data.readInt16LE(this.offset);
         this.offset += 2;
+        return a;
+    }
+    readUInt24() {
+        const a = this.data.readUIntLE(this.offset, 3);
+        this.offset += 3;
+        return a;
+    }
+    readInt24() {
+        const a = this.data.readIntLE(this.offset, 3);
+        this.offset += 3;
         return a;
     }
     readUInt32() {
@@ -60,6 +71,11 @@ class Reader {
         let start = this.offset, index = this.offset;
         while (index + 1 < this.length && this.readUInt8() !== 0) index++;
         return this.data.slice(start, index).toString("utf-8");
+    }
+    readColor() {
+        const a = this.data.readUIntLE(this.offset, 3)
+        this.offset += 3;
+        return (a & 0xFF) | ((a >> 8) & 0xFF) | (a >> 16);
     }
 }
 

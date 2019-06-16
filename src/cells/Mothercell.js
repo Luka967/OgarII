@@ -10,7 +10,7 @@ class Mothercell extends Cell {
      */
     constructor(world, x, y) {
         const size = world.settings.mothercellSize;
-        super(world, x, y, size, { r: 206, g: 99, b: 99 });
+        super(world, x, y, size, 0xCE6363);
 
         this.pelletCount = 0;
         this.activePelletFormQueue = 0;

@@ -1,3 +1,14 @@
+1.3.0 @ 2019-06-16
+- Fix command killall improperly querying for players in world
+- Fix command setting being susceptible of code injections
+- Fix inconsistency for server load on modern protocol
+- New setting, worldPlayerBotSkins, which will be used if a bot's skin in name is *
+- New setting, playerAllowSkinInName, which will allow players to set skin via name where enclosed in <>
+- Colors are internally defined as number hex instead of an interface
+- Decrease lowlight / highlight difference in Teams
+- Streamline long name trimming
+- Formatting
+
 1.2.5 @ 2019-06-05
 - Fix crash when executing worldid player command
 - Fix joinworld player command not letting player with no world join

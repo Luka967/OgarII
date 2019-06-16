@@ -6,7 +6,7 @@ class EjectedCell extends Cell {
      * @param {Player} owner
      * @param {number} x
      * @param {number} y
-     * @param {Color} color
+     * @param {number} color
      */
     constructor(world, owner, x, y, color) {
         const size = world.settings.ejectedSize;

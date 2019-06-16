@@ -194,7 +194,7 @@ class ModernProtocol extends Protocol {
             item = this.connection.player.world.stats;
             writer.writeZTStringUTF8(item.name);
             writer.writeZTStringUTF8(item.gamemode);
-            writer.writeFloat32(item.loadTime);
+            writer.writeFloat32(item.loadTime / this.handle.tickDelay);
             writer.writeUInt32(item.uptime);
             writer.writeUInt16(item.limit);
             writer.writeUInt16(item.external);
@@ -208,9 +208,7 @@ class ModernProtocol extends Protocol {
             for (i = 0; i < l; i++) {
                 item = this.chatPending[i];
                 writer.writeZTStringUTF8(item.source.name);
-                writer.writeUInt8(item.source.color.r);
-                writer.writeUInt8(item.source.color.g);
-                writer.writeUInt8(item.source.color.b);
+                writer.writeColor(item.source.color);
                 writer.writeUInt8(item.source.isServer ? 1 : 0);
                 writer.writeZTStringUTF8(item.message);
             }
@@ -267,9 +265,7 @@ class ModernProtocol extends Protocol {
                 writer.writeFloat32(item.x);
                 writer.writeFloat32(item.y);
                 writer.writeUInt16(item.size);
-                writer.writeUInt8(item.color.r);
-                writer.writeUInt8(item.color.g);
-                writer.writeUInt8(item.color.b);
+                writer.writeColor(item.color);
                 flags = 0;
                 if (item.type === 0 && item.owner === this.connection.player)
                     flags |= 1;
@@ -298,11 +294,7 @@ class ModernProtocol extends Protocol {
                 }
                 if (item.sizeChanged)
                     writer.writeUInt16(item.size);
-                if (item.colorChanged) {
-                    writer.writeUInt8(item.color.r);
-                    writer.writeUInt8(item.color.g);
-                    writer.writeUInt8(item.color.b);
-                }
+                if (item.colorChanged) writer.writeColor(item.color);
                 if (item.nameChanged) writer.writeZTStringUTF8(item.name);
                 if (item.skinChanged) writer.writeZTStringUTF8(item.skin);
             }

@@ -28,7 +28,10 @@ const value = Object.seal({
     worldPlayerDisposeDelay: 25 * 60,
 
     worldPlayerBotsPerWorld: 0,
+    /** @type {string[]} */
     worldPlayerBotNames: [],
+    /** @type {string[]} */
+    worldPlayerBotSkins: [],
     worldMinionsPerPlayer: 0,
     worldMaxPlayers: 50,
     worldMinCount: 0,
@@ -73,6 +76,7 @@ const value = Object.seal({
     playerViewScaleMult: 1,
     playerMinViewScale: 0.01,
     playerMaxNameLength: 16,
+    playerAllowSkinInName: true,
 
     playerMinSize: 32,
     playerSpawnSize: 32,
