@@ -77,8 +77,8 @@ class LegacyProtocol extends Protocol {
                         this.connection.minions[i].splitAttempts++;
                 else this.connection.splitAttempts++;
                 break;
-            case 18: this.isPressingQ = true; break;
-            case 19: this.isPressingQ = this.hasProcessedQ = false; break;
+            case 18: this.connection.isPressingQ = true; break;
+            case 19: this.connection.isPressingQ = this.hasProcessedQ = false; break;
             case 21:
                 if (this.connection.controllingMinions)
                     for (let i = 0, l = this.connection.minions.length; i < l; i++)

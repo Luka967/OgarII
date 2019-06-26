@@ -141,7 +141,7 @@ class PlayerBot extends Bot {
      */
     canSplitkill(aSize, bSize, d) {
         const splitDistance = Math.max(
-            2 * aSize / 1.4142135623730951,
+            2 * aSize / 1.4142135623730951 / 2,
             this.listener.settings.playerSplitBoost
         );
         return aSize / 1.4142135623730951 > bSize * 1.140175425099138 &&

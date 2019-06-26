@@ -1,3 +1,7 @@
+1.3.1 @ 2019-06-26
+- Fix Q presses not registering for legacy protocol
+- When equal size playercells rigid collide, the distance traveled of both is half the size; retroactively apply this to bot splitting
+
 1.3.0 @ 2019-06-16
 - Fix command killall improperly querying for players in world
 - Fix command setting being susceptible of code injections
