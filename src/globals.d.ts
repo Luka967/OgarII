@@ -2,7 +2,7 @@ interface Point {
     x: number;
     y: number;
 }
-interface Range extends Point {
+interface Rect extends Point {
     w: number;
     h: number;
 }
@@ -12,7 +12,7 @@ interface Quadrant {
     l: boolean;
     r: boolean;
 }
-interface ViewArea extends Range {
+interface ViewArea extends Rect {
     s: number;
 }
 interface Boost {

@@ -45,7 +45,7 @@ class World {
         this.largestPlayer = null;
         this.worldChat = new ChatChannel(this.handle);
 
-        /** @type {Range} */
+        /** @type {Rect} */
         this.border = { x: NaN, y: NaN, w: NaN, h: NaN };
         /** @type {QuadTree<Cell>} */
         this.finder = null;
@@ -84,7 +84,9 @@ class World {
             this.removeCell(this.cells[0]);
     }
 
-    /** @param {Range} range */
+    /**
+     * @param {Rect} range
+     */
     setBorder(range) {
         this.border.x = range.x;
         this.border.y = range.y;
@@ -189,7 +191,7 @@ class World {
         };
     }
     /**
-     * @param {Range} range
+     * @param {Rect} range
      */
     isSafeSpawnPos(range) {
         return !this.finder.containsAny(range, /** @param {Cell} other */ (item) => item.avoidWhenSpawning);

@@ -160,7 +160,7 @@ class LegacyProtocol extends Protocol {
     }
 
     /**
-     * @param {Range} range
+     * @param {Rect} range
      * @param {boolean} includeServerInfo
      */
     onNewWorldBounds(range, includeServerInfo) {

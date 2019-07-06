@@ -28,8 +28,8 @@ module.exports = {
     },
 
     /**
-     * @param {Range} a
-     * @param {Range} b
+     * @param {Rect} a
+     * @param {Rect} b
      */
     intersects(a, b) {
         return a.x - a.w <= b.x + b.w &&
@@ -38,8 +38,8 @@ module.exports = {
             a.y + a.h >= b.y - b.h;
     },
     /**
-     * @param {Range} a
-     * @param {Range} b
+     * @param {Rect} a
+     * @param {Rect} b
      */
     fullyIntersects(a, b) {
         return a.x - a.w >= b.x + b.w &&
@@ -48,8 +48,8 @@ module.exports = {
                a.y + a.h <= b.y - b.h;
     },
     /**
-     * @param {Range} a
-     * @param {Range} b
+     * @param {Rect} a
+     * @param {Rect} b
      * @returns {Quadrant}
      */
     getQuadIntersect(a, b) {
@@ -61,8 +61,8 @@ module.exports = {
         };
     },
     /**
-     * @param {Range} a
-     * @param {Range} b
+     * @param {Rect} a
+     * @param {Rect} b
      * @returns {Quadrant}
      */
     getQuadFullIntersect(a, b) {
@@ -82,5 +82,5 @@ module.exports = {
         return unmapped ? unmapped[1] : a;
     },
 
-    version: "1.3.0"
+    version: "1.3.2"
 };

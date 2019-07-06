@@ -1,11 +1,7 @@
 const serverSource = {
     name: "Server",
     isServer: true,
-    color: {
-        r: 63,
-        g: 63,
-        b: 192
-    }
+    color: 0x3F3FC0
 };
 
 /** @param {Connection} connection */

@@ -20,7 +20,7 @@ class Cell {
         this.exists = false;
         /** @type {Cell} */
         this.eatenBy = null;
-        /** @type {Range} */
+        /** @type {Rect} */
         this.range = null;
         this.isBoosting = false;
         /** @type {Boost} */

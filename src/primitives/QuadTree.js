@@ -2,7 +2,7 @@ const { intersects, fullyIntersects, getQuadIntersect, getQuadFullIntersect } = 
 
 /**
  * @template T
- * @typedef {T | { __root: QuadTree<T>, range: Range }} QuadItem
+ * @typedef {T | { __root: QuadTree<T>, range: Rect }} QuadItem
  *
  * @typedef {-1 | 0 | 1 | 2 | 3} DefiniteQuad
  */
@@ -12,7 +12,7 @@ const { intersects, fullyIntersects, getQuadIntersect, getQuadFullIntersect } = 
  */
 class QuadTree {
     /**
-     * @param {Range} range
+     * @param {Rect} range
      * @param {number} maxLevel
      * @param {number} maxItems
      * @param {QuadTree<T>=} root
@@ -127,7 +127,7 @@ class QuadTree {
     }
 
     /**
-     * @param {Range} range
+     * @param {Rect} range
      * @param {(item: QuadItem<T>) => void} callback
      */
     search(range, callback) {
@@ -145,7 +145,7 @@ class QuadTree {
         }
     }
     /**
-     * @param {Range} range
+     * @param {Rect} range
      * @param {(item: QuadItem<T>) => boolean} selector
      * @returns {boolean}
      */
@@ -198,7 +198,7 @@ class QuadTree {
     }
 
     /**
-     * @param {Range} a
+     * @param {Rect} a
      * @returns {DefiniteQuad}
      */
     getQuadrant(a) {

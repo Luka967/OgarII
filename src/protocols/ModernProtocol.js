@@ -22,7 +22,7 @@ class ModernProtocol extends Protocol {
 
         /** @type {{ source: ChatSource, message: string }[]} */
         this.chatPending = [];
-        /** @type {Range} */
+        /** @type {Rect} */
         this.worldBorderPending = null;
         /** @type {ViewArea} */
         this.spectateAreaPending = null;
@@ -104,7 +104,7 @@ class ModernProtocol extends Protocol {
     onNewOwnedCell(cell) { /* ignored */ }
 
     /**
-     * @param {Range} range
+     * @param {Rect} range
      * @param {boolean} includeServerInfo
      */
     onNewWorldBounds(range, includeServerInfo) {

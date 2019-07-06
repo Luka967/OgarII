@@ -77,10 +77,13 @@ class Connection extends Router {
     }
     createPlayer() {
         super.createPlayer();
+        if (this.settings.chatEnabled)
+            this.listener.globalChat.add(this);
         if (this.settings.matchmakerNeedsQueuing) {
             this.listener.globalChat.directMessage(null, this, "This server requires players to be queued.");
             this.listener.globalChat.directMessage(null, this, "Try spawning to enqueue.");
-        } else this.handle.matchmaker.toggleQueued(this);
+        } else
+            this.handle.matchmaker.toggleQueued(this);
     }
 
     /**
