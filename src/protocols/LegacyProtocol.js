@@ -196,18 +196,9 @@ class LegacyProtocol extends Protocol {
         this.lastLeaderboardType = type;
         const writer = new Writer();
         switch (type) {
-            case "ffa":
-                ffaLeaderboard[this.protocol](writer, data, selfData, this.protocol);
-                break;
-            case "pie":
-                writer.writeUInt8(50);
-                writer.writeUInt32(data.length);
-                for (let i = 0, l = data.length; i < l; i++)
-                    writer.writeFloat32(data[i]);
-                break;
-            case "text":
-                textBoard[this.protocol](writer, data, this.protocol);
-                break;
+            case "ffa": ffaLeaderboard[this.protocol](writer, data, selfData, this.protocol); break;
+            case "pie": pieLeaderboard[this.protocol](writer, data, selfData, this.protocol); break;
+            case "text": textBoard[this.protocol](writer, data, this.protocol); break;
         }
         this.send(writer.finalize());
     }
@@ -265,6 +256,56 @@ class LegacyProtocol extends Protocol {
 }
 
 module.exports = LegacyProtocol;
+
+/**
+ * @type {{ [protocol: number]: (writer: Writer, data: LeaderboardDataType["pie"][], selfData: LeaderboardDataType["pie"], protocol: number) => void }}
+ */
+const pieLeaderboard = {
+    4: pieLeaderboard4,
+    5: pieLeaderboard4,
+    6: pieLeaderboard4,
+    7: pieLeaderboard4,
+    8: pieLeaderboard4,
+    9: pieLeaderboard4,
+    10: pieLeaderboard4,
+    11: pieLeaderboard4,
+    12: pieLeaderboard4,
+    13: pieLeaderboard4,
+    14: pieLeaderboard4,
+    15: pieLeaderboard4,
+    16: pieLeaderboard4,
+    17: pieLeaderboard4,
+    18: pieLeaderboard4,
+    19: pieLeaderboard4,
+    20: pieLeaderboard4,
+    21: pieLeaderboard21
+};
+/**
+ * @param {Writer} writer
+ * @param {LeaderboardDataType["pie"][]} data
+ * @param {LeaderboardDataType["pie"]=} selfData
+ * @param {number} protocol
+ */
+function pieLeaderboard4(writer, data, protocol) {
+    writer.writeUInt8(50);
+    writer.writeUInt32(data.length);
+    for (let i = 0, l = data.length; i < l; i++)
+        writer.writeFloat32(data[i].weight);
+}
+/**
+ * @param {Writer} writer
+ * @param {LeaderboardDataType["pie"][]} data
+ * @param {LeaderboardDataType["pie"]=} selfData
+ * @param {number} protocol
+ */
+function pieLeaderboard21(writer, data, protocol) {
+    writer.writeUInt8(50);
+    writer.writeUInt32(data.length);
+    for (let i = 0, l = data.length; i < l; i++) {
+        writer.writeFloat32(data[i].weight);
+        writer.writeColor(data[i].color);
+    }
+}
 
 /**
  * @type {{ [protocol: number]: (writer: Writer, data: LeaderboardDataType["ffa"][], selfData: LeaderboardDataType["ffa"], protocol: number) => void }}

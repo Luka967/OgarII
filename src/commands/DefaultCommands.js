@@ -324,10 +324,8 @@ module.exports = (commands, chatCommands) => {
                 const memory = prettyMemoryData(process.memoryUsage());
                 const external = handle.listener.connections.length;
                 const internal = handle.listener.routers.length - external;
-                if (!handle.running) {
-                    logger.print("not running");
-                    return;
-                }
+                if (!handle.running)
+                    return void logger.print("not running");
                 logger.print(`load:    ${handle.averageTickTime.toFixed(4)} ms / ${handle.tickDelay} ms`);
                 logger.print(`memory:  ${memory.heapUsed} / ${memory.heapTotal} / ${memory.rss} / ${memory.external}`);
                 logger.print(`uptime:  ${prettyTime(Math.floor((Date.now() - handle.startTime.getTime()) / 1000))}`);
@@ -487,7 +485,7 @@ module.exports = (commands, chatCommands) => {
                 if (player === false || count === false)
                     return;
                 if (!player.router.isExternal)
-                    return void handle.logger.print("player is a bot");
+                    return void handle.logger.print("player is not external");
                 if (!player.hasWorld)
                     return void handle.logger.print("player is not in a world");
                 for (let i = 0; i < count; i++) new Minion(player.router);
@@ -505,7 +503,7 @@ module.exports = (commands, chatCommands) => {
                 if (player === false || count === false)
                     return;
                 if (!player.router.isExternal)
-                    return void handle.logger.print("player is a bot");
+                    return void handle.logger.print("player is not external");
                 if (!player.hasWorld)
                     return void handle.logger.print("player is not in a world");
                 let realCount = 0;
@@ -585,7 +583,7 @@ module.exports = (commands, chatCommands) => {
                         return void handle.logger.print("no player has this id");
                     const player = handle.players[id];
                     if (!player.router.isExternal)
-                        return void handle.logger.print("player is a bot");
+                        return void handle.logger.print("player is not external");
                     ip = player.router.remoteAddress;
                 }
                 handle.settings.listenerForbiddenIPs.push(ip);

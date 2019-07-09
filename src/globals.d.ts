@@ -35,6 +35,10 @@ interface FFALeaderboardEntry {
     cellId: number;
     position: number;
 }
+interface PieLeaderboardEntry {
+    weight: number;
+    color: number;
+}
 interface WorldStats {
     limit: number;
     internal: number;
@@ -74,7 +78,7 @@ declare type PlayerState = -1 | 0 | 1 | 2;
 declare type LeaderboardType = "ffa" | "pie" | "text";
 declare type LeaderboardDataType = {
     "ffa": FFALeaderboardEntry,
-    "pie": number,
+    "pie": PieLeaderboardEntry,
     "text": string
 };
 

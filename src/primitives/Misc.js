@@ -82,5 +82,5 @@ module.exports = {
         return unmapped ? unmapped[1] : a;
     },
 
-    version: "1.3.2"
+    version: "1.3.3"
 };

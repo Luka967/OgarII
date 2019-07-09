@@ -10,6 +10,11 @@ const teamColors = [
     { r: lowlightBase, g: highlightBase, b: lowlightBase },
     { r: lowlightBase, g: lowlightBase, b: highlightBase }
 ];
+const teamColorsInt = [
+    0xFF0000,
+    0x00FF00,
+    0x0000FF
+];
 const teamCount = teamColors.length;
 
 /**
@@ -32,7 +37,7 @@ class Teams extends Gamemode {
     }
 
     static get name() { return "Teams"; }
-    static get type() { return 1; }
+    static get type() { return 2; }
 
     /**
      * @param {World} world
@@ -48,11 +53,11 @@ class Teams extends Gamemode {
      */
     onPlayerJoinWorld(player, world) {
         if (!player.router.separateInTeams) return;
-        let s = 0;
+        let team = 0;
         for (let i = 0; i < teamCount; i++)
-            s = world.teams[i].length < world.teams[s].length ? i : s;
-        world.teams[s].push(player);
-        player.team = s;
+            team = world.teams[i].length < world.teams[team].length ? i : team;
+        world.teams[team].push(player);
+        player.team = team;
         player.chatColor = getTeamColor(player.team);
     }
     /**
@@ -87,15 +92,22 @@ class Teams extends Gamemode {
      * @param {World} world
      */
     compileLeaderboard(world) {
-        const teams = world.leaderboard = new Array(teamCount).fill(0);
+        /** @type {PieLeaderboardEntry[]} */
+        const teams = world.leaderboard = [];
+        for (let i = 0; i < teamCount; i++)
+            teams.push({
+                weight: 0,
+                color: teamColorsInt[i]
+            });
         let sum = 0;
         for (let i = 0; i < world.playerCells.length; i++) {
             const cell = world.playerCells[i];
             if (cell.owner.team === null) continue;
-            teams[cell.owner.team] += cell.squareSize;
+            teams[cell.owner.team].weight += cell.squareSize;
             sum += cell.squareSize;
         }
-        for (let i = 0; i < teamCount; i++) teams[i] /= sum;
+        for (let i = 0; i < teamCount; i++)
+            teams[i].weight /= sum;
     }
 
     /** @param {Connection} connection */

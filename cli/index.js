@@ -64,7 +64,7 @@ currentHandle.commands.register(
         args: "",
         desc: "start the handle",
         exec: (handle, context, args) => {
-            if (!handle.start()) handle.logger.print("failed");
+            if (!handle.start()) handle.logger.print("handle already running");
         }
     }),
     genCommand({
@@ -72,7 +72,7 @@ currentHandle.commands.register(
         args: "",
         desc: "stop the handle",
         exec: (handle, context, args) => {
-            if (!handle.stop()) handle.logger.print("failed");
+            if (!handle.stop()) handle.logger.print("handle not started");
         }
     }),
     genCommand({
@@ -112,7 +112,7 @@ function ask() {
         if (!(input = input.trim())) return;
         logger.printFile(`@ ${input}`);
         if (!currentHandle.commands.execute(null, input))
-            logger.print(`unknown command ${input}`);
+            logger.print(`unknown command`);
     });
 }
 setTimeout(() => {

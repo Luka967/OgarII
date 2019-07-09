@@ -1,3 +1,8 @@
+1.3.3 @ 2019-07-09
+- Implement legacy protocol 21's different Pie leaderboard message netcode
+- POTENTIALLY BREAKING: Define Teams gamemode's type as 2 instead of 1, to avoid agar.io registering it as the new Team mode with royale-like properties
+- Language refactoring
+
 1.3.2 @ 2019-07-06
 - Fix crash where a connection with no protocol gets added into global chat and gets sent a message
 - Fix server message having a black color
