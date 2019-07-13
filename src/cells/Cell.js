@@ -1,4 +1,4 @@
-const { throwIfBadNumber } = require("../primitives/Misc");
+const { throwIfBadNumber, throwIfBadOrNegativeNumber } = require("../primitives/Misc");
 
 /** @abstract */
 class Cell {
@@ -11,9 +11,6 @@ class Cell {
      */
     constructor(world, x, y, size, color) {
         this.world = world;
-        throwIfBadNumber(x);
-        throwIfBadNumber(y);
-        throwIfBadNumber(size);
 
         this.id = world.nextCellId;
         this.birthTick = world.handle.tick;
@@ -84,7 +81,7 @@ class Cell {
 
     get size() { return this._size; }
     /** @param {number} value */
-    set size(value) { throwIfBadNumber(value); this._size = value; this.sizeChanged = true; }
+    set size(value) { throwIfBadOrNegativeNumber(value); this._size = value; this.sizeChanged = true; }
 
     get squareSize() { return this.size * this.size; }
     /** @param {number} value */

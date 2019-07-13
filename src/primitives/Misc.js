@@ -24,7 +24,14 @@ module.exports = {
     /** @param {number[]} n */
     throwIfBadNumber(...n) {
         for (let i = 0; i < n.length; i++)
-            if (isNaN(n[i]) || !isFinite(n[i]) || n[i] == null) throw new Error(`bad number (${n[i]}, index ${i})`);
+            if (isNaN(n[i]) || !isFinite(n[i]) || n[i] == null)
+                throw new Error(`bad number (${n[i]}, index ${i})`);
+    },
+    /** @param {number[]} n */
+    throwIfBadOrNegativeNumber(...n) {
+        for (let i = 0; i < n.length; i++)
+            if (isNaN(n[i]) || !isFinite(n[i]) || n[i] == null || n[i] < 0)
+                throw new Error(`bad or negative number (${n[i]}, index ${i})`);
     },
 
     /**
@@ -82,5 +89,5 @@ module.exports = {
         return unmapped ? unmapped[1] : a;
     },
 
-    version: "1.3.3"
+    version: "1.3.4"
 };
