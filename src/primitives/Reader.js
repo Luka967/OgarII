@@ -73,7 +73,7 @@ class Reader {
         return this.data.slice(start, index).toString("utf-8");
     }
     readColor() {
-        const a = this.data.readUIntLE(this.offset, 3)
+        const a = this.data.readUIntLE(this.offset, 3);
         this.offset += 3;
         return (a & 0xFF) | ((a >> 8) & 0xFF) | (a >> 16);
     }

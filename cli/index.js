@@ -63,6 +63,9 @@ currentHandle.commands.register(
         name: "start",
         args: "",
         desc: "start the handle",
+        /**
+         * @param {ServerHandle} context
+         */
         exec: (handle, context, args) => {
             if (!handle.start()) handle.logger.print("handle already running");
         }
@@ -71,6 +74,9 @@ currentHandle.commands.register(
         name: "stop",
         args: "",
         desc: "stop the handle",
+        /**
+         * @param {ServerHandle} context
+         */
         exec: (handle, context, args) => {
             if (!handle.stop()) handle.logger.print("handle not started");
         }
@@ -79,6 +85,9 @@ currentHandle.commands.register(
         name: "exit",
         args: "",
         desc: "stop the handle and close the command stream",
+        /**
+         * @param {ServerHandle} context
+         */
         exec: (handle, context, args) => {
             handle.stop();
             commandStream.close();
@@ -89,6 +98,9 @@ currentHandle.commands.register(
         name: "reload",
         args: "",
         desc: "reload the settings from local settings.json",
+        /**
+         * @param {ServerHandle} context
+         */
         exec: (handle, context, args) => {
             handle.setSettings(readSettings());
             logger.print("done");
@@ -98,6 +110,9 @@ currentHandle.commands.register(
         name: "save",
         args: "",
         desc: "save the current settings to settings.json",
+        /**
+         * @param {ServerHandle} context
+         */
         exec: (handle, context, args) => {
             overwriteSettings(handle.settings);
             logger.print("done");

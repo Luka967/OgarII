@@ -63,44 +63,46 @@ class Cell {
     /**
      * @abstract
      * @returns {boolean}
-    */
+     */
     get avoidWhenSpawning() { throw new Error("Must be overriden"); }
-    /** @virtual */
+    /**
+     * @virtual
+     */
     get shouldUpdate() {
         return this.posChanged || this.sizeChanged ||
             this.colorChanged || this.nameChanged || this.skinChanged;
     }
 
     get age() { return (this.world.handle.tick - this.birthTick) * this.world.handle.stepMult; }
+    /** @type {number} */
     get x() { return this._x; }
+    /** @type {number} */
     get y() { return this._y; }
-    /** @param {number} value */
     set x(value) { throwIfBadNumber(value); this._x = value; this.posChanged = true; }
-    /** @param {number} value */
     set y(value) { throwIfBadNumber(value); this._y = value; this.posChanged = true; }
 
+    /** @type {number} */
     get size() { return this._size; }
-    /** @param {number} value */
     set size(value) { throwIfBadOrNegativeNumber(value); this._size = value; this.sizeChanged = true; }
 
+    /** @type {number} */
     get squareSize() { return this.size * this.size; }
-    /** @param {number} value */
     set squareSize(value) { this.size = Math.sqrt(value); }
 
+    /** @type {number} */
     get mass() { return this.size * this.size / 100; }
-    /** @param {number} value */
     set mass(value) { this.size = Math.sqrt(100 * value); }
 
+    /** @type {number} */
     get color() { return this._color; }
-    /** @param {number} value */
     set color(value) { this._color = value; this.colorChanged = true; }
 
+    /** @type {string} */
     get name() { return this._name; }
-    /** @param {string} value */
     set name(value) { this._name = value; this.nameChanged = true; }
 
+    /** @type {string} */
     get skin() { return this._skin; }
-    /** @param {string} value */
     set skin(value) { this._skin = value; this.skinChanged = true; }
 
     /**
@@ -111,9 +113,13 @@ class Cell {
         throw new Error("Must be overriden");
     }
 
-    /** @virtual */
+    /**
+     * @virtual
+     */
     onSpawned() { }
-    /** @virtual */
+    /**
+     * @virtual
+     */
     onTick() {
         this.posChanged =
             this.sizeChanged =
@@ -122,15 +128,23 @@ class Cell {
             this.skinChanged =
             false;
     }
-    /** @param {Cell} other @virtual */
+    /**
+     * @param {Cell} other
+     * @virtual
+     */
     whenAte(other) {
         this.squareSize += other.squareSize;
     }
-    /** @param {Cell} other @virtual */
+    /**
+     * @param {Cell} other
+     * @virtual
+     */
     whenEatenBy(other) {
         this.eatenBy = other;
     }
-    /** @virtual */
+    /**
+     * @virtual
+     */
     onRemoved() { }
 }
 

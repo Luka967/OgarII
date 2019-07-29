@@ -58,6 +58,8 @@ class ModernProtocol extends Protocol {
                 this.worldStatsPending = true;
                 break;
             case 3:
+                if (reader.length < 12)
+                    return void this.fail(1003, "Unexpected message format");
                 let i, l, count;
                 this.connection.mouseX = reader.readInt32();
                 this.connection.mouseY = reader.readInt32();
@@ -67,8 +69,11 @@ class ModernProtocol extends Protocol {
                     this.connection.minions[i].splitAttempts += count;
 
                 const globalFlags = reader.readUInt8();
-                if (globalFlags & 1)
+                if (globalFlags & 1) {
+                    if (reader.length < 13)
+                        return void this.fail(1003, "Unexpected message format");
                     this.connection.spawningName = reader.readZTStringUTF8();
+                }
                 if (globalFlags & 2) this.connection.requestingSpectate = true;
                 if (globalFlags & 4) this.connection.isPressingQ = true;
                 if (globalFlags & 8) this.connection.isPressingQ = this.connection.hasProcessedQ = false;
@@ -78,7 +83,11 @@ class ModernProtocol extends Protocol {
                         this.connection.minions[i].ejectAttempts++;
                 if (globalFlags & 64) this.connection.minionsFrozen = !this.connection.minionsFrozen;
                 if (globalFlags & 128) {
+                    if (reader.length < 13 + (globalFlags & 1))
+                        return void this.fail(1003, "Unexpected message format");
                     count = reader.readUInt8();
+                    if (reader.length < 13 + (globalFlags & 1) + count)
+                        return void this.fail(1003, "Unexpected message format");
                     for (let i = 0; i < count; i++)
                         this.connection.onChatMessage(reader.readZTStringUTF8());
                 }

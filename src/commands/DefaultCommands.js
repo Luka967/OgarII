@@ -222,6 +222,9 @@ module.exports = (commands, chatCommands) => {
             name: "help",
             args: "",
             desc: "display all registered commands and their relevant information",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 const list = handle.commands.list;
                 const keys = Object.keys(list).sort();
@@ -245,6 +248,9 @@ module.exports = (commands, chatCommands) => {
             name: "routers",
             args: "[router type]",
             desc: "display information about routers and their players",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 const matchingType = args.length >= 1 ? args[0] : null;
                 const routers = handle.listener.routers
@@ -275,6 +281,9 @@ module.exports = (commands, chatCommands) => {
             name: "players",
             args: "[world id or \"any\"] [router type]",
             desc: "display information about players",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 const worldId = args.length >= 1 ? parseInt(args[0]) || null : null;
                 const routerType = args.length === 2 ? args[1] : null;
@@ -319,6 +328,9 @@ module.exports = (commands, chatCommands) => {
             name: "stats",
             args: "",
             desc: "display critical information about the server",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 const logger = handle.logger;
                 const memory = prettyMemoryData(process.memoryUsage());
@@ -344,6 +356,9 @@ module.exports = (commands, chatCommands) => {
             name: "setting",
             args: "<name> [value]",
             desc: "change/print the value of a setting",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 if (args.length < 1)
                     return void handle.logger.print("no setting name provided");
@@ -377,6 +392,9 @@ module.exports = (commands, chatCommands) => {
             name: "eval",
             args: "",
             desc: "evaluate javascript code in a function bound to server handle",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 const result = (function() {
                     try { return eval(args.join(" ")); }
@@ -389,18 +407,27 @@ module.exports = (commands, chatCommands) => {
             name: "test",
             args: "",
             desc: "test command",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => handle.logger.print("success successful")
         }),
         genCommand({
             name: "crash",
             args: "",
             desc: "manually force an error throw",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => { throw new Error("manual crash"); }
         }),
         genCommand({
             name: "restart",
             args: "",
             desc: "stop then immediately start the handle",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 if (!handle.stop()) return void handle.logger.print("handle not started");
                 handle.start();
@@ -410,6 +437,9 @@ module.exports = (commands, chatCommands) => {
             name: "pause",
             args: "",
             desc: "toggle handle pause",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 if (!handle.running) return void handle.logger.print("handle not started");
                 if (handle.ticker.running)
@@ -421,6 +451,9 @@ module.exports = (commands, chatCommands) => {
             name: "mass",
             args: "<id> <mass>",
             desc: "set cell mass to all of a player's cells",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 const player = getPlayerByID(args, handle, 0, true);
                 const mass = getFloat(args, handle, 1, "mass");
@@ -435,6 +468,9 @@ module.exports = (commands, chatCommands) => {
             name: "merge",
             args: "<id>",
             desc: "instantly merge a player",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 const player = getPlayerByID(args, handle, 0, true);
                 if (player === false)
@@ -453,6 +489,9 @@ module.exports = (commands, chatCommands) => {
             name: "kill",
             args: "<id>",
             desc: "instantly kill a player",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 const player = getPlayerByID(args, handle, 0, true);
                 if (player === false)
@@ -466,6 +505,9 @@ module.exports = (commands, chatCommands) => {
             name: "explode",
             args: "<id>",
             desc: "instantly explode a player's first cell",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 const player = getPlayerByID(args, handle, 0, true);
                 if (player === false)
@@ -478,6 +520,9 @@ module.exports = (commands, chatCommands) => {
             name: "addminion",
             args: "<id> [count]",
             desc: "assign minions to a player",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 if (args.length === 1) args[1] = "1";
                 const player = getPlayerByID(args, handle, 0, false);
@@ -496,6 +541,9 @@ module.exports = (commands, chatCommands) => {
             name: "rmminion",
             args: "<id> [count]",
             desc: "remove assigned minions from a player",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 if (args.length === 1) args[1] = "1";
                 const player = getPlayerByID(args, handle, 0, false);
@@ -518,6 +566,9 @@ module.exports = (commands, chatCommands) => {
             name: "killall",
             args: "<world id>",
             desc: "instantly kill all players in a world",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 const world = getWorldByID(args, handle, 0, false);
                 if (world === false)
@@ -536,6 +587,9 @@ module.exports = (commands, chatCommands) => {
             name: "addbot",
             args: "<world id> [count=1]",
             desc: "assign player bots to a world",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 if (args.length === 1) args[1] = "1";
 
@@ -551,6 +605,9 @@ module.exports = (commands, chatCommands) => {
             name: "rmbot",
             args: "<world id> [count=1]",
             desc: "remove player bots from a world",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 if (args.length === 1) args[1] = "1";
 
@@ -571,6 +628,9 @@ module.exports = (commands, chatCommands) => {
             name: "forbid",
             args: "<IP address / player id>",
             desc: "forbid (ban) specified IP or a connected player",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 if (args.length < 1)
                     return void handle.logger.print("");
@@ -594,6 +654,9 @@ module.exports = (commands, chatCommands) => {
             name: "pardon",
             args: "<IP address>",
             desc: "pardon (unban) specified IP",
+            /**
+             * @param {ServerHandle} context
+             */
             exec: (handle, context, args) => {
                 if (args.length < 1)
                     return void handle.logger.print("");
@@ -615,6 +678,9 @@ module.exports = (commands, chatCommands) => {
             name: "help",
             args: "",
             desc: "display all registered commands and their relevant information",
+            /**
+             * @param {Connection} context
+             */
             exec: (handle, context, args) => {
                 const list = handle.chatCommands.list;
                 handle.listener.globalChat.directMessage(null, context, "available commands:");
@@ -630,6 +696,9 @@ module.exports = (commands, chatCommands) => {
             name: "id",
             args: "",
             desc: "get your id",
+            /**
+             * @param {Connection} context
+             */
             exec: (handle, context, args) => {
                 handle.listener.globalChat.directMessage(
                     null,
@@ -642,6 +711,9 @@ module.exports = (commands, chatCommands) => {
             name: "worldid",
             args: "",
             desc: "get your world's id",
+            /**
+             * @param {Connection} context
+             */
             exec: (handle, context, args) => {
                 const chat = handle.listener.globalChat;
                 if (!context.hasPlayer)
@@ -659,6 +731,9 @@ module.exports = (commands, chatCommands) => {
             name: "leaveworld",
             args: "",
             desc: "leave your world",
+            /**
+             * @param {Connection} context
+             */
             exec: (handle, context, args) => {
                 const chat = handle.listener.globalChat;
                 if (!context.hasPlayer)
@@ -672,6 +747,9 @@ module.exports = (commands, chatCommands) => {
             name: "joinworld",
             args: "<id>",
             desc: "try to join a world",
+            /**
+             * @param {Connection} context
+             */
             exec: (handle, context, args) => {
                 const chat = handle.listener.globalChat;
                 if (args.length === 0)
@@ -695,3 +773,4 @@ module.exports = (commands, chatCommands) => {
 
 const { CommandList } = require("./CommandList");
 const ServerHandle = require("../ServerHandle");
+const Connection = require("../sockets/Connection");

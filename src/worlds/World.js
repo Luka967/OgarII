@@ -10,7 +10,7 @@ const Mothercell = require("../cells/Mothercell");
 const Virus = require("../cells/Virus");
 const ChatChannel = require("../sockets/ChatChannel");
 
-const { fullyIntersects } = require("../primitives/Misc");
+const { fullyIntersects, SQRT_2 } = require("../primitives/Misc");
 
 /**
  * @implements {Spawner}
@@ -413,7 +413,9 @@ class World {
         this.updateCell(a);
     }
 
-    /** @param {Cell} cell */
+    /**
+     * @param {Cell} cell
+     */
     boostCell(cell) {
         const d = cell.boost.d / 9 * this.handle.stepMult;
         cell.x += cell.boost.dx * d;
@@ -428,7 +430,7 @@ class World {
     /**
      * @param {Cell} cell
      * @param {boolean=} bounce
-    */
+     */
     bounceCell(cell, bounce) {
         const r = cell.size / 2;
         const b = this.border;
@@ -450,7 +452,9 @@ class World {
         }
     }
 
-    /** @param {Virus} virus */
+    /**
+     * @param {Virus} virus
+     */
     splitVirus(virus) {
         const newVirus = new Virus(this, virus.x, virus.y);
         newVirus.boost.dx = Math.sin(virus.splitAngle);
@@ -460,7 +464,9 @@ class World {
         this.setCellAsBoosting(newVirus);
     }
 
-    /** @param {PlayerCell} cell */
+    /**
+     * @param {PlayerCell} cell
+     */
     movePlayerCell(cell) {
         const router = cell.owner.router;
         if (router.disconnected) return;
@@ -472,7 +478,9 @@ class World {
         cell.x += dx * m;
         cell.y += dy * m;
     }
-    /** @param {PlayerCell} cell */
+    /**
+     * @param {PlayerCell} cell
+     */
     decayPlayerCell(cell) {
         const newSize = cell.size - cell.size * this.handle.gamemode.getDecayMult(cell) / 50 * this.handle.stepMult;
         cell.size = Math.max(newSize, this.settings.playerMinSize);
@@ -493,7 +501,9 @@ class World {
         this.addCell(newCell);
         this.setCellAsBoosting(newCell);
     }
-    /** @param {PlayerCell} cell */
+    /**
+     * @param {PlayerCell} cell
+     */
     autosplitPlayerCell(cell) {
         const minSplit = this.settings.playerMaxSize * this.settings.playerMaxSize;
         const cellsLeft = 1 + this.settings.playerMaxCells - cell.owner.ownedCells.length;
@@ -512,7 +522,9 @@ class World {
         cell.size = splitSize;
     }
 
-    /** @param {Player} player */
+    /**
+     * @param {Player} player
+     */
     splitPlayer(player) {
         const router = player.router;
         const l = player.ownedCells.length;
@@ -527,14 +539,16 @@ class World {
             let d = Math.sqrt(dx * dx + dy * dy);
             if (d < 1) dx = 1, dy = 0, d = 1;
             else dx /= d, dy /= d;
-            this.launchPlayerCell(cell, cell.size / 1.4142135623730952, {
+            this.launchPlayerCell(cell, cell.size / SQRT_2, {
                 dx: dx,
                 dy: dy,
                 d: this.settings.playerSplitBoost
             });
         }
     }
-    /** @param {Player} player */
+    /**
+     * @param {Player} player
+     */
     ejectFromPlayer(player) {
         const dispersion = this.settings.ejectDispersion;
         const loss = this.settings.ejectingLoss * this.settings.ejectingLoss;

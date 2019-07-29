@@ -22,6 +22,10 @@ class Mothercell extends Cell {
     get isAgitated() { return false; }
     get avoidWhenSpawning() { return true; }
 
+    /**
+     * @param {Cell} other
+     * @returns {CellEatResult}
+     */
     getEatResult(other) { return 0; }
 
     onTick() {

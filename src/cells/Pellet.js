@@ -21,6 +21,10 @@ class Pellet extends Cell {
     get isAgitated() { return false; }
     get avoidWhenSpawning() { return false; }
 
+    /**
+     * @param {Cell} other
+     * @returns {CellEatResult}
+     */
     getEatResult() { return 0; }
 
     onTick() {

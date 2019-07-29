@@ -2,7 +2,7 @@ const { intersects, fullyIntersects, getQuadIntersect, getQuadFullIntersect } = 
 
 /**
  * @template T
- * @typedef {T | { __root: QuadTree<T>, range: Rect }} QuadItem
+ * @typedef {T & { __root: QuadTree<T>, range: Rect }} QuadItem
  *
  * @typedef {-1 | 0 | 1 | 2 | 3} DefiniteQuad
  */
