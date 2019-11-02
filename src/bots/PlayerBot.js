@@ -1,5 +1,4 @@
 const Bot = require("./Bot");
-const { SQRT_2, SQRT_1_3 } = require("../primitives/Misc");
 
 class PlayerBot extends Bot {
     /**
@@ -133,7 +132,7 @@ class PlayerBot extends Bot {
      * @param {number} bSize
      */
     canEat(aSize, bSize) {
-        return aSize > bSize * SQRT_1_3;
+        return aSize > bSize * this.listener.settings.worldEatMult;
     }
     /**
      * @param {number} aSize
@@ -142,11 +141,11 @@ class PlayerBot extends Bot {
      */
     canSplitkill(aSize, bSize, d) {
         const splitDistance = Math.max(
-            2 * aSize / SQRT_2 / 2,
+            2 * aSize / this.listener.settings.playerSplitSizeDiv / 2,
             this.listener.settings.playerSplitBoost
         );
-        return aSize / SQRT_2 > bSize * SQRT_1_3 &&
-               d - splitDistance <= aSize - bSize / 3;
+        return aSize / this.listener.settings.playerSplitSizeDiv > bSize * this.listener.settings.worldEatMult &&
+               d - splitDistance <= aSize - bSize / this.listener.settings.worldEatOverlapDiv;
     }
 }
 

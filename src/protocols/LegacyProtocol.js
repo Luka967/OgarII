@@ -278,7 +278,8 @@ const pieLeaderboard = {
     18: pieLeaderboard4,
     19: pieLeaderboard4,
     20: pieLeaderboard4,
-    21: pieLeaderboard21
+    21: pieLeaderboard21,
+    22: pieLeaderboard21
 };
 /**
  * @param {Writer} writer
@@ -328,7 +329,8 @@ const ffaLeaderboard = {
     18: ffaLeaderboard11,
     19: ffaLeaderboard11,
     20: ffaLeaderboard11,
-    21: ffaLeaderboard11
+    21: ffaLeaderboard11,
+    22: ffaLeaderboard11
 };
 /**
  * @param {Writer} writer
@@ -387,7 +389,8 @@ const textBoard = {
     18: textBoard14,
     19: textBoard14,
     20: textBoard14,
-    21: textBoard14
+    21: textBoard14,
+    22: textBoard14
 };
 /**
  * @param {Writer} writer
@@ -434,7 +437,8 @@ const writeCellData = {
     18: writeCellData11,
     19: writeCellData11,
     20: writeCellData11,
-    21: writeCellData11
+    21: writeCellData11,
+    22: writeCellData11
 };
 /**
  * @param {Writer} writer

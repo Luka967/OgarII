@@ -89,8 +89,5 @@ module.exports = {
         return unmapped ? unmapped[1] : a;
     },
 
-    version: "1.3.5",
-
-    SQRT_2: 1.414213562373095,
-    SQRT_1_3: 1.140175425099138
+    version: "1.3.6"
 };

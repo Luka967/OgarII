@@ -23,9 +23,12 @@ const value = Object.seal({
     worldMapH: 7071,
     worldFinderMaxLevel: 16,
     worldFinderMaxItems: 16,
-    worldSafeSpawnTries: 16,
+    worldSafeSpawnTries: 64,
     worldSafeSpawnFromEjectedChance: 0.8,
     worldPlayerDisposeDelay: 25 * 60,
+
+    worldEatMult: 1.140175425099138,
+    worldEatOverlapDiv: 3,
 
     worldPlayerBotsPerWorld: 0,
     /** @type {string[]} */
@@ -88,6 +91,8 @@ const value = Object.seal({
     playerMaxCells: 16,
 
     playerMoveMult: 1,
+    playerSplitSizeDiv: 1.414213562373095,
+    playerSplitDistance: 40,
     playerSplitBoost: 780,
     playerNoCollideDelay: 13,
     playerNoMergeDelay: 15,

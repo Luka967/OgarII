@@ -1,5 +1,4 @@
 const Cell = require("./Cell");
-const { SQRT_1_3 } = require("../primitives/Misc");
 
 class PlayerCell extends Cell {
     /**
@@ -43,7 +42,7 @@ class PlayerCell extends Cell {
                 return (other.age < delay || this.age < delay) ? 0 : 1;
             return this.getDefaultEatResult(other);
         }
-        if (other.type === 4 && other.size > this.size * SQRT_1_3) return 3;
+        if (other.type === 4 && other.size > this.size * this.world.settings.worldEatMult) return 3;
         if (other.type === 1) return 2;
         return this.getDefaultEatResult(other);
     }
@@ -51,7 +50,7 @@ class PlayerCell extends Cell {
      * @param {Cell} other
      */
     getDefaultEatResult(other) {
-        return other.size * SQRT_1_3 > this.size ? 0 : 2;
+        return other.size * this.world.settings.worldEatMult > this.size ? 0 : 2;
     }
 
     onTick() {
@@ -68,7 +67,7 @@ class PlayerCell extends Cell {
         let delay = settings.playerNoMergeDelay;
         if (settings.playerMergeTime > 0) {
             const initial = Math.round(25 * settings.playerMergeTime);
-            const increase = Math.round(25 * this.mass * settings.playerMergeTimeIncrease);
+            const increase = Math.round(25 * this.size * settings.playerMergeTimeIncrease);
             delay = Math.max(delay, settings.playerMergeVersion === "new" ? Math.max(initial, increase) : initial + increase);
         }
         this._canMerge = this.age >= delay;

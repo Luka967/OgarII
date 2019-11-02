@@ -30,14 +30,18 @@ class Minion extends Bot {
             ||  this.following.player.world !== this.player.world;
     }
     update() {
+        const name =
+            this.listener.settings.minionName === "*"
+            ? `*${this.following.player.leaderboardName}`
+            : this.listener.settings.minionName;
         const player = this.player;
         if (player.state === -1 && this.following.player.state === 0) {
-            this.spawningName =
-                this.listener.settings.minionName === "*"
-                ? `*${this.following.player.leaderboardName}`
-                : this.listener.settings.minionName;
+            this.spawningName = name;
             this.onSpawnRequest();
             this.spawningName = null;
+        } else {
+            player.cellName = name;
+            player.leaderboardName = name;
         }
         this.mouseX = this.following.minionsFrozen ? this.player.viewArea.x : this.following.mouseX;
         this.mouseY = this.following.minionsFrozen ? this.player.viewArea.y : this.following.mouseY;

@@ -260,9 +260,14 @@ class World {
     liveUpdate() {
         this.handle.gamemode.onWorldTick(this);
 
-        const self = this;
-        const eat = [], rigid = [];
-        let i, l;
+        /** @type {Cell[]} */
+        const eat = [];
+        /** @type {Cell[]} */
+        const rigid = [];
+        /** @type {number} */
+        let i;
+        /** @type {number} */
+        let l;
 
         for (i = 0, l = this.cells.length; i < l; i++)
             this.cells[i].onTick();
@@ -285,7 +290,7 @@ class World {
             else i++;
         }
 
-        for (i = 0; i < this.boostingCells.length; i++) {
+        for (i = 0; i < l; i++) {
             const cell = this.boostingCells[i];
             if (cell.type !== 2 && cell.type !== 3) continue;
             this.finder.search(cell.range, (other) => {
@@ -300,14 +305,14 @@ class World {
 
         for (i = 0, l = this.playerCells.length; i < l; i++) {
             const cell = this.playerCells[i];
-            this.autosplitPlayerCell(cell);
             this.movePlayerCell(cell);
             this.decayPlayerCell(cell);
+            this.autosplitPlayerCell(cell);
             this.bounceCell(cell);
             this.updateCell(cell);
         }
 
-        for (i = 0; i < l; i++) {
+        for (i = 0, l = this.playerCells.length; i < l; i++) {
             const cell = this.playerCells[i];
             this.finder.search(cell.range, (other) => {
                 if (cell.id === other.id) return;
@@ -405,7 +410,7 @@ class World {
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const d = Math.sqrt(dx * dx + dy * dy);
-        if (d > a.size - b.size / 3) return;
+        if (d > a.size - b.size / this.settings.worldEatOverlapDiv) return;
         if (!this.handle.gamemode.canEat(a, b)) return;
         a.whenAte(b);
         b.whenEatenBy(a);
@@ -492,8 +497,8 @@ class World {
      */
     launchPlayerCell(cell, size, boost) {
         cell.squareSize -= size * size;
-        const x = cell.x + 20 * boost.dx;
-        const y = cell.y + 20 * boost.dy;
+        const x = cell.x + this.settings.playerSplitDistance * boost.dx;
+        const y = cell.y + this.settings.playerSplitDistance * boost.dy;
         const newCell = new PlayerCell(cell.owner, x, y, size);
         newCell.boost.dx = boost.dx;
         newCell.boost.dy = boost.dy;
@@ -539,7 +544,7 @@ class World {
             let d = Math.sqrt(dx * dx + dy * dy);
             if (d < 1) dx = 1, dy = 0, d = 1;
             else dx /= d, dy /= d;
-            this.launchPlayerCell(cell, cell.size / SQRT_2, {
+            this.launchPlayerCell(cell, cell.size / this.settings.playerSplitSizeDiv, {
                 dx: dx,
                 dy: dy,
                 d: this.settings.playerSplitBoost
