@@ -1,4 +1,5 @@
 1.3.6 @ 2019-11-02
+- Support legacy protocol 22
 - New setting, worldEatMult
 - New setting, worldEatOverlapDiv
 - New setting, playerSplitSizeDiv
