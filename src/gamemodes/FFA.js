@@ -58,6 +58,7 @@ class FFA extends Gamemode {
         if (!connection.hasPlayer) return;
         const player = connection.player;
         if (!player.hasWorld) return;
+	if (!player.id) return;
         if (player.world.frozen) return;
         /** @type {Player[]} */
         const leaderboard = player.world.leaderboard;
