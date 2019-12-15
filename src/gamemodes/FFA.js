@@ -9,8 +9,8 @@ const Misc = require("../primitives/Misc");
 function getLeaderboardData(player, requesting, index) {
     return {
         name: player.leaderboardName,
-        highlighted: requesting.id === player.id,
-        cellId: player.ownedCells[0].id,
+        highlighted: (requesting || { }).id === (player || { }).id,
+        cellId: (player.ownedCells[0] || { }).id,
         position: 1 + index
     };
 }
