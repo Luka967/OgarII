@@ -179,7 +179,7 @@ class Connection extends Router {
 
 module.exports = Connection;
 
-const WebSocket = require("uws");
+const { WebSocket } = require("@clusterws/cws");
 const Listener = require("./Listener");
 const Minion = require("../bots/Minion");
 const Protocol = require("../protocols/Protocol");

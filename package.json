@@ -17,6 +17,6 @@
         "url": "https://github.com/Luka967/OgarII/issues"
     },
     "dependencies": {
-        "uws": "10.148.1"
+        "@clusterws/cws": "^0.16.0"
     }
 }

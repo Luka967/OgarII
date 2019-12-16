@@ -1,5 +1,4 @@
-const WebSocket = require("uws");
-const WebSocketServer = WebSocket.Server;
+const { WebSocket, WebSocketServer } = require("@clusterws/cws");
 
 const Connection = require("./Connection");
 const ChatChannel = require("./ChatChannel");
