@@ -9,8 +9,8 @@ const Misc = require("../primitives/Misc");
 function getLeaderboardData(player, requesting, index) {
     return {
         name: player.leaderboardName,
-        highlighted: requesting.id === player.id,
-        cellId: player.ownedCells[0].id,
+        highlighted: (requesting || { }).id === (player || { }).id,
+        cellId: (player.ownedCells[0] || { }).id,
         position: 1 + index
     };
 }
@@ -48,7 +48,7 @@ class FFA extends Gamemode {
      * @param {World} world
      */
     compileLeaderboard(world) {
-        world.leaderboard = world.players.slice(0).filter((v) => !isNaN(v.score)).sort((a, b) => b.score - a.score);
+        world.leaderboard = world.players.slice(0).filter((v) => !isNaN(v.score) && v.ownedCells && v.ownedCells.length > 0).sort((a, b) => b.score - a.score);
     }
 
     /**
@@ -58,6 +58,7 @@ class FFA extends Gamemode {
         if (!connection.hasPlayer) return;
         const player = connection.player;
         if (!player.hasWorld) return;
+	if (!player.id) return;
         if (player.world.frozen) return;
         /** @type {Player[]} */
         const leaderboard = player.world.leaderboard;

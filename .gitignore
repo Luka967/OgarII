@@ -3,6 +3,13 @@ cli/logs
 cli/settings.json
 cli/log-settings.json
 
+# logs
+logs
+
+# settings
+settings.json
+log-settings.json
+
 # npm
 node_modules
 package-lock.json
