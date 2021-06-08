@@ -31,7 +31,7 @@ class Writer {
      * @param {number} a
      */
     writeInt16(a) {
-        sharedBuf.writeUInt16LE(a, offset);
+        sharedBuf.writeInt16LE(a, offset);
         offset += 2;
     }
     /**
@@ -45,7 +45,7 @@ class Writer {
      * @param {number} a
      */
     writeInt24(a) {
-        sharedBuf.writeUIntLE(a, offset, 3);
+        sharedBuf.writeIntLE(a, offset, 3);
         offset += 3;
     }
     /**
