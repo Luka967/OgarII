@@ -10,7 +10,7 @@ const value = Object.seal({
 
     serverFrequency: 25,
     serverName: "An unnamed server",
-    serverGamemode: "FFA",
+    serverGamemode: "TEAMS",
 
     chatEnabled: true,
     /** @type {string[]} */
@@ -30,7 +30,7 @@ const value = Object.seal({
     worldEatMult: 1.140175425099138,
     worldEatOverlapDiv: 3,
 
-    worldPlayerBotsPerWorld: 10,
+    worldPlayerBotsPerWorld: 30,
     /** @type {string[]} */
     worldPlayerBotNames: [],
     /** @type {string[]} */
@@ -82,7 +82,7 @@ const value = Object.seal({
     playerAllowSkinInName: true,
 
     playerMinSize: 32,
-    playerSpawnSize: 32,
+    playerSpawnSize: 200,
     playerMaxSize: 1500,
     playerMinSplitSize: 60,
     playerMinEjectSize: 60,
