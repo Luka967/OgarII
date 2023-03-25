@@ -8,6 +8,9 @@
         "url": "https://github.com/Luka967",
         "email": "luka.djokovic2@gmail.com"
     },
+	"engines": {
+    "node": "8.15.1"
+	},
 	    "scripts": {
         "start": "cd cli && node index"
     },
