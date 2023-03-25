@@ -6,7 +6,7 @@ const value = Object.seal({
     listenerMaxConnections: 100,
     listenerMaxClientDormancy: 1000 * 60,
     listenerMaxConnectionsPerIP: -1,
-    listeningPort: 443,
+    listeningPort: process.env.PORT,
 
     serverFrequency: 25,
     serverName: "An unnamed server",
@@ -30,7 +30,7 @@ const value = Object.seal({
     worldEatMult: 1.140175425099138,
     worldEatOverlapDiv: 3,
 
-    worldPlayerBotsPerWorld: 0,
+    worldPlayerBotsPerWorld: 10,
     /** @type {string[]} */
     worldPlayerBotNames: [],
     /** @type {string[]} */
