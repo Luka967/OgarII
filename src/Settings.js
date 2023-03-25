@@ -10,7 +10,7 @@ const value = Object.seal({
 
     serverFrequency: 25,
     serverName: "An unnamed server",
-    serverGamemode: "TEAMS",
+    serverGamemode: "Teams",
 
     chatEnabled: true,
     /** @type {string[]} */
