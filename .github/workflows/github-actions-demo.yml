@@ -1,3 +1,5 @@
+# This workflow will automatically deploy your application to www.evennode.com on push to main branch.
+
 name: Deploy to EvenNode
 
 on:
