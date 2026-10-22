@@ -8,7 +8,7 @@ Your friendly agar.io private server recreation.
 
 - It supports handling multiple worlds, all within one instance. Be wary that you can still use up the one CPU core node.js is running on.
 
-- It has a minimal memory footprint, and strictly uses uWebSockets for networking.
+- It has a minimal memory footprint, and uses uWebSockets.js for networking.
 
 - The code uses JSDoc to specify types. Understanding what the code does is down to your understanding of English.
 
@@ -20,19 +20,15 @@ Your friendly agar.io private server recreation.
 
 ## Running
 
-1. Make sure you have node.js version 8 or greater.
+1. Make sure you have node.js version >= 22 to utilize the prebuilt binaries provided by uWebSockets.js.
 
-2. Make sure you have a C++11 compliant compiler for building uWebSockets.
-    - If you're on Windows, `npm install -g windows-build-tools`.
-    - If you're on GNU/Linux, use your package manager to install a supported C++ compiler such as GCC.
+2. Clone / [download](https://github.com/Luka967/OgarII/archive/master.zip) the repo.
 
-3. Clone / [download](https://github.com/Luka967/OgarII/archive/master.zip) the repo.
+3. Run `npm install` in the project root (or `npm ci` for a clean install). The project-local `.npmrc` permits the versioned uWebSockets.js archive declared directly in this project.
 
-4. `npm install` in `/`.
+4. `cd ./cli/`
 
-5. `cd ./cli/`
-
-6. `node index.js`
+5. `node index.js`
 
 ## Configuring
 
@@ -41,6 +37,28 @@ Your friendly agar.io private server recreation.
 - To change how OgarII runs, modify `cli/settings.json`.
 
 - To change what gets logged, modify `cli/log-settings.json`.
+
+### TLS / secure WebSockets
+
+OgarII accepts unencrypted `ws://` connections by default. To accept `wss://`
+connections instead, set both certificate and private-key paths in `cli/settings.json`:
+
+```json
+{
+    "listeningPort": 443,
+    "listenerTlsCertPath": "./certs/server.crt",
+    "listenerTlsKeyPath": "./certs/server.key",
+    "listenerAcceptedOrigins": ["https://your-domain.example"]
+}
+```
+
+The example shows the relevant fields; keep the other settings in the generated
+file. Relative paths are resolved from the process working directory (normally
+`cli/` when running the CLI as described above). Provide a valid certificate
+and its matching private key. With either path missing or invalid, OgarII will
+fail to start rather than silently accept `ws://` connections. Remove both
+paths (or set both to empty strings) to use `ws://` again; one listener does
+not serve `ws://` and `wss://` simultaneously.
 
 ## Expanding
 

@@ -5,11 +5,12 @@ const { filterIPAddress } = require("../primitives/Misc");
 class Connection extends Router {
     /**
      * @param {Listener} listener
-     * @param {WebSocket} webSocket
+     * @param {import("uWebSockets.js").WebSocket} webSocket
+     * @param {string} remoteAddress
      */
-    constructor(listener, webSocket) {
+    constructor(listener, webSocket, remoteAddress) {
         super(listener);
-        this.remoteAddress = filterIPAddress(webSocket._socket.remoteAddress);
+        this.remoteAddress = filterIPAddress(remoteAddress);
         this.webSocket = webSocket;
         this.connectTime = Date.now();
         this.lastActivityTime = Date.now();
@@ -29,10 +30,6 @@ class Connection extends Router {
         this.minionsFrozen = false;
         this.controllingMinions = false;
 
-        webSocket.on("close", this.onSocketClose.bind(this));
-        webSocket.on("message", this.onSocketMessage.bind(this));
-        webSocket.on("ping", this.closeSocket.bind(this, 1003, "Unexpected message format"));
-        webSocket.on("pong", this.closeSocket.bind(this, 1003, "Unexpected message format"));
     }
 
     close() {
@@ -41,7 +38,7 @@ class Connection extends Router {
         this.disconnected = true;
         this.disconnectionTick = this.handle.tick;
         this.listener.onDisconnection(this, this.closeCode, this.closeReason);
-        this.webSocket.removeAllListeners();
+        this.webSocket = null;
     }
 
     static get type() { return "connection"; }
@@ -61,11 +58,13 @@ class Connection extends Router {
     }
 
     /**
-     * @param {ArrayBuffer|string} data
+     * @param {ArrayBuffer} data
+     * @param {boolean} isBinary
      */
-    onSocketMessage(data) {
-        if (data instanceof String) return void this.closeSocket(1003, "Unexpected message format");
-        if (data.byteLength > 512 || data.byteLength === 0)
+    onSocketMessage(data, isBinary) {
+        // uws passed text frames as strings, whose byteLength was undefined.
+        // Keep their original path through the protocol reader as well.
+        if (isBinary && (data.byteLength > 512 || data.byteLength === 0))
             return void this.closeSocket(1009, "Unexpected message size");
         this.lastActivityTime = Date.now();
         const reader = new Reader(Buffer.from(data), 0);
@@ -162,7 +161,7 @@ class Connection extends Router {
     /** @param {Buffer} data */
     send(data) {
         if (this.socketDisconnected) return;
-        this.webSocket.send(data);
+        this.webSocket.send(data, true);
     }
     /**
      * @param {number=} code
@@ -171,15 +170,16 @@ class Connection extends Router {
     closeSocket(code, reason) {
         if (this.socketDisconnected) return;
         this.socketDisconnected = true;
-        this.closeCode = code;
+        this.closeCode = code || 1006;
         this.closeReason = reason;
-        this.webSocket.close(code || 1006, reason || "");
+        // 1006 is reserved: the client observes it only when no close frame is sent.
+        if (!code || code === 1006) this.webSocket.close();
+        else this.webSocket.end(code, reason || "");
     }
 }
 
 module.exports = Connection;
 
-const WebSocket = require("uws");
 const Listener = require("./Listener");
 const Minion = require("../bots/Minion");
 const Protocol = require("../protocols/Protocol");

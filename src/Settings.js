@@ -7,6 +7,8 @@ const value = Object.seal({
     listenerMaxClientDormancy: 1000 * 60,
     listenerMaxConnectionsPerIP: -1,
     listeningPort: 443,
+    listenerTlsCertPath: "",
+    listenerTlsKeyPath: "",
 
     serverFrequency: 25,
     serverName: "An unnamed server",
