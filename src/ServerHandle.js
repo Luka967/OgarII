@@ -73,7 +73,16 @@ class ServerHandle {
         this.averageTickTime = this.tick = 0;
         this.running = true;
 
-        this.listener.open();
+        try {
+            if (!this.listener.open())
+                throw new Error(`listener could not open at ${this.settings.listeningPort}`);
+        } catch (error) {
+            if (this.listener.listenerSocket !== null) this.listener.close();
+            this.startTime = null;
+            this.averageTickTime = this.tick = NaN;
+            this.running = false;
+            throw error;
+        }
         this.ticker.start();
         this.gamemode.onHandleStart();
 

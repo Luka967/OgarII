@@ -44,7 +44,7 @@ class Ticker {
         this._virtualTime += this.step;
         const delta = (this._virtualTime + this.step) - Date.now();
         if (delta < 0) this._virtualTime -= delta;
-        this._timeoutId = setTimeout(this._bind, delta);
+        this._timeoutId = setTimeout(this._bind, delta < 0 ? 1 : delta);
     }
     stop() {
         if (!this.running) throw new Error("The ticker hasn't started");
