@@ -16,7 +16,6 @@ class Connection extends Router {
         this.lastActivityTime = Date.now();
         this.lastChatTime = Date.now();
 
-        this.upgradeLevel = 0;
         /** @type {Protocol} */
         this.protocol = null;
 
@@ -129,14 +128,12 @@ class Connection extends Router {
         const player = this.player;
         const     visible = player.visibleCells,
               lastVisible = player.lastVisibleCells;
-        for (let id in visible) {
-            const cell = visible[id];
-            if (!lastVisible.hasOwnProperty(id)) add.push(cell);
+        for (const cell of visible) {
+            if (!lastVisible.has(cell)) add.push(cell);
             else if (cell.shouldUpdate) upd.push(cell);
         }
-        for (let id in lastVisible) {
-            const cell = lastVisible[id];
-            if (visible.hasOwnProperty(id)) continue;
+        for (const cell of lastVisible) {
+            if (visible.has(cell)) continue;
             if (cell.eatenBy !== null) eat.push(cell);
             del.push(cell);
         }
@@ -164,8 +161,8 @@ class Connection extends Router {
         this.webSocket.send(data, true);
     }
     /**
-     * @param {number=} code
-     * @param {string=} reason
+     * @param {number?} code
+     * @param {string?} reason
      */
     closeSocket(code, reason) {
         if (this.socketDisconnected) return;

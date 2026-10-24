@@ -1,3 +1,10 @@
+1.4.0 @ 2026-10-23
+- Add TLS support, courtesy of FirstCodeReviewer
+- Update uws dependency to uWebSockets.js, courtesy of FirstCodeReviewer
+- Support legacy protocol 23, courtesy of Libra-Agario
+- Refactor KV object of visible cells to use swapping Sets for less allocation pressure
+- Fix crash on client disconnection when its protocol was yet to be distinguished
+
 1.3.6 @ 2019-11-02
 - Support legacy protocol 22
 - New setting, worldEatMult

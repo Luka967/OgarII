@@ -39,10 +39,10 @@ class Player {
 
         /** @type {PlayerCell[]} */
         this.ownedCells = [];
-        /** @type {{[cellId: string]: Cell}} */
-        this.visibleCells = { };
-        /** @type {{[cellId: string]: Cell}} */
-        this.lastVisibleCells = { };
+        /** @type {Set<Cell>} */
+        this.visibleCells = new Set();
+        /** @type {Set<Cell>} */
+        this.lastVisibleCells = new Set();
         /** @type {ViewArea} */
         this.viewArea = {
             x: 0,
@@ -122,14 +122,13 @@ class Player {
 
     updateVisibleCells() {
         if (this.world === null) return;
-        delete this.lastVisibleCells;
+        const newSet = this.lastVisibleCells;
         this.lastVisibleCells = this.visibleCells;
-        let visibleCells = this.visibleCells = { };
-        for (let i = 0, l = this.ownedCells.length; i < l; i++) {
-            const cell = this.ownedCells[i];
-            visibleCells[cell.id] = cell;
-        }
-        this.world.finder.search(this.viewArea, (cell) => visibleCells[cell.id] = cell);
+        this.visibleCells = newSet;
+        newSet.clear();
+        for (let i = 0, l = this.ownedCells.length; i < l; i++)
+            newSet.add(this.ownedCells[i]);
+        this.world.finder.search(this.viewArea, (cell) => newSet.add(cell));
     }
 
     checkExistence() {

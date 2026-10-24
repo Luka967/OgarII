@@ -204,7 +204,8 @@ class Listener {
         this.logger.onAccess(`DISCONNECTION FROM ${connection.remoteAddress} (${code} '${reason}')`);
         if (--this.connectionsByIP[connection.remoteAddress] <= 0)
             delete this.connectionsByIP[connection.remoteAddress];
-        this.globalChat.remove(connection);
+        if (connection.protocol != null)
+            this.globalChat.remove(connection);
         this.connections.splice(this.connections.indexOf(connection), 1);
     }
 
